@@ -1132,6 +1132,9 @@
 
         function writeSessionValue(key, value) {
             sessionStorage.setItem(key, value);
+            if (key === 'user_id' || key === 'data_updated' || key.startsWith('eye_analysis_') || key.startsWith('bilateral_')) {
+                localStorage.setItem(key, value);
+            }
         }
 
         function removeSessionValue(key) {
@@ -1676,9 +1679,9 @@
                 applyUploadedPreview(dataUrl);
 
                 if (mobileUploadOnlyMode) {
-                    setUploadProgress(true, '서버 분석 중...', 'YOLO가 좌/우 눈을 감지하고 있습니다.');
+                    setUploadProgress(true, '서버 분석 중...', 'MediaPipe가 좌/우 눈을 감지하고 있습니다.');
                 } else {
-                    setUploadProgress(true, '서버 분석 중...', '업로드 사진은 YOLO를 건너뛰고 EfficientNet 분류를 진행합니다.');
+                    setUploadProgress(true, '서버 분석 중...', '업로드 사진은 MediaPipe 얼굴 메쉬 기반 분류를 진행합니다.');
                 }
                 const analysisResult = await analyzeWithServer(dataUrl);
                 captureMessage.textContent = analysisResult.ok ? '업로드/분석 완료' : '업로드/분석 실패';
@@ -1749,7 +1752,7 @@
         async function analyzeWithServer(base64Image) {
             const captureMessage = document.getElementById('capture-message');
             try {
-                captureMessage.textContent = '서버 분석 중 (YOLO 눈 자동 감지)...';
+                captureMessage.textContent = '서버 분석 중 (MediaPipe 눈 자동 감지)...';
                 const userId = readSessionValue('user_id') || 'anonymous';
                 const selectedEyeHint = inferSelectedEyeHint();
                 const response = await fetch('/analyze', {
@@ -1767,7 +1770,7 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    // YOLO가 감지한 좌/우 눈을 각각 저장 (없으면 이전 값 유지)
+                    // MediaPipe가 감지한 좌/우 눈을 각각 저장 (없으면 이전 값 유지)
                     if (result.left_eye)  writeSessionValue('eye_analysis_L', JSON.stringify(result.left_eye));
                     if (result.right_eye) writeSessionValue('eye_analysis_R', JSON.stringify(result.right_eye));
 

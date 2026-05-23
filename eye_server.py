@@ -128,7 +128,7 @@ import socket
 import subprocess
 import hmac
 from datetime import datetime
-from PIL import Image
+from PIL import Image, ImageOps
 
 import config as config
 from model_loader import initialize_models, get_models
@@ -1127,7 +1127,7 @@ def build_report_eye_image_reader(image_path, bbox=None):
         from reportlab.lib.utils import ImageReader as ReportImageReader
 
         with Image.open(image_path) as source_image:
-            source_image = source_image.convert('RGB')
+            source_image = ImageOps.exif_transpose(source_image).convert('RGB')
             if bbox and isinstance(bbox, (list, tuple)) and len(bbox) == 4:
                 try:
                     x1, y1, x2, y2 = [int(float(value)) for value in bbox]
@@ -1140,12 +1140,120 @@ def build_report_eye_image_reader(image_path, bbox=None):
                     pass
 
             buffer = io.BytesIO()
-            source_image.save(buffer, format='JPEG', quality=92)
+            source_image = ImageOps.contain(
+                source_image,
+                (1600, 1600),
+                method=Image.Resampling.LANCZOS,
+            )
+            source_image.save(buffer, format='JPEG', quality=95, subsampling=0, optimize=True)
             buffer.seek(0)
             return ReportImageReader(buffer)
     except Exception as error:
         print(f"[WARNING] 리포트 눈 이미지 준비 실패: {image_path} ({error})")
         return None
+
+
+_REPORT_PDF_FONT_NAME = None
+
+
+def get_report_pdf_font_name() -> str:
+    global _REPORT_PDF_FONT_NAME
+    if _REPORT_PDF_FONT_NAME:
+        return _REPORT_PDF_FONT_NAME
+
+    try:
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
+    except Exception:
+        _REPORT_PDF_FONT_NAME = 'Helvetica'
+        return _REPORT_PDF_FONT_NAME
+
+    font_candidates = [
+        'Noto Sans CJK KR',
+        'NanumGothic',
+        'Apple SD Gothic Neo',
+        'DejaVu Sans',
+    ]
+
+    for font_query in font_candidates:
+        font_path = None
+        try:
+            completed = subprocess.run(
+                ['fc-match', '-f', '%{file}\n', font_query],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=2,
+            )
+            font_path = (completed.stdout or '').strip().splitlines()[0].strip() if (completed.stdout or '').strip() else None
+        except Exception:
+            font_path = None
+
+        if not font_path or not os.path.exists(font_path):
+            continue
+
+        font_name = f"ReportFont-{font_query.replace(' ', '')}"
+        try:
+            pdfmetrics.registerFont(TTFont(font_name, font_path, subfontIndex=0))
+            _REPORT_PDF_FONT_NAME = font_name
+            return _REPORT_PDF_FONT_NAME
+        except Exception:
+            continue
+
+    _REPORT_PDF_FONT_NAME = 'Helvetica'
+    return _REPORT_PDF_FONT_NAME
+
+
+def wrap_pdf_text(text: object, font_name: str, font_size: float, max_width: float) -> list[str]:
+    from reportlab.pdfbase import pdfmetrics
+
+    raw_text = '' if text is None else str(text)
+    lines: list[str] = []
+
+    for paragraph in raw_text.splitlines() or ['']:
+        if paragraph == '':
+            lines.append('')
+            continue
+
+        current_line = ''
+        for word in paragraph.split(' '):
+            candidate = word if not current_line else f'{current_line} {word}'
+            if pdfmetrics.stringWidth(candidate, font_name, font_size) <= max_width:
+                current_line = candidate
+                continue
+
+            if current_line:
+                lines.append(current_line)
+                current_line = ''
+
+            if pdfmetrics.stringWidth(word, font_name, font_size) <= max_width:
+                current_line = word
+                continue
+
+            chunk = ''
+            for char in word:
+                candidate = f'{chunk}{char}'
+                if not chunk or pdfmetrics.stringWidth(candidate, font_name, font_size) <= max_width:
+                    chunk = candidate
+                else:
+                    lines.append(chunk)
+                    chunk = char
+            current_line = chunk
+
+        if current_line:
+            lines.append(current_line)
+
+    return lines or ['']
+
+
+def draw_pdf_text_block(c, x: float, y: float, text: object, font_name: str, font_size: float, max_width: float, line_gap: float = 4.0) -> float:
+    c.setFont(font_name, font_size)
+    lines = wrap_pdf_text(text, font_name, font_size, max_width)
+    line_height = font_size + line_gap
+    for line in lines:
+        c.drawString(x, y, line)
+        y -= line_height
+    return y
 
 
 def generate_session_pdf_report(user_id, session_data, latest_survey):
@@ -1178,46 +1286,43 @@ def generate_session_pdf_report(user_id, session_data, latest_survey):
     c = canvas.Canvas(pdf_path, pagesize=A4)
     page_w, page_h = A4
     y = page_h - 48
+    font_name = get_report_pdf_font_name()
+    bold_font_name = font_name
+    text_width = page_w - 72
 
-    # 주석: 폰트는 환경 의존성을 줄이기 위해 기본 Helvetica를 사용한다.
-    c.setFont('Helvetica-Bold', 14)
+    c.setFont(bold_font_name, 14)
     c.drawString(36, y, 'Eye Project - Diagnosis Report')
     y -= 20
 
-    c.setFont('Helvetica', 10)
+    c.setFont(font_name, 10)
     c.drawString(36, y, f'User ID: {safe_user_id}')
     y -= 14
     c.drawString(36, y, f'Exam Time: {session_created_at}')
     y -= 20
 
-    c.setFont('Helvetica-Bold', 11)
+    c.setFont(bold_font_name, 11)
     c.drawString(36, y, 'AI Summary')
     y -= 14
 
-    c.setFont('Helvetica', 10)
-    c.drawString(44, y, summary['left_summary'])
-    y -= 14
-    c.drawString(44, y, summary['right_summary'])
-    y -= 14
-    c.drawString(44, y, f"Guide Tag: {summary['guide_tag']}")
-    y -= 14
-    c.drawString(44, y, f"Guide: {summary['guide_summary'][:120]}")
+    y = draw_pdf_text_block(c, 44, y, summary['left_summary'], font_name, 10, text_width - 8)
+    y = draw_pdf_text_block(c, 44, y, summary['right_summary'], font_name, 10, text_width - 8)
+    y = draw_pdf_text_block(c, 44, y, f"Guide Tag: {summary['guide_tag']}", font_name, 10, text_width - 8)
+    y = draw_pdf_text_block(c, 44, y, f"Guide: {summary['guide_summary'][:120]}", font_name, 10, text_width - 8)
     y -= 20
 
     if latest_survey:
-        c.setFont('Helvetica-Bold', 11)
+        c.setFont(bold_font_name, 11)
         c.drawString(36, y, 'Latest Survey')
         y -= 14
-        c.setFont('Helvetica', 10)
+        c.setFont(font_name, 10)
         age_text = latest_survey.get('age') if latest_survey.get('age') is not None else '-'
-        c.drawString(44, y, f"Age: {age_text} | Gender: {latest_survey.get('gender', '-')}")
-        y -= 14
+        y = draw_pdf_text_block(c, 44, y, f"Age: {age_text} | Gender: {latest_survey.get('gender', '-')}", font_name, 10, text_width - 8)
         symptoms = latest_survey.get('symptoms') or []
         symptom_text = ', '.join(symptoms[:5]) if isinstance(symptoms, list) and symptoms else '없음'
-        c.drawString(44, y, f"Symptoms: {symptom_text}")
-        y -= 22
+        y = draw_pdf_text_block(c, 44, y, f"Symptoms: {symptom_text}", font_name, 10, text_width - 8)
+        y -= 8
 
-    c.setFont('Helvetica-Bold', 11)
+    c.setFont(bold_font_name, 11)
     c.drawString(36, y, 'Captured Images')
     y -= 12
 
@@ -1256,7 +1361,7 @@ def generate_session_pdf_report(user_id, session_data, latest_survey):
             print(f"[WARNING] PDF 이미지 삽입 실패: {image_path} ({image_error})")
 
     if image_drawn == 0:
-        c.setFont('Helvetica', 10)
+        c.setFont(font_name, 10)
         c.drawString(44, y, '이미지 파일을 찾지 못해 텍스트 요약만 포함되었습니다.')
 
     c.showPage()
@@ -3634,6 +3739,18 @@ def result():
 def report():
     """리포트 페이지"""
     return render_template('report.html')
+
+
+@app.route('/report/pdf')
+def report_pdf():
+    """출력 전용 리포트 페이지"""
+    return render_template('report_pdf.html')
+
+
+@app.route('/report_pdf')
+def report_pdf_legacy():
+    """Legacy alias for older report PDF links."""
+    return render_template('report_pdf.html')
 
 
 @app.route('/survey')

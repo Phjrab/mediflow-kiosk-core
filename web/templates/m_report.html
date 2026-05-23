@@ -1954,7 +1954,7 @@
             }
         }
 
-        function openReportPdfModal(pdfUrl) {
+        function openReportPdfModal(pdfUrl = '/report/pdf') {
             const overlay = document.getElementById('pdf-overlay');
             const frame = document.getElementById('pdf-frame');
             if (!overlay || !frame || !pdfUrl) return;
@@ -1989,9 +1989,9 @@
             return data;
         }
 
-        // report 페이지 "보고서" 버튼 동작
-        // - 최신 세션 기준 PDF 생성
-        // - 새 탭 대신 팝업(모달)로 PDF를 표시
+        // m_report 페이지 "보고서" 버튼 동작
+        // - 최신 세션 기준 보고서 생성
+        // - 생성 완료 후 report_pdf.html을 모달 iframe으로 표시
         async function generateShareReport() {
             const button = document.getElementById('btn-share-report');
             const originalText = button ? button.textContent : '📄 보고서';
@@ -2002,14 +2002,11 @@
                     button.textContent = '보고서 생성 중...';
                 }
 
-                const data = await requestReportShare(false);
+                await requestReportShare(false);
 
-                const pdfUrl = data.pdf_url || null;
-                if (pdfUrl) {
-                    openReportPdfModal(pdfUrl);
-                }
+                openReportPdfModal('/report/pdf');
 
-                await showAlert('보고서가 생성되었습니다. 팝업에서 확인해 주세요.');
+                await showAlert('보고서가 생성되었습니다. 미리보기 창에서 확인해 주세요.');
             } catch (error) {
                 await showAlert(`보고서 처리 실패: ${error.message || error}`);
             } finally {

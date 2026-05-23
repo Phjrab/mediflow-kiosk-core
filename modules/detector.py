@@ -115,8 +115,8 @@ class EyeDetector:
             cx, cy = (x_min + x_max) / 2, (y_min + y_max) / 2
             box_w, box_h = x_max - x_min, y_max - y_min
             
-            # 정방형 만들기 (현재 크롭의 약 2배 크기로 확장)
-            side_length = max(box_w, box_h) * 2.4
+            # 정방형 만들기 (현재 크롭보다 약 50% 더 크게 확장)
+            side_length = max(box_w, box_h) * 3.6
             half_side = side_length / 2
             
             # 이미지 범위 내로 조정
