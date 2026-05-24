@@ -1131,7 +1131,7 @@
 
                 // 미리보기는 메쉬를 유지하되, 분석용 입력은 원본 프레임을 사용한다.
                 const rawDataUrl = await fetchRawCameraFrameDataUrl();
-                const srcImg = await loadImageFromDataUrl(rawDataUrl);
+                const srcImg = await loadImageElementWithOrientation(null, rawDataUrl);
 
                 // 1. 고해상도 캡처 캔버스 생성 (해상도 방어)
                 const tempCanvas = document.createElement('canvas');
@@ -1139,16 +1139,12 @@
                 tempCanvas.height = 1080;
                 const ctx = tempCanvas.getContext('2d');
 
-                // 2. 줌 배율을 캡처에도 동일하게 반영 (중앙 크롭)
+                // 2. 전체 얼굴 프레임을 그대로 분석용 입력으로 사용한다.
                 const sourceWidth = srcImg.naturalWidth || srcImg.width || 640;
                 const sourceHeight = srcImg.naturalHeight || srcImg.height || 480;
-                const cropWidth = sourceWidth / digitalZoom;
-                const cropHeight = sourceHeight / digitalZoom;
-                const sx = (sourceWidth - cropWidth) / 2;
-                const sy = (sourceHeight - cropHeight) / 2;
 
                 // UI 미리보기와 별개로, 원본 프레임을 AI 진단 입력으로 사용한다.
-                ctx.drawImage(srcImg, sx, sy, cropWidth, cropHeight, 0, 0, tempCanvas.width, tempCanvas.height);
+                ctx.drawImage(srcImg, 0, 0, sourceWidth, sourceHeight, 0, 0, tempCanvas.width, tempCanvas.height);
 
                 // 3. 이미지를 Base64 데이터로 변환
                 const dataUrl = tempCanvas.toDataURL('image/jpeg', 0.8);
