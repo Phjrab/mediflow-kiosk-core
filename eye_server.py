@@ -144,6 +144,11 @@ MP_DRAWING = mp.solutions.drawing_utils
 MP_DRAWING_STYLES = mp.solutions.drawing_styles
 MP_FACE_MESH_LOCK = threading.Lock()
 
+# Pillow fallback statistics (thread-safe)
+PILLOW_FALLBACK_SUCCESS = 0
+PILLOW_FALLBACK_FAIL = 0
+PILLOW_FALLBACK_LOCK = threading.Lock()
+
 # ========================================
 # [1] Flask 앱 설정
 # ========================================
@@ -1682,8 +1687,21 @@ def decode_base64_image(base64_image_data):
                 arr = np.array(pil_img)
                 # PIL은 RGB, OpenCV는 BGR 사용
                 img_bgr = cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
+                # 기록
+                try:
+                    with PILLOW_FALLBACK_LOCK:
+                        global PILLOW_FALLBACK_SUCCESS
+                        PILLOW_FALLBACK_SUCCESS += 1
+                except Exception:
+                    pass
                 print('[INFO] decode_base64_image: OpenCV 디코드 실패, Pillow로 폴백 성공')
             except Exception as pil_err:
+                try:
+                    with PILLOW_FALLBACK_LOCK:
+                        global PILLOW_FALLBACK_FAIL
+                        PILLOW_FALLBACK_FAIL += 1
+                except Exception:
+                    pass
                 print(f'[WARNING] decode_base64_image: Pillow 폴백 실패: {pil_err}')
                 return None, "이미지 디코딩 실패"
 
@@ -3594,6 +3612,26 @@ def api_admin_logout():
     session['is_admin'] = False
     session.pop('admin_csrf_token', None)
     return jsonify({'status': 'ok', 'message': '관리자 세션이 종료되었습니다.'}), 200
+
+
+@app.route('/api/admin/fallback_stats', methods=['GET'])
+def api_admin_fallback_stats():
+    """관리자 전용: Pillow 폴백 성공/실패 통계 조회"""
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+
+    try:
+        with PILLOW_FALLBACK_LOCK:
+            success = int(PILLOW_FALLBACK_SUCCESS)
+            fail = int(PILLOW_FALLBACK_FAIL)
+
+        return jsonify({
+            'status': 'ok',
+            'pillow_fallback_success': success,
+            'pillow_fallback_fail': fail
+        }), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 def schedule_server_action(action):
