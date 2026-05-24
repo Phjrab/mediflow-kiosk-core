@@ -531,6 +531,9 @@
 
         function writeSessionValue(key, value) {
             sessionStorage.setItem(key, value);
+            if (key === 'user_id' || key === 'active_capture_user_id' || key === 'data_updated' || key === 'bilateral_capture' || key.startsWith('eye_analysis_') || key.startsWith('bilateral_')) {
+                localStorage.setItem(key, value);
+            }
         }
 
         function removeSessionValue(key) {
@@ -1091,9 +1094,9 @@
                 applyUploadedPreview(dataUrl);
 
                 if (mobileUploadOnlyMode) {
-                    setUploadProgress(true, '서버 분석 중...', 'YOLO가 좌/우 눈을 감지하고 있습니다.');
+                    setUploadProgress(true, '서버 분석 중...', 'MediaPipe가 좌/우 눈을 감지하고 있습니다.');
                 } else {
-                    setUploadProgress(true, '서버 분석 중...', '업로드 사진은 YOLO를 건너뛰고 EfficientNet 분류를 진행합니다.');
+                    setUploadProgress(true, '서버 분석 중...', '업로드 사진은 MediaPipe를 건너뛰고 EfficientNet 분류를 진행합니다.');
                 }
                 const analysisResult = await analyzeWithServer(dataUrl);
                 captureMessage.textContent = analysisResult.ok ? '업로드/분석 완료' : '업로드/분석 실패';
@@ -1168,7 +1171,16 @@
         async function analyzeWithServer(base64Image) {
             const captureMessage = document.getElementById('capture-message');
             try {
-                captureMessage.textContent = '서버 분석 중 (YOLO 눈 자동 감지)...';
+                captureMessage.textContent = '서버 분석 중 (미디어파이프 눈 자동 감지)...';
+                // 안전장치: AVIF 등으로 된 data URL이 들어오면 클라이언트에서 JPEG로 변환 후 전송
+                if (String(base64Image || '').startsWith('data:image/avif') || String(base64Image || '').startsWith('data:image/heic')) {
+                    try {
+                        base64Image = await convertToJpegDataUrl(base64Image);
+                        console.info('[analyzeWithServer] Converted AVIF/HEIC → JPEG before upload');
+                    } catch (convErr) {
+                        console.warn('[analyzeWithServer] Conversion to JPEG failed', convErr);
+                    }
+                }
                 const userId = readSessionValue('user_id') || 'anonymous';
                 const selectedEyeHint = inferSelectedEyeHint();
                 const response = await fetch('/analyze', {
@@ -1202,7 +1214,7 @@
                         meta: result.meta,
                         message: result.message,
                         user_id: result.user_id,
-                        yolo_cam_image_url: result.yolo_cam_image_url,
+                        mediapipe_cam_image_url: result.mediapipe_cam_image_url,
                         saved_image_url: result.saved_image_url
                     });
 
@@ -1223,6 +1235,32 @@
                 setResultButtonState(hasAnalysisResult());
                 return { ok: false, message: String(error || 'server-error') };
             }
+        }
+
+        // 클라이언트에서 dataURL을 JPEG로 변환하는 유틸 (Image → canvas → toDataURL)
+        function convertToJpegDataUrl(dataUrl) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const img = new Image();
+                    img.onload = () => {
+                        try {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = img.naturalWidth || img.width;
+                            canvas.height = img.naturalHeight || img.height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+                            const jpeg = canvas.toDataURL('image/jpeg', 0.85);
+                            resolve(jpeg);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    };
+                    img.onerror = (e) => reject(e || new Error('image load error'));
+                    img.src = dataUrl;
+                } catch (err) {
+                    reject(err);
+                }
+            });
         }
 
         // 화면 로딩 시 프레임 스트리밍 및 감지 폴링 시작
