@@ -2816,6 +2816,18 @@ def analyze():
             analysis = analyze_bilateral_from_image(img_bgr, user_id=user_id, selected_eye=selected_eye)
 
         if analysis.get('status') == 'error':
+            error_message = str(analysis.get('message', ''))
+            soft_failure_messages = (
+                '얼굴을 인식할 수 없습니다.',
+                '얼굴은 인식되었으나 눈을 감지하지 못했습니다.',
+            )
+            if any(text in error_message for text in soft_failure_messages):
+                analysis['status'] = 'warning'
+                analysis['message'] = error_message
+                analysis['meta'] = analysis.get('meta') or {}
+                analysis['meta']['analysis_warning'] = error_message
+                return jsonify(analysis), 200
+
             return jsonify(analysis), 400
 
         if not skip_yolo_for_upload:
