@@ -1673,9 +1673,19 @@ def decode_base64_image(base64_image_data):
         image_data = base64.b64decode(encoded)
         nparr = np.frombuffer(image_data, np.uint8)
         img_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
         if img_bgr is None:
-            return None, "이미지 디코딩 실패"
+            # OpenCV로 디코딩 실패 시 Pillow로 폴백 시도 (AVIF 등 OpenCV가 직접 디코딩하지 못하는 형식 처리)
+            try:
+                bio = io.BytesIO(image_data)
+                pil_img = Image.open(bio)
+                pil_img = pil_img.convert('RGB')
+                arr = np.array(pil_img)
+                # PIL은 RGB, OpenCV는 BGR 사용
+                img_bgr = cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
+                print('[INFO] decode_base64_image: OpenCV 디코드 실패, Pillow로 폴백 성공')
+            except Exception as pil_err:
+                print(f'[WARNING] decode_base64_image: Pillow 폴백 실패: {pil_err}')
+                return None, "이미지 디코딩 실패"
 
         return img_bgr, None
     except Exception as e:
@@ -1731,7 +1741,7 @@ def analyze_uploaded_single_eye_from_image(img_bgr, user_id='anonymous', selecte
             'message': '업로드 단안 분석 완료',
             'left_eye': eye_payload if side_key == 'left_eye' else None,
             'right_eye': eye_payload if side_key == 'right_eye' else None,
-            'yolo_cam_image_url': None,
+            'mediapipe_cam_image_url': None,
             'meta': {
                 'source_resolution': [source_w, source_h],
                 'eyes_detected': 1,
@@ -1908,7 +1918,7 @@ def analyze_bilateral_from_image(img_bgr, user_id='anonymous', selected_eye=None
                 'message': '얼굴을 인식할 수 없습니다. 다시 촬영해주세요.',
                 'left_eye': None,
                 'right_eye': None,
-                'yolo_cam_image_url': None,
+                'mediapipe_cam_image_url': None,
                 'meta': {
                     'source_resolution': [source_w, source_h],
                     'eyes_detected': 0,
@@ -1940,7 +1950,7 @@ def analyze_bilateral_from_image(img_bgr, user_id='anonymous', selected_eye=None
                 'left_eye': None,
                 'right_eye': None,
                 'mediapipe_mesh_image_url': None,
-                'yolo_cam_image_url': None,
+                'mediapipe_cam_image_url': None,
                 'meta': {
                     'source_resolution': [source_w, source_h],
                     'eyes_detected': 0,
@@ -1970,7 +1980,7 @@ def analyze_bilateral_from_image(img_bgr, user_id='anonymous', selected_eye=None
             'left_eye': None,
             'right_eye': None,
             'mediapipe_mesh_image_url': mediapipe_mesh_image_url,
-            'yolo_cam_image_url': mediapipe_mesh_image_url,
+            'mediapipe_cam_image_url': mediapipe_mesh_image_url,
             'meta': {
                 'source_resolution': [source_w, source_h],
                 'eyes_detected': len(eye_crops),
