@@ -1960,18 +1960,26 @@ def analyze_bilateral_from_image(img_bgr, user_id='anonymous', selected_eye=None
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
-        # 눈이 검출되지 않은 경우 처리
-        if len(eye_crops) == 0:
+        # Strict pipeline: 양안이 모두 검출되지 않으면 전체 분석을 중단한다.
+        if len(eye_crops) != 2:
+            detected_count = len(eye_crops)
+            detected_sides = {str(crop.get('side', '')).upper() for crop in eye_crops}
+            missing_parts = []
+            if 'LEFT_EYE' not in detected_sides:
+                missing_parts.append('left_eye')
+            if 'RIGHT_EYE' not in detected_sides:
+                missing_parts.append('right_eye')
             return {
                 'status': 'error',
-                'message': '얼굴은 인식되었으나 눈을 감지하지 못했습니다. 다시 촬영해주세요.',
+                'message': '좌안/우안이 모두 검출되지 않아 분석을 중단했습니다. 얼굴 전체가 프레임에 들어오도록 다시 촬영해주세요.',
                 'left_eye': None,
                 'right_eye': None,
                 'mediapipe_mesh_image_url': None,
                 'mediapipe_cam_image_url': None,
                 'meta': {
                     'source_resolution': [source_w, source_h],
-                    'eyes_detected': 0,
+                    'eyes_detected': detected_count,
+                    'missing_eye': missing_parts or ['left_eye', 'right_eye'],
                     'detection_method': 'mediapipe_face_mesh',
                     'detection_time_ms': round(detection_elapsed_ms, 1),
                     'face_detected': True
@@ -1993,15 +2001,15 @@ def analyze_bilateral_from_image(img_bgr, user_id='anonymous', selected_eye=None
 
         # Step 3) EfficientNet 순차 분류
         result = {
-            'status': 'success' if len(eye_crops) >= 2 else 'warning',
-            'message': '양안 분석 완료' if len(eye_crops) >= 2 else '한쪽 눈만 검출되었습니다.',
+            'status': 'success',
+            'message': '양안 분석 완료',
             'left_eye': None,
             'right_eye': None,
             'mediapipe_mesh_image_url': mediapipe_mesh_image_url,
             'mediapipe_cam_image_url': mediapipe_mesh_image_url,
             'meta': {
                 'source_resolution': [source_w, source_h],
-                'eyes_detected': len(eye_crops),
+                'eyes_detected': 2,
                 'detection_method': 'mediapipe_face_mesh',
                 'detection_time_ms': round(detection_elapsed_ms, 1)
             }
@@ -2011,12 +2019,42 @@ def analyze_bilateral_from_image(img_bgr, user_id='anonymous', selected_eye=None
         for side in ['left_eye', 'right_eye']:
             eye_item = labeled_eyes.get(side)
             if eye_item is None:
-                continue
+                return {
+                    'status': 'error',
+                    'message': '좌안/우안이 모두 검출되지 않아 분석을 중단했습니다. 얼굴 전체가 프레임에 들어오도록 다시 촬영해주세요.',
+                    'left_eye': None,
+                    'right_eye': None,
+                    'mediapipe_mesh_image_url': mediapipe_mesh_image_url,
+                    'mediapipe_cam_image_url': mediapipe_mesh_image_url,
+                    'meta': {
+                        'source_resolution': [source_w, source_h],
+                        'eyes_detected': len(eye_crops),
+                        'detection_method': 'mediapipe_face_mesh',
+                        'detection_time_ms': round(detection_elapsed_ms, 1),
+                        'face_detected': True,
+                        'missing_eye': [side]
+                    }
+                }
 
             cls_start = time.time()
             prepared_eye = upscale_eye_crop_for_classifier(eye_item['image'])
             if prepared_eye is None:
-                continue
+                return {
+                    'status': 'error',
+                    'message': '눈 크롭 생성에 실패했습니다. 다시 촬영해주세요.',
+                    'left_eye': None,
+                    'right_eye': None,
+                    'mediapipe_mesh_image_url': mediapipe_mesh_image_url,
+                    'mediapipe_cam_image_url': mediapipe_mesh_image_url,
+                    'meta': {
+                        'source_resolution': [source_w, source_h],
+                        'eyes_detected': len(eye_crops),
+                        'detection_method': 'mediapipe_face_mesh',
+                        'detection_time_ms': round(detection_elapsed_ms, 1),
+                        'face_detected': True,
+                        'failed_eye': side
+                    }
+                }
 
             classification = classifier.classify_with_details(prepared_eye, generate_cam=True)
             eye_analysis = analyzer.analyze(prepared_eye)

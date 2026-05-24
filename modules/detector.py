@@ -20,6 +20,53 @@ class EyeDetector:
     # MediaPipe Face Mesh landmark indices
     LEFT_EYE_INDICES = [33, 133, 157, 158, 159, 160, 161, 246, 173, 153, 154, 155, 144, 145, 163, 7]
     RIGHT_EYE_INDICES = [362, 263, 384, 385, 386, 387, 388, 466, 398, 380, 381, 382, 373, 374, 390, 249]
+
+    def _build_square_eye_bbox(self, points, image_width, image_height, margin_ratio=0.25):
+        """눈 랜드마크를 감싸는 정방형 bbox를 생성하고 이미지 경계 내로 보정한다."""
+        if points is None or len(points) == 0:
+            return None
+
+        x_min, y_min = np.min(points, axis=0)
+        x_max, y_max = np.max(points, axis=0)
+
+        eye_width = float(x_max - x_min)
+        eye_height = float(y_max - y_min)
+        base_side = max(eye_width, eye_height)
+        if base_side <= 0:
+            return None
+
+        # 양쪽으로 20~30% 정도 여유를 주기 위해 기본 크기를 확장한다.
+        side_length = int(np.ceil(base_side * (1.0 + (2.0 * float(margin_ratio)))))
+        side_length = max(2, min(side_length, int(image_width), int(image_height)))
+
+        cx = float(x_min + x_max) / 2.0
+        cy = float(y_min + y_max) / 2.0
+        half_side = side_length / 2.0
+
+        x1 = int(round(cx - half_side))
+        y1 = int(round(cy - half_side))
+        x2 = x1 + side_length
+        y2 = y1 + side_length
+
+        if x1 < 0:
+            x2 -= x1
+            x1 = 0
+        if y1 < 0:
+            y2 -= y1
+            y1 = 0
+        if x2 > image_width:
+            shift = x2 - image_width
+            x1 = max(0, x1 - shift)
+            x2 = image_width
+        if y2 > image_height:
+            shift = y2 - image_height
+            y1 = max(0, y1 - shift)
+            y2 = image_height
+
+        if x2 <= x1 or y2 <= y1:
+            return None
+
+        return (x1, y1, x2, y2)
     
     def __init__(self, model_path=None):
         """
@@ -95,7 +142,7 @@ class EyeDetector:
             'frame_width': w
         }
     
-    def get_efficientnet_crop(self, image, landmarks, indices, target_size=(224, 224)):
+    def get_efficientnet_crop(self, image, landmarks, indices, target_size=(224, 224), margin_ratio=0.25):
         """
         MediaPipe 랜드마크로부터 정방형 크롭 생성 (EfficientNet 입력용)
         
@@ -106,7 +153,7 @@ class EyeDetector:
             target_size (tuple): 최종 리사이즈 크기 (기본값: 224x224)
             
         Returns:
-            np.ndarray: 정규화된 224x224 크롭 또는 None (실패 시)
+            tuple | None: (224x224 크롭, square bbox) 또는 None (실패 시)
         """
         h, w, _ = image.shape
         
@@ -120,24 +167,12 @@ class EyeDetector:
             
             if len(points) == 0:
                 return None
-            
-            # Bounding Box 계산
-            x_min, y_min = np.min(points, axis=0)
-            x_max, y_max = np.max(points, axis=0)
-            
-            # 중심과 크기 계산
-            cx, cy = (x_min + x_max) / 2, (y_min + y_max) / 2
-            box_w, box_h = x_max - x_min, y_max - y_min
-            
-            # 정방형 만들기 (현재 크롭보다 약 50% 더 크게 확장)
-            side_length = max(box_w, box_h) * 3.6
-            half_side = side_length / 2
-            
-            # 이미지 범위 내로 조정
-            x1 = int(max(0, cx - half_side))
-            y1 = int(max(0, cy - half_side))
-            x2 = int(min(w, cx + half_side))
-            y2 = int(min(h, cy + half_side))
+
+            bbox = self._build_square_eye_bbox(points, w, h, margin_ratio=margin_ratio)
+            if bbox is None:
+                return None
+
+            x1, y1, x2, y2 = bbox
             
             # 크롭
             cropped_eye = image[y1:y2, x1:x2]
@@ -148,7 +183,7 @@ class EyeDetector:
             # EfficientNet 입력 크기로 리사이즈
             final_eye = cv2.resize(cropped_eye, target_size, interpolation=cv2.INTER_AREA)
             
-            return final_eye
+            return final_eye, bbox
         except Exception as e:
             print(f"[ERROR] get_efficientnet_crop 실패: {e}")
             return None
@@ -187,53 +222,35 @@ class EyeDetector:
             return eye_crops
         
         # 좌안(OS) 크롭
-        left_eye_crop = self.get_efficientnet_crop(
+        left_eye_result = self.get_efficientnet_crop(
             image,
             landmarks,
             self.LEFT_EYE_INDICES,
             target_size=(224, 224)
         )
-        
-        if left_eye_crop is not None:
-            # 좌안 bbox 계산
-            h, w, _ = image.shape
-            left_points = np.array([
-                (landmarks[i].x * w, landmarks[i].y * h)
-                for i in self.LEFT_EYE_INDICES
-                if i < len(landmarks)
-            ])
-            x_min, y_min = np.min(left_points, axis=0)
-            x_max, y_max = np.max(left_points, axis=0)
-            
+
+        if left_eye_result is not None:
+            left_eye_crop, left_bbox = left_eye_result
             eye_crops.append({
                 'image': left_eye_crop,
-                'bbox': (int(x_min), int(y_min), int(x_max), int(y_max)),
+                'bbox': left_bbox,
                 'confidence': 1.0,
                 'side': 'LEFT_EYE'
             })
         
         # 우안(OD) 크롭
-        right_eye_crop = self.get_efficientnet_crop(
+        right_eye_result = self.get_efficientnet_crop(
             image,
             landmarks,
             self.RIGHT_EYE_INDICES,
             target_size=(224, 224)
         )
-        
-        if right_eye_crop is not None:
-            # 우안 bbox 계산
-            h, w, _ = image.shape
-            right_points = np.array([
-                (landmarks[i].x * w, landmarks[i].y * h)
-                for i in self.RIGHT_EYE_INDICES
-                if i < len(landmarks)
-            ])
-            x_min, y_min = np.min(right_points, axis=0)
-            x_max, y_max = np.max(right_points, axis=0)
-            
+
+        if right_eye_result is not None:
+            right_eye_crop, right_bbox = right_eye_result
             eye_crops.append({
                 'image': right_eye_crop,
-                'bbox': (int(x_min), int(y_min), int(x_max), int(y_max)),
+                'bbox': right_bbox,
                 'confidence': 1.0,
                 'side': 'RIGHT_EYE'
             })
