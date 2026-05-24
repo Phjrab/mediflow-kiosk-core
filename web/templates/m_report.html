@@ -276,9 +276,16 @@
             min-height: 0;
         }
 
+        .summary-box.history-records-box {
+            max-height: 260px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
         .history-records-box .all-history-list {
-            flex: 1;
-            height: 220px;
+            flex: 1 1 auto;
+            height: 100%;
             max-height: none;
             min-height: 0;
             overflow-y: auto;
@@ -1296,7 +1303,7 @@
                 <div class="footer-btns">
                     <button class="btn btn-home" onclick="location.href='/'">메인으로</button>
                     <button class="btn btn-home" onclick="location.href='/result'">결과로 돌아가기</button>
-                    <button id="btn-share-report" class="btn btn-print" onclick="generateShareReport()">📄 보고서</button>
+                    <button id="btn-share-report" class="btn btn-print" onclick="generateShareReport()">📄 보고서 발행</button>
                     <button id="btn-send-kakao" class="btn btn-kakao" onclick="sendReportToKakao()">💬 카카오로 보내기</button>
                 </div>
             </div>
@@ -1994,7 +2001,7 @@
         // - 생성 완료 후 report_pdf.html을 모달 iframe으로 표시
         async function generateShareReport() {
             const button = document.getElementById('btn-share-report');
-            const originalText = button ? button.textContent : '📄 보고서';
+            const originalText = button ? button.textContent : '📄 보고서 발행';
 
             try {
                 if (button) {
