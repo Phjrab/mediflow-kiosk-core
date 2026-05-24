@@ -62,19 +62,33 @@ class EyeDetector:
         # [LEGACY YOLO] return results[0] if results else None
         
         h, w, _ = image.shape
-        
+
         # BGR을 RGB로 변환
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        
+
         # MediaPipe Face Mesh 처리
         results = self.face_mesh.process(image_rgb)
-        
+
+        # 기본 처리에서 실패하면, 이미지 크기를 축소해 재시도합니다.
+        # 모바일/고해상도 캡처에서 MediaPipe가 불안정하게 동작할 수 있어 축소 재시도가 도움이 됩니다.
         if results.multi_face_landmarks is None or len(results.multi_face_landmarks) == 0:
+            try:
+                for scale in (0.75, 0.5, 0.33):
+                    sw = max(160, int(w * scale))
+                    sh = max(120, int(h * scale))
+                    small_rgb = cv2.resize(image_rgb, (sw, sh), interpolation=cv2.INTER_AREA)
+                    results = self.face_mesh.process(small_rgb)
+                    if results and results.multi_face_landmarks and len(results.multi_face_landmarks) > 0:
+                        break
+            except Exception:
+                results = None
+
+        if results is None or results.multi_face_landmarks is None or len(results.multi_face_landmarks) == 0:
             return None
-        
+
         # 첫 번째 얼굴만 사용
         landmarks = results.multi_face_landmarks[0].landmark
-        
+
         return {
             'landmarks': landmarks,
             'frame_height': h,
