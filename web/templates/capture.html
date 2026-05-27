@@ -271,6 +271,9 @@
         .btn-capture { width: 100%; padding: 25px; border-radius: 15px; background: var(--primary); color: white; font-weight: 800; border: none; font-size: 1.3rem; cursor: pointer; }
         .btn-upload { width: 100%; padding: 16px; border-radius: 12px; background: #eef2ff; color: #334155; font-weight: 700; border: 1px solid var(--border); font-size: 1rem; cursor: pointer; margin-top: 10px; }
         .btn-restore { width: 100%; padding: 14px; border-radius: 12px; background: #f8fafc; color: #475569; font-weight: 700; border: 1px solid var(--border); font-size: 0.95rem; cursor: pointer; margin-top: 8px; }
+        .btn-mesh-toggle { width: 100%; padding: 14px; border-radius: 12px; background: #eef2ff; color: #1e3a8a; font-weight: 700; border: 1px solid #c7d2fe; font-size: 0.95rem; cursor: pointer; margin-top: 8px; }
+        .btn-mesh-toggle.active { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
+        .btn-mesh-toggle:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-go-result { width: 100%; padding: 18px; border-radius: 12px; background: #16a34a; color: #fff; font-weight: 800; border: none; font-size: 1.05rem; cursor: pointer; margin-top: 10px; }
         .btn-go-result:disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
         .eye-select-wrap { display:flex; gap:10px; }
@@ -467,11 +470,11 @@
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
                 <span style="font-size:0.95rem; color:#334155;" data-i18n="auto_shutter_label">자동셔터</span>
                 <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#64748b;">
-                    <input type="checkbox" id="auto-shutter-toggle" checked onchange="toggleAutoShutter()">
+                    <input type="checkbox" id="auto-shutter-toggle" onchange="toggleAutoShutter()">
                     <span data-i18n="use_label">사용</span>
                 </label>
             </div>
-            <div id="auto-shutter-status" style="font-size:0.85rem; color:#64748b; margin-bottom:14px;" data-i18n="auto_shutter_status">자동셔터 대기 중</div>
+            <div id="auto-shutter-status" style="font-size:0.85rem; color:#64748b; margin-bottom:14px;">자동셔터 꺼짐</div>
 
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                 <span style="font-size:0.95rem; color:#334155;" data-i18n="digital_zoom_label">디지털 줌</span>
@@ -486,6 +489,7 @@
             <button class="btn-upload" onclick="openImageUploader()" data-i18n="btn_upload_photo">🖼️ 얼굴 사진 업로드</button>
             <button id="btn-use-last-upload" class="btn-use-last" onclick="useLastUploadedImage()" data-i18n="btn_use_last_upload">↺ 최근 업로드 다시 사용</button>
             <button class="btn-restore" onclick="restoreCameraPreview()" data-i18n="btn_restore_camera">↩️ 실시간 카메라로 복귀</button>
+            <button id="btn-face-mesh-toggle" class="btn-mesh-toggle active" onclick="toggleFaceMeshPreview()">👁️ Face Mesh 끄기</button>
             <button id="btn-go-result" class="btn-go-result" onclick="goToResult()" disabled data-i18n="btn_view_result">✅ 결과 보기</button>
             <input id="upload-image-input" type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleUploadedImage(event)">
             <div id="capture-message" style="margin-top:10px; font-size:0.9rem; color:#64748b;" data-i18n="capture_guidance">안내: 얼굴 사진 한 장을 촬영하면 MediaPipe Face Mesh가 좌/우 눈을 자동으로 감지해 분석합니다.</div>
@@ -506,13 +510,14 @@
         let analysisReady = false;
         let detectionPollingInterval = null;
         let digitalZoom = 1.0;
-        let autoShutterEnabled = true;
+        let autoShutterEnabled = false;
         let isCapturing = false;
         let autoCooldownUntil = 0;
         let previewMode = 'camera'; // 'camera' | 'upload'
         let mobileUploadOnlyMode = false;
         let captureCameraSessionActive = false;
         let videoFallbackInterval = null;
+        let faceMeshPreviewEnabled = true;
         const AUTO_SHUTTER_CONF_THRESHOLD = 0.70; // 70%
         const LAST_UPLOAD_KEY = 'last_mobile_upload_capture';
         const MOBILE_HINT_SEEN_KEY = 'mobile_upload_hint_seen_v1';
@@ -640,6 +645,32 @@
             }
         }
 
+        function getVideoFeedUrl() {
+            return `/video_feed?mesh=${faceMeshPreviewEnabled ? 1 : 0}&t=${Date.now()}`;
+        }
+
+        function syncFaceMeshToggleUI() {
+            const btn = document.getElementById('btn-face-mesh-toggle');
+            if (!btn) return;
+            btn.classList.toggle('active', faceMeshPreviewEnabled);
+            btn.textContent = faceMeshPreviewEnabled ? '👁️ Face Mesh 끄기' : '👁️ Face Mesh 켜기';
+            btn.disabled = !!mobileUploadOnlyMode;
+        }
+
+        function refreshCameraPreviewStream() {
+            if (previewMode !== 'camera' || mobileUploadOnlyMode) return;
+            const videoImg = document.getElementById('video-feed');
+            if (!videoImg) return;
+            videoImg.src = getVideoFeedUrl();
+        }
+
+        function toggleFaceMeshPreview() {
+            if (mobileUploadOnlyMode) return;
+            faceMeshPreviewEnabled = !faceMeshPreviewEnabled;
+            syncFaceMeshToggleUI();
+            refreshCameraPreviewStream();
+        }
+
         async function fetchRawCameraFrameDataUrl() {
             const response = await fetch(`/video_frame?mesh=0&t=${Date.now()}`);
             if (!response.ok) {
@@ -726,7 +757,7 @@
             stopVideoFallbackPolling();
             videoFallbackInterval = setInterval(() => {
                 if (previewMode !== 'camera') return;
-                videoImg.src = `/video_frame?t=${Date.now()}`;
+                videoImg.src = getVideoFeedUrl();
             }, 250);
         }
 
@@ -883,7 +914,7 @@
                 stopVideoFallbackPolling();
             };
             videoImg.src = '';
-            videoImg.src = `/video_feed?t=${Date.now()}`;
+            videoImg.src = getVideoFeedUrl();
             videoImg.style.objectFit = 'cover';
             videoImg.style.transform = `scaleX(-1) scale(${digitalZoom})`;
             captureMessage.textContent = '실시간 카메라 모드로 복귀했습니다.';
@@ -1199,7 +1230,7 @@
                     if (result.right_eye) writeSessionValue('eye_analysis_R', JSON.stringify(result.right_eye));
 
                     const isUploadNoYoloMode = result?.meta?.analysis_mode === 'upload_single_eye_no_yolo';
-                    const detectedSides = [result.left_eye ? '좌안' : null, result.right_eye ? '우안' : null].filter(Boolean);
+                    const detectedSides = [result.left_eye ? '우안' : null, result.right_eye ? '좌안' : null].filter(Boolean);
                     const detectedText = isUploadNoYoloMode
                         ? '업로드 단안 분석 완료'
                         : (detectedSides.length ? detectedSides.join(', ') + ' 감지됨' : '눈 감지 실패 - 다시 시도해 주세요');
@@ -1268,11 +1299,20 @@
                 enableMobileUploadOnlyMode();
             }
 
+            if (!mobileUploadOnlyMode) {
+                const autoToggle = document.getElementById('auto-shutter-toggle');
+                if (autoToggle) {
+                    autoToggle.checked = false;
+                }
+                toggleAutoShutter();
+            }
+
             const videoImg = document.getElementById('video-feed');
             if (!mobileUploadOnlyMode) {
                 videoImg.style.objectFit = 'cover';
                 videoImg.style.transform = `scaleX(-1) scale(${digitalZoom})`;
             }
+            syncFaceMeshToggleUI();
 
             capturedPhoto = null;
             analysisReady = false;
@@ -1363,5 +1403,6 @@
             applyTheme(currentTheme(), false);
         })();
     </script>
+    <script src="/static/js/timeout.js"></script>
 </body>
 </html>

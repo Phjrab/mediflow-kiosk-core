@@ -2338,7 +2338,7 @@ def get_camera_session_count():
 # ========================================
 # [4] 카메라 프레임 스트림
 # ========================================
-def gen_frames():
+def gen_frames(show_mesh=True):
     """
     백그라운드 스레드가 수집한 current_frame을 브라우저로 실시간 스트리밍
     """
@@ -2358,9 +2358,10 @@ def gen_frames():
             continue
             
         frame_to_send = current_frame.copy()
-        mesh_overlay = build_mediapipe_mesh_overlay(frame_to_send)
-        if mesh_overlay is not None:
-            frame_to_send = mesh_overlay
+        if show_mesh:
+            mesh_overlay = build_mediapipe_mesh_overlay(frame_to_send)
+            if mesh_overlay is not None:
+                frame_to_send = mesh_overlay
 
         # [LEGACY YOLO] 스트림 오버레이 YOLO는 GPU 메모리 사용량이 커서 기본 비활성화한다.
         # [LEGACY YOLO] if YOLO_STREAM_DEBUG_OVERLAY:
@@ -2705,7 +2706,8 @@ def mobile_dashboard_page():
 @app.route('/video_feed')
 def video_feed():
     """실시간 영상 스트림 (MJPEG)"""
-    return Response(gen_frames(),
+    show_mesh = str(request.args.get('mesh', '1')).strip().lower() not in ('0', 'false', 'no', 'off')
+    return Response(gen_frames(show_mesh=show_mesh),
                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
@@ -3849,6 +3851,13 @@ def report_pdf():
 def report_pdf_legacy():
     """Legacy alias for older report PDF links."""
     return render_template('report_pdf.html')
+
+
+@app.route('/training')
+@app.route('/training.html')
+def training():
+    """안구 마사지 가이드 페이지"""
+    return render_template('training.html')
 
 
 @app.route('/survey')

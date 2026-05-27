@@ -541,6 +541,7 @@
         .btn-home { background: var(--primary); color: white; }
         .btn-print { background: #1d1d1f; color: white; }
         .btn-kakao { background: #334155; color: #fff; }
+        .btn-training { background: linear-gradient(135deg, #38bdf8, #0ea5e9); color: white; }
 
         .pdf-overlay {
             position: fixed;
@@ -954,6 +955,7 @@
                 <div class="footer-btns">
                     <button class="btn btn-home" onclick="location.href='/'">메인으로</button>
                     <button class="btn btn-home" onclick="location.href='/result'">결과로 돌아가기</button>
+                    <button class="btn btn-training" onclick="location.href='/training.html'">👁️ 안구 마사지 가이드</button>
                     <button id="btn-share-report" class="btn btn-print" onclick="generateShareReport()">📄 보고서 발행</button>
                     <button id="btn-send-kakao" class="btn btn-kakao" onclick="sendReportToKakao()">💬 카카오로 보내기</button>
                 </div>
@@ -1013,8 +1015,8 @@
                 <div class="line-chart-title">라인 차트 보기</div>
                 <svg id="redness-line-chart" class="line-svg" viewBox="0 0 620 180" preserveAspectRatio="none"></svg>
                 <div class="line-legend">
-                    <span class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span>좌안</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span>우안</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span>우안</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span>좌안</span>
                 </div>
             </div>
         </div>
@@ -1268,6 +1270,25 @@
             };
         }
 
+        const MIRROR_EYE_LABELS = true;
+
+        function getVisualEyeSide(side) {
+            if (!MIRROR_EYE_LABELS) return side;
+            if (side === 'L') return 'R';
+            if (side === 'R') return 'L';
+            return side;
+        }
+
+        function getReportEyeData(analysis, side) {
+            const visualSide = getVisualEyeSide(side);
+            return visualSide === 'L' ? (analysis?.left_eye || null) : (analysis?.right_eye || null);
+        }
+
+        function getReportEyeLabel(side) {
+            const visualSide = getVisualEyeSide(side);
+            return visualSide === 'L' ? '좌안' : '우안';
+        }
+
         function addRecordEyesToSession(session, record) {
             const analysis = record?.analysis || {};
 
@@ -1499,8 +1520,8 @@
                     <div class="history-item">
                         <div class="history-date">${dateText}</div>
                         <div class="history-desc">${desc}</div>
-                        <button class="history-view-btn" onclick="viewHistoryImage(${index}, 'L')">좌안</button>
-                        <button class="history-view-btn right" onclick="viewHistoryImage(${index}, 'R')">우안</button>
+                        <button class="history-view-btn" onclick="viewHistoryImage(${index}, 'L')">우안</button>
+                        <button class="history-view-btn right" onclick="viewHistoryImage(${index}, 'R')">좌안</button>
                         <button class="history-delete-btn" onclick="deleteHistorySession(${index})">삭제</button>
                     </div>
                 `;
@@ -1983,16 +2004,16 @@
 
         function renderRednessGraph(currentAnalysis, pastAnalysis) {
             const graph = document.getElementById('redness-graph');
-            const currLeft = currentAnalysis?.left_eye?.redness;
-            const currRight = currentAnalysis?.right_eye?.redness;
-            const pastLeft = pastAnalysis?.left_eye?.redness;
-            const pastRight = pastAnalysis?.right_eye?.redness;
+            const currLeft = getReportEyeData(currentAnalysis, 'L')?.redness;
+            const currRight = getReportEyeData(currentAnalysis, 'R')?.redness;
+            const pastLeft = getReportEyeData(pastAnalysis, 'L')?.redness;
+            const pastRight = getReportEyeData(pastAnalysis, 'R')?.redness;
 
             const rows = [];
-            if (typeof currLeft === 'number') rows.push(makeGraphRow('현재 좌안', currLeft));
-            if (typeof pastLeft === 'number') rows.push(makeGraphRow('과거 좌안', pastLeft));
-            if (typeof currRight === 'number') rows.push(makeGraphRow('현재 우안', currRight));
-            if (typeof pastRight === 'number') rows.push(makeGraphRow('과거 우안', pastRight));
+            if (typeof currLeft === 'number') rows.push(makeGraphRow(`현재 ${getReportEyeLabel('L')}`, currLeft));
+            if (typeof pastLeft === 'number') rows.push(makeGraphRow(`과거 ${getReportEyeLabel('L')}`, pastLeft));
+            if (typeof currRight === 'number') rows.push(makeGraphRow(`현재 ${getReportEyeLabel('R')}`, currRight));
+            if (typeof pastRight === 'number') rows.push(makeGraphRow(`과거 ${getReportEyeLabel('R')}`, pastRight));
 
             graph.innerHTML = rows.length
                 ? rows.join('')
@@ -2042,14 +2063,15 @@
             // previewSlots[section][side]는 이제 session eye 객체 {image_url, bbox, record}
             const eye = previewSlots?.[section]?.[side] || null;
             if (!eye?.record) return;
-            await openEyeImageFromRecord(eye.record, side);
+            await openEyeImageFromRecord(eye.record, getVisualEyeSide(side));
         }
 
         async function viewHistoryImage(index, side) {
             const session = historySessions[index] || null;
-            const eye = side === 'R' ? session?.eyes?.R : session?.eyes?.L;
+            const visualSide = getVisualEyeSide(side || 'L');
+            const eye = session?.eyes?.[visualSide] || null;
             if (!eye || !eye.record) return;
-            await openEyeImageFromRecord(eye.record, side || 'L');
+            await openEyeImageFromRecord(eye.record, visualSide);
         }
 
         (function () {
@@ -2095,5 +2117,6 @@
             applyTheme(currentTheme(), false);
         })();
     </script>
+    <script src="/static/js/timeout.js"></script>
 </body>
 </html>

@@ -504,8 +504,8 @@
 
         <div class="eye-select-row">
             <button id="btn-view-original" class="eye-select-btn active" onclick="setEyePhotoView('ORIGINAL')">🖼️ 원본 보기</button>
-            <button id="btn-view-left" class="eye-select-btn" onclick="setEyePhotoView('L')">👁️ 좌안 보기</button>
-            <button id="btn-view-right" class="eye-select-btn" onclick="setEyePhotoView('R')">👁️ 우안 보기</button>
+            <button id="btn-view-left" class="eye-select-btn" onclick="setEyePhotoView('L')">👁️ 우안 보기</button>
+            <button id="btn-view-right" class="eye-select-btn" onclick="setEyePhotoView('R')">👁️ 좌안 보기</button>
         </div>
 
         <div class="camera-bottom-btns">
@@ -693,6 +693,34 @@
             return !!(eye && parseBBox(eye.bbox));
         }
 
+        const MIRROR_EYE_LABELS = true;
+
+        function getVisualEyeMode(mode) {
+            if (!MIRROR_EYE_LABELS) return mode;
+            if (mode === 'L') return 'R';
+            if (mode === 'R') return 'L';
+            return mode;
+        }
+
+        function getEyeDataForMode(analysis, mode) {
+            const visualMode = getVisualEyeMode(mode);
+            if (visualMode === 'L') return analysis?.left_eye || null;
+            if (visualMode === 'R') return analysis?.right_eye || null;
+            return null;
+        }
+
+        function getEyeLabelForMode(mode) {
+            const visualMode = getVisualEyeMode(mode);
+            if (visualMode === 'L') return '좌안';
+            if (visualMode === 'R') return '우안';
+            return '원본';
+        }
+
+        function getEyeButtonText(mode) {
+            if (mode === 'ORIGINAL') return '🖼️ 원본 보기';
+            return `👁️ ${getEyeLabelForMode(mode)} 보기`;
+        }
+
         function setActiveEyeViewButton(mode) {
             const originalBtn = document.getElementById('btn-view-original');
             const leftBtn = document.getElementById('btn-view-left');
@@ -712,16 +740,19 @@
 
             const hasPhoto = !!getPhotoDataUrl();
 
-            const leftAvailable = hasUsableEye(analysis?.left_eye);
-            const rightAvailable = hasUsableEye(analysis?.right_eye);
+            const leftAvailable = hasUsableEye(getEyeDataForMode(analysis, 'L'));
+            const rightAvailable = hasUsableEye(getEyeDataForMode(analysis, 'R'));
 
             originalBtn.disabled = !hasPhoto;
             leftBtn.disabled = !hasPhoto || !leftAvailable;
             rightBtn.disabled = !hasPhoto || !rightAvailable;
 
+            leftBtn.textContent = getEyeButtonText('L');
+            rightBtn.textContent = getEyeButtonText('R');
+
             originalBtn.title = hasPhoto ? '원본 사진 보기' : '원본 사진이 없습니다';
-            leftBtn.title = (!hasPhoto) ? '원본 사진이 없습니다' : (leftAvailable ? '좌안 사진 보기' : '좌안이 인식되지 않아 선택할 수 없습니다');
-            rightBtn.title = (!hasPhoto) ? '원본 사진이 없습니다' : (rightAvailable ? '우안 사진 보기' : '우안이 인식되지 않아 선택할 수 없습니다');
+            leftBtn.title = (!hasPhoto) ? '원본 사진이 없습니다' : (leftAvailable ? `${getEyeLabelForMode('L')} 사진 보기` : `${getEyeLabelForMode('L')}이 인식되지 않아 선택할 수 없습니다`);
+            rightBtn.title = (!hasPhoto) ? '원본 사진이 없습니다' : (rightAvailable ? `${getEyeLabelForMode('R')} 사진 보기` : `${getEyeLabelForMode('R')}이 인식되지 않아 선택할 수 없습니다`);
 
             if (eyeViewMode === 'L' && leftBtn.disabled) {
                 eyeViewMode = 'ORIGINAL';
@@ -736,7 +767,7 @@
             if (!btn) return;
 
             if (eyeViewMode !== 'ORIGINAL') {
-                const eye = eyeViewMode === 'L' ? analysis?.left_eye : analysis?.right_eye;
+                const eye = getEyeDataForMode(analysis, eyeViewMode);
                 const hasEfficientNetCam = !!sanitizeCamUrl(eye?.cam_image_url);
                 if (!hasEfficientNetCam) {
                     btn.disabled = true;
@@ -819,9 +850,7 @@
         }
 
         function getSelectedEyeData(analysis) {
-            if (eyeViewMode === 'L') return analysis?.left_eye || null;
-            if (eyeViewMode === 'R') return analysis?.right_eye || null;
-            return null;
+            return getEyeDataForMode(analysis, eyeViewMode);
         }
 
         function renderSelectedEyeImageForMode(analysis) {
@@ -886,7 +915,7 @@
                     imageEl.src = basePhoto;
                     if (hintEl) hintEl.style.display = 'none';
                 } else {
-                    const eye = mode === 'L' ? analysis?.left_eye : analysis?.right_eye;
+                    const eye = getEyeDataForMode(analysis, mode);
                     const bbox = parseBBox(eye?.bbox);
                     if (!bbox) {
                         return;
@@ -1011,8 +1040,8 @@
             const leftLevelEl = document.getElementById('redness-left-level');
             const rightLevelEl = document.getElementById('redness-right-level');
 
-            const left = readNumber(analysis?.left_eye?.redness);
-            const right = readNumber(analysis?.right_eye?.redness);
+            const left = readNumber(getEyeDataForMode(analysis, 'L')?.redness);
+            const right = readNumber(getEyeDataForMode(analysis, 'R')?.redness);
 
             if (left !== null) {
                 const lv = getRednessLevel(left);
@@ -1153,6 +1182,7 @@
             });
         };
     </script>
+    <script src="/static/js/timeout.js"></script>
 </body>
 <script>
     (function () {

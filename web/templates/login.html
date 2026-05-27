@@ -154,6 +154,43 @@
             background-color: #fafafa;
         }
 
+        .consent-group {
+            margin-bottom: 25px;
+            padding: 18px 20px;
+            border: 1px solid rgba(0, 122, 255, 0.18);
+            background: #f5f9ff;
+            border-radius: 18px;
+            color: var(--text-dark);
+            text-align: left;
+        }
+
+        .consent-group label {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 1rem;
+            line-height: 1.6;
+            cursor: pointer;
+        }
+
+        .consent-group input[type="checkbox"] {
+            margin-top: 4px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        [data-theme="dark"] .consent-group {
+            background: #111827;
+            border-color: rgba(79, 70, 229, 0.2);
+            color: var(--text-dark);
+        }
+
+        [data-theme="dark"] .consent-group input[type="checkbox"] {
+            accent-color: #4ea1ff;
+        }
+
         [data-theme="dark"] .input-group input {
             background-color: #0f172a !important;
             color: var(--text-dark) !important;
@@ -280,6 +317,13 @@
             <input type="password" id="admin-password" name="admin-password" placeholder="관리자 비밀번호를 입력하세요" autocomplete="current-password">
         </div>
 
+        <div class="consent-group">
+            <label for="privacy-consent">
+                <input type="checkbox" id="privacy-consent" name="privacy-consent">
+                <span>개인정보 수집 및 이용에 동의합니다. 입력하신 정보는 문진 결과 데이터베이스 매칭 및 서비스 제공 목적으로 사용됩니다.</span>
+            </label>
+        </div>
+
         <div class="info-message">
             <p style="margin:0; font-size:1rem; color:var(--text-sub); line-height:1.6;" data-i18n="login_privacy_note" data-i18n-html="true">
                 ℹ️ <strong>비식별화 아키텍처</strong>를 통해 개인정보를 보호합니다.<br>
@@ -356,6 +400,12 @@
     async function handleLogin(event) {
         event.preventDefault(); 
         
+        const consentCheckbox = document.getElementById('privacy-consent');
+        if (!consentCheckbox || !consentCheckbox.checked) {
+            await showAlert('개인정보 수집 및 이용에 동의하셔야 합니다.');
+            return false;
+        }
+
         const identifier = document.getElementById('identifier').value.trim();
         const normalized = identifier.toLowerCase();
         const adminPassword = document.getElementById('admin-password').value;
@@ -367,7 +417,7 @@
                 if (role !== 'admin') {
                     sessionStorage.removeItem('admin_csrf_token');
                 }
-                localStorage.setItem('user_id', userId);
+                localStorage.removeItem('user_id');
                 localStorage.removeItem('user_role');
             } catch (e) {}
         }
@@ -492,5 +542,6 @@
     })();
 </script>
 
+    <script src="/static/js/timeout.js"></script>
 </body>
-</html>
+    </html>
