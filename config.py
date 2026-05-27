@@ -79,10 +79,10 @@ CAMERA_DEVICE_INDEX = _get_env_int('CAMERA_DEVICE_INDEX', 0)
 # ========================================
 # [4] YOLO 검출 임계값
 # ========================================
-YOLO_CONF_THRESHOLD = _get_env_float('YOLO_CONF_THRESHOLD', 0.5)
-YOLO_IOU_THRESHOLD = _get_env_float('YOLO_IOU_THRESHOLD', 0.45)
-YOLO_INPUT_SIZE = _get_env_int('YOLO_INPUT_SIZE', 640)
-YOLO_STATUS_CONF_THRESHOLD = _get_env_float('YOLO_STATUS_CONF_THRESHOLD', 0.25)
+YOLO_CONF_THRESHOLD = _get_env_float('MEDIAPIPE_CONF_THRESHOLD', 0.5)
+YOLO_IOU_THRESHOLD = _get_env_float('MEDIAPIPE_IOU_THRESHOLD', 0.45)
+YOLO_INPUT_SIZE = _get_env_int('MEDIAPIPE_INPUT_SIZE', 640)
+YOLO_STATUS_CONF_THRESHOLD = _get_env_float('MEDIAPIPE_STATUS_CONF_THRESHOLD', 0.25)
 
 # ========================================
 # [5] 분류 모델 설정

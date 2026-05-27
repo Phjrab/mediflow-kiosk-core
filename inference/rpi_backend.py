@@ -122,7 +122,7 @@ class RPiONNXBackend(InferenceBackend):
         self.class_names = class_names or ["normal", "conjunctivitis", "uveitis", "cataract", "stye"]
 
         if not os.path.exists(self.yolo_onnx_path):
-            raise FileNotFoundError(f"YOLO ONNX model not found: {self.yolo_onnx_path}")
+            raise FileNotFoundError(f"MediaPipe/YOLO ONNX model not found: {self.yolo_onnx_path}")
         if not os.path.exists(self.classifier_onnx_path):
             raise FileNotFoundError(f"Classifier ONNX model not found: {self.classifier_onnx_path}")
 

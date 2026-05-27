@@ -416,23 +416,23 @@
             description: 'OpenCV가 열 카메라 인덱스입니다.',
             hint: '내장 카메라가 0인 경우가 많음. 인식 안되면 1, 2 순서로 확인.'
         },
-        YOLO_CONF_THRESHOLD: {
-            title: 'YOLO 검출 임계값(분석)',
+        MEDIAPIPE_CONF_THRESHOLD: {
+            title: 'MediaPipe 검출 임계값(분석)',
             description: '분석 파이프라인에서 눈을 검출할 최소 신뢰도입니다.',
             hint: '값↑: 오검출 감소/미검출 증가, 값↓: 검출 증가/잡음 증가. 보통 0.4~0.6.'
         },
-        YOLO_IOU_THRESHOLD: {
-            title: 'YOLO NMS IoU 임계값',
+        MEDIAPIPE_IOU_THRESHOLD: {
+            title: 'MediaPipe NMS IoU 임계값',
             description: '중복 박스 제거 기준(IoU)입니다.',
             hint: '일반적으로 0.4~0.6. 너무 낮으면 박스가 과도하게 제거될 수 있음.'
         },
-        YOLO_STATUS_CONF_THRESHOLD: {
+        MEDIAPIPE_STATUS_CONF_THRESHOLD: {
             title: '상태 표시용 임계값',
             description: '실시간 감지 상태(/detect_status) 판정용 최소 신뢰도입니다.',
             hint: '자동셔터 체감에 영향. 너무 높으면 감지 점등이 잘 안됨.'
         },
-        YOLO_INPUT_SIZE: {
-            title: 'YOLO 입력 해상도',
+        MEDIAPIPE_INPUT_SIZE: {
+            title: 'MediaPipe 입력 해상도',
             description: '검출 모델 입력 크기(px)입니다.',
             hint: '값↑: 정확도 향상 가능/속도 저하, 값↓: 속도 향상/정밀도 저하. 보통 640.'
         },

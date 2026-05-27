@@ -15,13 +15,6 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/static/css/chat-widget.css">
-        <!-- i18n Global Support -->
-        <link rel="stylesheet" href="/static/css/i18n-common.css">
-        <script src="/static/js/translations.js"></script>
-        <script src="/static/js/i18n.js"></script>
-        <!-- Global language FAB intentionally not included on this page -->
-    <script src="/static/js/chat-widget.js"></script>
     <style>
         :root { 
             --primary: #007AFF; 
@@ -504,9 +497,9 @@
         <div class="captured-media" id="captured-media">
             <img id="captured-image" alt="진단 이미지">
             <div id="cam-overlay-layer" class="cam-overlay-layer">
-                <img id="cam-overlay-yolo" class="cam-overlay-full" alt="원본 MediaPipe 메쉬 오버레이">
+                <img id="cam-overlay-mediapipe" class="cam-overlay-full" alt="원본 미디어 파이프 히트맵 오버레이">
             </div>
-            <div id="captured-empty-hint" class="captured-empty-hint" data-i18n="captured_image_empty">촬영된 원본 이미지가 없습니다. capture에서 얼굴 촬영을 먼저 진행해 주세요.</div>
+            <div id="captured-empty-hint" class="captured-empty-hint">촬영된 원본 이미지가 없습니다. capture에서 얼굴 촬영을 먼저 진행해 주세요.</div>
         </div>
 
         <div class="eye-select-row">
@@ -516,8 +509,8 @@
         </div>
 
         <div class="camera-bottom-btns">
-            <button class="btn btn-camera-sub btn-retake" onclick="retakePhotos()" data-i18n="btn_retake_photos">🔄 안구 재촬영</button>
-            <button id="btn-generate-report" class="btn btn-camera-sub" onclick="generateReport()" data-i18n="btn_generate_report">📋 리포트 발행</button>
+            <button class="btn btn-camera-sub btn-retake" onclick="retakePhotos()">🔄 안구 재촬영</button>
+            <button id="btn-generate-report" class="btn btn-camera-sub" onclick="generateReport()">📋 리포트 발행</button>
             <button class="btn btn-camera-sub" onclick="openNearbyClinicMap()">📍 주변 안과</button>
         </div>
     </div>
@@ -526,8 +519,8 @@
         <div class="card">
             <h2>🔍 자동 측정 데이터</h2>
             <div style="font-size:0.9rem; color:#475569;">
-                <div data-i18n="redness_left">좌안 충혈도: <b id="redness-left">-</b> <span id="redness-left-level"></span></div>
-                <div style="margin-top:4px;" data-i18n="redness_right">우안 충혈도: <b id="redness-right">-</b> <span id="redness-right-level"></span></div>
+                <div>좌안 충혈도: <b id="redness-left">-</b> <span id="redness-left-level"></span></div>
+                <div style="margin-top:4px;">우안 충혈도: <b id="redness-right">-</b> <span id="redness-right-level"></span></div>
                 <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">
                     기준: 정상(&lt;0.08) · 경미(0.08~&lt;0.14) · 심함(0.14~&lt;0.22) · 매우심함(≥0.22)
                 </div>
@@ -631,27 +624,6 @@
             return showToastPopup(message, { hideCancel: false, confirmText, cancelText: '취소' });
         }
 
-        function readSessionValue(key) {
-            const current = sessionStorage.getItem(key);
-            if (current !== null) return current;
-
-            const legacy = localStorage.getItem(key);
-            if (legacy !== null) {
-                sessionStorage.setItem(key, legacy);
-                localStorage.removeItem(key);
-            }
-            return legacy;
-        }
-
-        function writeSessionValue(key, value) {
-            sessionStorage.setItem(key, value);
-        }
-
-        function removeSessionValue(key) {
-            sessionStorage.removeItem(key);
-            localStorage.removeItem(key);
-        }
-
         function setStatusTag(el, level, text) {
             el.classList.remove('tag-normal', 'tag-warning', 'tag-danger');
             el.classList.add(level);
@@ -685,7 +657,7 @@
         }
 
         function parseStoredJson(key) {
-            const raw = readSessionValue(key);
+            const raw = localStorage.getItem(key);
             if (!raw) return null;
             try {
                 return JSON.parse(raw);
@@ -714,7 +686,7 @@
         }
 
         function getPhotoDataUrl() {
-            return readSessionValue('bilateral_capture') || '';
+            return localStorage.getItem('bilateral_capture') || '';
         }
 
         function hasUsableEye(eye) {
@@ -777,15 +749,15 @@
                 return;
             }
 
-            const meshUrl = sanitizeCamUrl(analysis?.mediapipe_mesh_image_url || analysis?.yolo_cam_image_url);
-            if (!meshUrl) {
+            const hasYoloCam = !!sanitizeCamUrl(analysis?.mediapipe_cam_image_url);
+            if (!hasYoloCam) {
                 btn.disabled = true;
-                btn.textContent = '🔥 MediaPipe 메쉬 없음';
+                btn.textContent = '🔥 미디어 파이프 히트맵 없음';
                 return;
             }
 
             btn.disabled = false;
-            btn.textContent = gradCamVisible ? '🙈 MediaPipe 메쉬 숨기기' : '🔥 MediaPipe 메쉬 보기';
+            btn.textContent = gradCamVisible ? '🙈 미디어 파이프 히트맵 숨기기' : '🔥 미디어 파이프 히트맵 보기';
         }
 
         function loadImageFromDataUrl(dataUrl) {
@@ -824,7 +796,7 @@
 
         function renderGradCamOverlay(analysis) {
             const layer = document.getElementById('cam-overlay-layer');
-            const yoloEl = document.getElementById('cam-overlay-yolo');
+            const yoloEl = document.getElementById('cam-overlay-mediapipe');
             if (!layer || !yoloEl) return;
 
             if (eyeViewMode !== 'ORIGINAL') {
@@ -834,10 +806,10 @@
                 return;
             }
 
-            const meshUrl = sanitizeCamUrl(analysis?.mediapipe_mesh_image_url || analysis?.yolo_cam_image_url);
-            const canShowOverlay = gradCamVisible && !!meshUrl;
+            const yoloUrl = sanitizeCamUrl(analysis?.mediapipe_cam_image_url);
+            const canShowOverlay = gradCamVisible && !!yoloUrl;
             if (canShowOverlay) {
-                yoloEl.src = meshUrl;
+                yoloEl.src = yoloUrl;
                 yoloEl.style.display = 'block';
             } else {
                 yoloEl.style.display = 'none';
@@ -1127,13 +1099,13 @@
         async function retakePhotos() {
             const ok = await showConfirm("현재 화면의 임시 촬영/분석 데이터만 초기화하고 다시 촬영하시겠습니까?\n이미 저장된 DB 이력과 기존 리포트 기록은 삭제되지 않습니다.", '재촬영');
             if (ok) {
-                removeSessionValue('eye_photo_L');
-                removeSessionValue('eye_photo_R');
-                removeSessionValue('eye_analysis_L');
-                removeSessionValue('eye_analysis_R');
-                removeSessionValue('bilateral_capture');
-                removeSessionValue('bilateral_analysis');
-                removeSessionValue('data_updated');
+                localStorage.removeItem('eye_photo_L');
+                localStorage.removeItem('eye_photo_R');
+                localStorage.removeItem('eye_analysis_L');
+                localStorage.removeItem('eye_analysis_R');
+                localStorage.removeItem('bilateral_capture');
+                localStorage.removeItem('bilateral_analysis');
+                localStorage.removeItem('data_updated');
                 window.location.href = '/capture';
             }
         }
@@ -1143,10 +1115,10 @@
             refreshReportAvailability();
 
             if (isLatestDataReady()) {
-                writeSessionValue('data_updated', 'true');
+                localStorage.setItem('data_updated', 'true');
                 await showAlert("최신 분석 데이터가 확인되었습니다. 바로 리포트를 발행할 수 있습니다.");
             } else {
-                writeSessionValue('data_updated', 'false');
+                localStorage.setItem('data_updated', 'false');
                 await showAlert("아직 최신 분석 데이터가 없습니다. 좌/우 눈 분석을 먼저 완료해 주세요.");
             }
         }
@@ -1154,10 +1126,10 @@
         // 4. 리포트 발행 및 페이지 이동 (report.html 연결)
         async function generateReport() {
             if (isLatestDataReady()) {
-                writeSessionValue('data_updated', 'true');
+                localStorage.setItem('data_updated', 'true');
                 window.location.href = '/report';
             } else {
-                writeSessionValue('data_updated', 'false');
+                localStorage.setItem('data_updated', 'false');
                 refreshReportAvailability();
                 await showAlert("리포트 발행에 필요한 최신 분석 데이터가 없습니다.");
             }
@@ -1166,7 +1138,7 @@
         window.onload = () => {
             renderCapturedPhoto();
             renderAiResults();
-            writeSessionValue('data_updated', isLatestDataReady() ? 'true' : 'false');
+            localStorage.setItem('data_updated', isLatestDataReady() ? 'true' : 'false');
             refreshReportAvailability();
             toggleGradCam(false);
 
@@ -1189,23 +1161,6 @@
             const t = root.getAttribute('data-theme');
             return (t === 'dark' || t === 'light') ? t : 'light';
         }
-        function themeModeText(mode) {
-            let lang = 'ko';
-            try {
-                const saved = localStorage.getItem('i18n_language') || localStorage.getItem('selectedLanguage') || document.documentElement.lang || 'ko';
-                lang = String(saved).slice(0, 2).toLowerCase();
-            } catch (e) {}
-            const map = {
-                ko: { dark: '다크 모드', light: '라이트 모드' },
-                en: { dark: 'Dark Mode', light: 'Light Mode' },
-                zh: { dark: '暗黑模式', light: '浅色模式' },
-                vi: { dark: 'Chế độ Tối', light: 'Chế độ Sáng' },
-                ru: { dark: 'Темный режим', light: 'Светлый режим' },
-                ja: { dark: 'ダークモード', light: 'ライトモード' }
-            };
-            const selected = map[lang] || map.ko;
-            return selected[mode] || map.ko[mode];
-        }
         function applyTheme(theme, persist) {
             root.setAttribute('data-theme', theme);
             if (persist) {
@@ -1217,10 +1172,10 @@
             const label = btn.querySelector('[data-role="label"]');
             if (theme === 'dark') {
                 if (icon) icon.textContent = '☀️';
-                if (label) label.textContent = themeModeText('light');
+                if (label) label.textContent = '라이트 모드';
             } else {
                 if (icon) icon.textContent = '🌙';
-                if (label) label.textContent = themeModeText('dark');
+                if (label) label.textContent = '다크 모드';
             }
         }
         applyTheme(currentTheme(), false);

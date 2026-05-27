@@ -36,7 +36,7 @@ pip install -r requirements_rpi.txt
 
 ```bash
 MODEL_DEVICE=rpi
-YOLO_ONNX_PATH=models/yolo.onnx
+MEDIAPIPE_ONNX_PATH=models/yolo.onnx
 CLASSIFIER_ONNX_PATH=models/efficientnet.onnx
 SERVER_HOST=0.0.0.0
 SERVER_PORT=5000

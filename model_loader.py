@@ -32,7 +32,7 @@ def build_loader_config(explicit_device: Optional[str] = None) -> LoaderConfig:
     device = resolve_device(explicit_device)
     return LoaderConfig(
         device=device,
-        yolo_onnx_path=os.getenv("YOLO_ONNX_PATH", "models/yolo.onnx"),
+        yolo_onnx_path=os.getenv("MEDIAPIPE_ONNX_PATH", "models/yolo.onnx"),
         classifier_onnx_path=os.getenv("CLASSIFIER_ONNX_PATH", "models/efficientnet.onnx"),
     )
 

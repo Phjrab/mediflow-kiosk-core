@@ -5,9 +5,9 @@ PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
 
 VENV_PATH="${VENV_PATH:-$PROJECT_DIR/.venv}"
-YOLO_PT_PATH="${YOLO_PT_PATH:-}"
+MEDIAPIPE_PT_PATH="${MEDIAPIPE_PT_PATH:-}"
 CLASSIFIER_PTH_PATH="${CLASSIFIER_PTH_PATH:-}"
-YOLO_ONNX_PATH="${YOLO_ONNX_PATH:-models/yolo.onnx}"
+MEDIAPIPE_ONNX_PATH="${MEDIAPIPE_ONNX_PATH:-models/yolo.onnx}"
 CLASSIFIER_ONNX_PATH="${CLASSIFIER_ONNX_PATH:-models/efficientnet.onnx}"
 IMGSZ="${IMGSZ:-640}"
 OPSET="${OPSET:-12}"
@@ -20,7 +20,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --yolo-pt)
-      YOLO_PT_PATH="$2"
+      MEDIAPIPE_PT_PATH="$2"
       shift 2
       ;;
     --classifier-pth)
@@ -28,7 +28,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --yolo-onnx)
-      YOLO_ONNX_PATH="$2"
+      MEDIAPIPE_ONNX_PATH="$2"
       shift 2
       ;;
     --classifier-onnx)
@@ -70,8 +70,8 @@ HELP
   esac
 done
 
-if [[ -z "$YOLO_PT_PATH" ]]; then
-  YOLO_PT_PATH="$(ls -t models/*.pt 2>/dev/null | head -n 1 || true)"
+if [[ -z "$MEDIAPIPE_PT_PATH" ]]; then
+  MEDIAPIPE_PT_PATH="$(ls -t models/*.pt 2>/dev/null | head -n 1 || true)"
 fi
 
 if [[ -z "$CLASSIFIER_PTH_PATH" ]]; then
@@ -88,8 +88,8 @@ if [[ ! -d "$VENV_PATH" ]]; then
   exit 1
 fi
 
-if [[ -z "$YOLO_PT_PATH" || ! -f "$YOLO_PT_PATH" ]]; then
-  echo "[ERROR] YOLO PT file not found: $YOLO_PT_PATH"
+if [[ -z "$MEDIAPIPE_PT_PATH" || ! -f "$MEDIAPIPE_PT_PATH" ]]; then
+  echo "[ERROR] YOLO PT file not found: $MEDIAPIPE_PT_PATH"
   exit 1
 fi
 
@@ -98,7 +98,7 @@ if [[ -z "$CLASSIFIER_PTH_PATH" || ! -f "$CLASSIFIER_PTH_PATH" ]]; then
   exit 1
 fi
 
-mkdir -p "$(dirname "$YOLO_ONNX_PATH")" "$(dirname "$CLASSIFIER_ONNX_PATH")"
+mkdir -p "$(dirname "$MEDIAPIPE_ONNX_PATH")" "$(dirname "$CLASSIFIER_ONNX_PATH")"
 
 # shellcheck disable=SC1090
 source "$VENV_PATH/bin/activate"
@@ -109,9 +109,9 @@ if [[ "$SKIP_INSTALL" -eq 0 ]]; then
   pip install -q torch torchvision ultralytics onnx onnxscript
 fi
 
-echo "[INFO] Exporting YOLO ONNX from: $YOLO_PT_PATH"
+echo "[INFO] Exporting YOLO ONNX from: $MEDIAPIPE_PT_PATH"
 yolo export \
-  model="$YOLO_PT_PATH" \
+  model="$MEDIAPIPE_PT_PATH" \
   format=onnx \
   imgsz="$IMGSZ" \
   opset="$OPSET" \
@@ -119,16 +119,16 @@ yolo export \
   simplify=False \
   device=cpu
 
-GENERATED_YOLO_ONNX="${YOLO_PT_PATH%.pt}.onnx"
+GENERATED_YOLO_ONNX="${MEDIAPIPE_PT_PATH%.pt}.onnx"
 if [[ ! -f "$GENERATED_YOLO_ONNX" ]]; then
   echo "[ERROR] Expected generated file not found: $GENERATED_YOLO_ONNX"
   exit 1
 fi
 
-if [[ "$(readlink -f "$YOLO_ONNX_PATH" 2>/dev/null || echo "$YOLO_ONNX_PATH")" != "$(readlink -f "$GENERATED_YOLO_ONNX")" ]]; then
-  cp -f "$GENERATED_YOLO_ONNX" "$YOLO_ONNX_PATH"
+if [[ "$(readlink -f "$MEDIAPIPE_ONNX_PATH" 2>/dev/null || echo "$MEDIAPIPE_ONNX_PATH")" != "$(readlink -f "$GENERATED_YOLO_ONNX")" ]]; then
+  cp -f "$GENERATED_YOLO_ONNX" "$MEDIAPIPE_ONNX_PATH"
 else
-  echo "[INFO] YOLO output already points to generated ONNX: $YOLO_ONNX_PATH"
+  echo "[INFO] YOLO output already points to generated ONNX: $MEDIAPIPE_ONNX_PATH"
 fi
 
 echo "[INFO] Exporting classifier ONNX from: $CLASSIFIER_PTH_PATH"
@@ -175,7 +175,7 @@ print(f"[OK] Classifier ONNX exported: {out}")
 PY
 
 echo "[INFO] Validating ONNX runtime load"
-python - "$YOLO_ONNX_PATH" "$CLASSIFIER_ONNX_PATH" <<'PY'
+python - "$MEDIAPIPE_ONNX_PATH" "$CLASSIFIER_ONNX_PATH" <<'PY'
 import sys
 import onnxruntime as ort
 
@@ -187,5 +187,5 @@ for path in sys.argv[1:]:
 PY
 
 echo "[DONE] ONNX export completed"
-echo "       YOLO ONNX: $YOLO_ONNX_PATH"
+echo "       YOLO ONNX: $MEDIAPIPE_ONNX_PATH"
 echo "       Classifier ONNX: $CLASSIFIER_ONNX_PATH"

@@ -1132,7 +1132,7 @@
 
         function writeSessionValue(key, value) {
             sessionStorage.setItem(key, value);
-            if (key === 'user_id' || key === 'data_updated' || key.startsWith('eye_analysis_') || key.startsWith('bilateral_')) {
+            if (key === 'user_id' || key === 'active_capture_user_id' || key === 'data_updated' || key.startsWith('eye_analysis_') || key.startsWith('bilateral_')) {
                 localStorage.setItem(key, value);
             }
         }
@@ -1786,7 +1786,7 @@
                         meta: result.meta,
                         message: result.message,
                         user_id: result.user_id,
-                        yolo_cam_image_url: result.yolo_cam_image_url,
+                        mediapipe_cam_image_url: result.mediapipe_cam_image_url,
                         saved_image_url: result.saved_image_url
                     });
 

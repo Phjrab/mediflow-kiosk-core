@@ -660,7 +660,7 @@
         <div class="captured-media" id="captured-media">
             <img id="captured-image" alt="진단 이미지">
             <div id="cam-overlay-layer" class="cam-overlay-layer">
-                <img id="cam-overlay-yolo" class="cam-overlay-full" alt="원본 YOLO 히트맵 오버레이">
+                <img id="cam-overlay-mediapipe" class="cam-overlay-full" alt="원본 미디어 파이프 히트맵 오버레이">
             </div>
             <div id="captured-empty-hint" class="captured-empty-hint" data-i18n="captured_image_empty">촬영된 원본 이미지가 없습니다. capture에서 얼굴 촬영을 먼저 진행해 주세요.</div>
         </div>
@@ -692,11 +692,11 @@
 
         <div class="card">
             <h2>🤖 AI 질환 분석 결과</h2>
-            <div class="status-item"><span>일반 (Normal)</span><span id="ai-normal" class="status-tag tag-normal">분석 대기</span></div>
-            <div class="status-item"><span>결막염</span><span id="ai-conj" class="status-tag tag-normal">분석 대기</span></div>
-            <div class="status-item"><span>포도막염</span><span id="ai-uveitis" class="status-tag tag-normal">분석 대기</span></div>
-            <div class="status-item"><span>백내장</span><span id="ai-cataract" class="status-tag tag-normal">분석 대기</span></div>
-            <div class="status-item" style="border:none;"><span>다래끼</span><span id="ai-eyelid" class="status-tag tag-normal">분석 대기</span></div>
+            <div class="status-item"><span>일반 (Normal)</span><span id="ai-normal" class="status-tag tag-normal">-</span></div>
+            <div class="status-item"><span>결막염</span><span id="ai-conj" class="status-tag tag-normal">-</span></div>
+            <div class="status-item"><span>포도막염</span><span id="ai-uveitis" class="status-tag tag-normal">-</span></div>
+            <div class="status-item"><span>백내장</span><span id="ai-cataract" class="status-tag tag-normal">-</span></div>
+            <div class="status-item" style="border:none;"><span>다래끼</span><span id="ai-eyelid" class="status-tag tag-normal">-</span></div>
 
             <button id="btn-cam-toggle" class="cam-toggle-btn" onclick="toggleGradCam()">🔥 히트맵 오버레이 보기</button>
         </div>
@@ -738,6 +738,8 @@
         let gradCamVisible = false;
         let eyeViewMode = 'ORIGINAL';
         let eyeCropCache = { L: '', R: '' };
+        let resultPhotoUrl = '';
+        let resultAnalysisCache = null;
 
         function showToastPopup(message, options = {}) {
             return new Promise((resolve) => {
@@ -794,7 +796,15 @@
             const legacy = localStorage.getItem(key);
             if (legacy !== null) {
                 sessionStorage.setItem(key, legacy);
-                localStorage.removeItem(key);
+                const preserveKeys = key === 'user_id'
+                    || key === 'active_capture_user_id'
+                    || key === 'data_updated'
+                    || key === 'bilateral_capture'
+                    || key.startsWith('eye_analysis_')
+                    || key.startsWith('bilateral_');
+                if (!preserveKeys) {
+                    localStorage.removeItem(key);
+                }
             }
             return legacy;
         }
@@ -870,7 +880,7 @@
         }
 
         function getPhotoDataUrl() {
-            return readSessionValue('bilateral_capture') || '';
+            return resultPhotoUrl || readSessionValue('bilateral_capture') || '';
         }
 
         function hasUsableEye(eye) {
@@ -933,15 +943,15 @@
                 return;
             }
 
-            const hasYoloCam = !!sanitizeCamUrl(analysis?.yolo_cam_image_url);
+            const hasYoloCam = !!sanitizeCamUrl(analysis?.mediapipe_cam_image_url);
             if (!hasYoloCam) {
                 btn.disabled = true;
-                btn.textContent = '🔥 YOLO 히트맵 없음';
+                btn.textContent = '🔥 미디어 파이프 히트맵 없음';
                 return;
             }
 
             btn.disabled = false;
-            btn.textContent = gradCamVisible ? '🙈 YOLO 히트맵 숨기기' : '🔥 YOLO 히트맵 보기';
+            btn.textContent = gradCamVisible ? '🙈 미디어 파이프 히트맵 숨기기' : '🔥 미디어 파이프 히트맵 보기';
         }
 
         function loadImageFromDataUrl(dataUrl) {
@@ -980,7 +990,7 @@
 
         function renderGradCamOverlay(analysis) {
             const layer = document.getElementById('cam-overlay-layer');
-            const yoloEl = document.getElementById('cam-overlay-yolo');
+            const yoloEl = document.getElementById('cam-overlay-mediapipe');
             if (!layer || !yoloEl) return;
 
             if (eyeViewMode !== 'ORIGINAL') {
@@ -990,7 +1000,7 @@
                 return;
             }
 
-            const yoloUrl = sanitizeCamUrl(analysis?.yolo_cam_image_url);
+            const yoloUrl = sanitizeCamUrl(analysis?.mediapipe_cam_image_url);
             const canShowOverlay = gradCamVisible && !!yoloUrl;
             if (canShowOverlay) {
                 yoloEl.src = yoloUrl;
@@ -1096,15 +1106,170 @@
         }
 
         function getStoredAnalysis() {
+            const cached = resultAnalysisCache || {};
             const stored = parseStoredJson('bilateral_analysis') || {};
             const leftStored = parseStoredJson('eye_analysis_L');
             const rightStored = parseStoredJson('eye_analysis_R');
 
             return {
+                ...cached,
                 ...stored,
-                left_eye: leftStored || stored.left_eye || null,
-                right_eye: rightStored || stored.right_eye || null
+                left_eye: leftStored || cached.left_eye || stored.left_eye || null,
+                right_eye: rightStored || cached.right_eye || stored.right_eye || null
             };
+        }
+
+        function resolveUserId() {
+            const direct = readSessionValue('user_id');
+            if (direct && String(direct).trim()) return String(direct).trim();
+            const fallback = readSessionValue('active_capture_user_id');
+            if (fallback && String(fallback).trim()) return String(fallback).trim();
+            return 'anonymous';
+        }
+
+        function parseDateToMs(value) {
+            if (!value) return 0;
+            const parsed = Date.parse(String(value).replace(' ', 'T'));
+            return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function hasLeftEye(record) {
+            return !!record?.analysis?.left_eye;
+        }
+
+        function hasRightEye(record) {
+            return !!record?.analysis?.right_eye;
+        }
+
+        function hasBothEyes(record) {
+            return hasLeftEye(record) && hasRightEye(record);
+        }
+
+        function isComplementaryPair(recordA, recordB) {
+            const aL = hasLeftEye(recordA);
+            const aR = hasRightEye(recordA);
+            const bL = hasLeftEye(recordB);
+            const bR = hasRightEye(recordB);
+            return (aL && !aR && !bL && bR) || (!aL && aR && bL && !bR);
+        }
+
+        function mergeAnalyses(baseAnalysis, nextAnalysis) {
+            const base = baseAnalysis || {};
+            const next = nextAnalysis || {};
+            return {
+                ...base,
+                ...next,
+                left_eye: base.left_eye || next.left_eye || null,
+                right_eye: base.right_eye || next.right_eye || null,
+                guide: base.guide || next.guide || null
+            };
+        }
+
+        function addRecordEyesToSession(session, record) {
+            const analysis = record?.analysis || {};
+
+            if (!session.eyes.L && analysis.left_eye) {
+                session.eyes.L = {
+                    image_url: record.image_url,
+                    record
+                };
+            }
+            if (!session.eyes.R && analysis.right_eye) {
+                session.eyes.R = {
+                    image_url: record.image_url,
+                    record
+                };
+            }
+
+            session.analysis = mergeAnalyses(session.analysis, analysis);
+            session.records.push(record);
+        }
+
+        function makeSessionFromRecord(record) {
+            const session = {
+                created_at: record?.created_at || null,
+                records: [],
+                analysis: {},
+                eyes: { L: null, R: null }
+            };
+            addRecordEyesToSession(session, record);
+            return session;
+        }
+
+        function buildHistorySessions(records) {
+            const sessions = [];
+            const maxMergeGapMs = 3 * 60 * 1000;
+
+            for (let index = 0; index < records.length; index += 1) {
+                const record = records[index];
+
+                if (!hasLeftEye(record) && !hasRightEye(record)) continue;
+
+                const session = makeSessionFromRecord(record);
+
+                const hasBothInCurrent = hasBothEyes(record);
+                if (!hasBothInCurrent && index + 1 < records.length) {
+                    const next = records[index + 1];
+                    const timeGap = Math.abs(parseDateToMs(record.created_at) - parseDateToMs(next.created_at));
+                    if (timeGap <= maxMergeGapMs && isComplementaryPair(record, next)) {
+                        addRecordEyesToSession(session, next);
+                        index += 1;
+                    }
+                }
+
+                sessions.push(session);
+            }
+
+            return sessions;
+        }
+
+        async function hydrateAnalysisFromHistory() {
+            const existing = getStoredAnalysis();
+            if (hasUsableAnalysis(existing)) {
+                return existing;
+            }
+
+            const userId = resolveUserId();
+
+            try {
+                const response = await fetch(`/api/history?user_id=${encodeURIComponent(userId)}&limit=20`);
+                const data = await response.json();
+                if (!response.ok || data.status !== 'ok' || !Array.isArray(data.history)) {
+                    return existing;
+                }
+
+                const sessions = buildHistorySessions(data.history);
+                const session = sessions[0] || null;
+                if (!session || !hasUsableAnalysis(session.analysis)) {
+                    return existing;
+                }
+
+                const analysis = {
+                    ...session.analysis,
+                    left_eye: session.analysis.left_eye || null,
+                    right_eye: session.analysis.right_eye || null
+                };
+
+                resultAnalysisCache = analysis;
+
+                const fallbackImage = session.eyes.L?.image_url || session.eyes.R?.image_url || session.records?.[0]?.image_url || '';
+                if (fallbackImage) {
+                    resultPhotoUrl = fallbackImage;
+                    writeSessionValue('bilateral_capture', fallbackImage);
+                }
+                writeSessionValue('bilateral_analysis', JSON.stringify(analysis));
+                if (analysis.left_eye) {
+                    writeSessionValue('eye_analysis_L', JSON.stringify(analysis.left_eye));
+                }
+                if (analysis.right_eye) {
+                    writeSessionValue('eye_analysis_R', JSON.stringify(analysis.right_eye));
+                }
+
+                return analysis;
+            } catch (error) {
+                console.warn('[Mobile Result History Hydrate Error]', error);
+                return existing;
+            }
         }
 
         function hasUsableAnalysis(analysis) {
@@ -1222,13 +1387,22 @@
         }
 
         function renderAiResults() {
+            let analysis = null;
             const normalEl = document.getElementById('ai-normal');
             const conjEl = document.getElementById('ai-conj');
             const uveitisEl = document.getElementById('ai-uveitis');
             const eyelidEl = document.getElementById('ai-eyelid');
             const cataractEl = document.getElementById('ai-cataract');
 
-            const analysis = getStoredAnalysis();
+            if (arguments.length > 0) {
+                analysis = arguments[0] || null;
+                if (analysis) {
+                    resultAnalysisCache = analysis;
+                }
+            }
+            if (!analysis) {
+                analysis = getStoredAnalysis();
+            }
             if (!analysis.left_eye && !analysis.right_eye) {
                 setStatusTag(normalEl, 'tag-warning', '분석 데이터 없음');
                 setStatusTag(conjEl, 'tag-warning', '분석 데이터 없음');
@@ -1319,9 +1493,10 @@
             }
         }
 
-        window.onload = () => {
+        window.onload = async () => {
+            const hydrated = await hydrateAnalysisFromHistory();
             renderCapturedPhoto();
-            renderAiResults();
+            renderAiResults(hydrated);
             writeSessionValue('data_updated', isLatestDataReady() ? 'true' : 'false');
             refreshReportAvailability();
             toggleGradCam(false);

@@ -371,7 +371,7 @@
                 if (role !== 'admin') {
                     sessionStorage.removeItem('admin_csrf_token');
                 }
-                localStorage.removeItem('user_id');
+                localStorage.setItem('user_id', userId);
                 localStorage.removeItem('user_role');
             } catch (e) {}
         }

@@ -31,12 +31,12 @@ if missing:
 PY
 
 MODEL_DEVICE="${MODEL_DEVICE:-rpi}"
-YOLO_ONNX_PATH="${YOLO_ONNX_PATH:-models/yolo.onnx}"
+MEDIAPIPE_ONNX_PATH="${MEDIAPIPE_ONNX_PATH:-models/yolo.onnx}"
 CLASSIFIER_ONNX_PATH="${CLASSIFIER_ONNX_PATH:-models/efficientnet.onnx}"
 
 echo "[CHECK] Env"
 echo "  - MODEL_DEVICE=$MODEL_DEVICE"
-echo "  - YOLO_ONNX_PATH=$YOLO_ONNX_PATH"
+echo "  - MEDIAPIPE_ONNX_PATH=$MEDIAPIPE_ONNX_PATH"
 echo "  - CLASSIFIER_ONNX_PATH=$CLASSIFIER_ONNX_PATH"
 
 if [[ "$MODEL_DEVICE" != "rpi" ]]; then
@@ -44,7 +44,7 @@ if [[ "$MODEL_DEVICE" != "rpi" ]]; then
 fi
 
 echo "[CHECK] Model files"
-[[ -f "$YOLO_ONNX_PATH" ]] && echo "  - OK: $YOLO_ONNX_PATH" || { echo "  - MISSING: $YOLO_ONNX_PATH"; exit 1; }
+[[ -f "$MEDIAPIPE_ONNX_PATH" ]] && echo "  - OK: $MEDIAPIPE_ONNX_PATH" || { echo "  - MISSING: $MEDIAPIPE_ONNX_PATH"; exit 1; }
 [[ -f "$CLASSIFIER_ONNX_PATH" ]] && echo "  - OK: $CLASSIFIER_ONNX_PATH" || { echo "  - MISSING: $CLASSIFIER_ONNX_PATH"; exit 1; }
 
 echo "[DONE] RPi preflight checks passed"

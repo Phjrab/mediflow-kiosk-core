@@ -1195,7 +1195,7 @@
         }
 
         sessionStorage.setItem('user_id', normalized);
-        localStorage.removeItem('user_id');
+        localStorage.setItem('user_id', normalized);
         status.textContent = i18n.getTranslation('kakao_link_loading');
 
         const baseUrl = `${window.location.protocol}//${window.location.hostname}:5001`;

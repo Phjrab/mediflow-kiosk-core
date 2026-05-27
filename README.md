@@ -42,7 +42,7 @@ Jetson/Raspberry Pi 기반의 엣지 AI 안구 진단 웹 애플리케이션입�
 ## 기술 스택
 
 - Backend: Flask, SQLite3
-- AI/ML: PyTorch, torchvision, Ultralytics YOLOv8
+- AI/ML: PyTorch, torchvision, MediaPipe Face Mesh (검출)
 - Vision: OpenCV, Pillow, NumPy
 - Frontend: HTML/CSS/Vanilla JavaScript
 
@@ -67,7 +67,7 @@ pip install -r requirements_rpi.txt
 
 ```bash
 MODEL_DEVICE=rpi
-YOLO_ONNX_PATH=models/yolo.onnx
+MEDIAPIPE_ONNX_PATH=models/yolo.onnx
 CLASSIFIER_ONNX_PATH=models/efficientnet.onnx
 ```
 
@@ -79,7 +79,7 @@ bash scripts/rpi_preflight.sh
 
 ### 3-1) ONNX 자동 변환 (필요 시)
 
-YOLO `.pt` + 분류기 `.pth`를 RPi 실행용 ONNX로 자동 변환합니다.
+YOLO `.pt` + 분류기 `.pth`를 RPi 실행용 ONNX로 자동 변환합니다. (레거시 YOLO 변환 스크립트 유지)
 
 ```bash
 bash scripts/export_onnx_rpi.sh
@@ -87,7 +87,7 @@ bash scripts/export_onnx_rpi.sh
 
 기본 출력:
 
-- `models/yolo.onnx`
+  - `models/yolo.onnx`
 - `models/efficientnet.onnx`
 
 ### 3-2) 서비스 스크립트 구분 규칙
@@ -211,7 +211,7 @@ python eye_server.py
   - `ADMIN_LOGIN_PASSWORD` (반드시 설정)
 - 설정 페이지에서 아래 주요 항목 수정 가능
   - 서버/카메라: `SERVER_IP`, `SERVER_PORT`, `CAMERA_DEVICE_INDEX`, `DEBUG_MODE`
-  - 검출/분류 임계값: `YOLO_*`, `CLASSIFIER_CONFIDENCE_THRESHOLD`
+  - 검출/분류 임계값: `MEDIAPIPE_*`, `CLASSIFIER_CONFIDENCE_THRESHOLD`
   - 홍채 제거/자동촬영: `IRIS_*`, `AUTO_*`
 
 일부 항목은 저장 후 서버 재시작 시 완전 적용됩니다.
