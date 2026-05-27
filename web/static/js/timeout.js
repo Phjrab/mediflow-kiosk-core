@@ -20,7 +20,7 @@
 
     const overlay = document.createElement('div');
     overlay.id = 'screensaver-overlay';
-    overlay.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.93); z-index:9999; display:flex; justify-content:center; align-items:center;';
+    overlay.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.93); z-index:9999; justify-content:center; align-items:center;';
 
     overlay.innerHTML = `
       <div style="text-align: center; max-width: 560px; width: 92%; padding: 28px; background: rgba(30,41,59,0.75); border-radius: 14px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); color: #fff;">
