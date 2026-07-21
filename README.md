@@ -193,11 +193,19 @@ python eye_server.py
 
 ## 데이터 저장 구조
 
-- 진단 DB: `database/history.db`
-- 이미지 저장: `web/static/captures/users/<user_id>/...jpg`
-- 테이블
-  - `diagnosis_history`: 분석 JSON + 이미지 경로 + 사용자 ID
-  - `survey_history`: 사용자 문진 JSON
+- 통합 운영 DB: `database/database.db`
+- 레거시 원본 백업: `database/history.db` (읽기 전용 마이그레이션 소스)
+- 이미지 저장: `web/static/captures/users/<user_hash>/...jpg`
+- 정규화 테이블
+  - `users`: 해시된 사용자 식별자와 카카오 연동 정보
+  - `diagnosis_sessions`: AI 판독, 픽셀 지표, 설문/FHIR 데이터
+  - `session_assets`: 원본 이미지와 PDF 등 세션 자산
+  - `survey_responses`: 독립 문진 기록
+  - `event_logs`: 진단·자산·전송 이벤트
+  - `migration_records`: 레거시 데이터 중복 이전 방지
+
+스키마의 단일 원본은 `database/schema.sql`입니다. 서비스 시작 시 기존
+`history.db` 데이터는 원본을 삭제하지 않고 통합 DB로 한 번만 이전됩니다.
 
 `/analyze` 호출 시 분석 결과에 `guide`가 포함되어 저장됩니다.
 
@@ -225,10 +233,10 @@ python eye_server.py
 
 ```bash
 # 미리보기
-python database/backfill_guides.py --db database/history.db --dry-run
+python database/backfill_guides.py --db database/database.db --dry-run
 
 # 실제 반영
-python database/backfill_guides.py --db database/history.db
+python database/backfill_guides.py --db database/database.db
 ```
 
 ---

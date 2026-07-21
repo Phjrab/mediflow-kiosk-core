@@ -6,12 +6,13 @@ import hmac
 
 PHONE_RE = re.compile(r"\D+")
 
-HASH_PEPPER = os.environ.get("HASH_PEPPER")  # 필수: 환경변수로 주입
+HASH_PEPPER = os.environ.get("HASH_PEPPER")  # 하위 호환용 초기값
 
 def _require_pepper() -> str:
-    if not HASH_PEPPER:
+    pepper = os.environ.get("HASH_PEPPER") or HASH_PEPPER
+    if not pepper:
         raise RuntimeError("HASH_PEPPER 환경변수가 설정되어야 합니다. (코드에 하드코딩 금지)")
-    return HASH_PEPPER
+    return pepper
 
 def normalize_phone(phone: str) -> str:
     """

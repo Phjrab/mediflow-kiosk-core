@@ -133,6 +133,7 @@ from PIL import Image, ImageOps
 import config as config
 from model_loader import initialize_models, get_models
 from utils.image_proc import resize_image, enhance_contrast
+from database.db import get_conn, identifier_hash_id, init_db, migrate_legacy_history
 
 MP_FACE_MESH = mp.solutions.face_mesh.FaceMesh(
     static_image_mode=True,
@@ -177,7 +178,11 @@ debug_boxes_cache = []
 debug_frame_counter = 0
 YOLO_STREAM_DEBUG_OVERLAY = os.getenv('YOLO_STREAM_DEBUG_OVERLAY', '0') == '1'
 
-HISTORY_DB_PATH = os.path.join(config.BASE_DIR, 'database', 'history.db')
+DATABASE_PATH = os.getenv(
+    'EYE_DATABASE_PATH',
+    os.path.join(config.BASE_DIR, 'database', 'database.db')
+)
+LEGACY_HISTORY_DB_PATH = os.path.join(config.BASE_DIR, 'database', 'history.db')
 REPORT_EXPORT_DIR = os.path.join(config.BASE_DIR, 'web', 'static', 'reports')
 KAKAO_BRIDGE_URL = os.getenv('KAKAO_BRIDGE_URL', 'http://127.0.0.1:5001').strip().rstrip('/')
 
@@ -583,48 +588,18 @@ class CaptureState:
 
 
 def init_history_db():
-    """사용자별 진단 히스토리 DB 초기화"""
-    os.makedirs(os.path.dirname(HISTORY_DB_PATH), exist_ok=True)
-
-    conn = sqlite3.connect(HISTORY_DB_PATH)
-    try:
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS diagnosis_history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id TEXT NOT NULL,
-                image_path TEXT NOT NULL,
-                image_url TEXT NOT NULL,
-                analysis_json TEXT NOT NULL,
-                created_at TEXT NOT NULL DEFAULT (datetime('now'))
-            )
-            """
+    """통합 DB를 초기화하고 기존 history.db를 안전하게 가져온다."""
+    init_db(DATABASE_PATH)
+    migration = migrate_legacy_history(
+        LEGACY_HISTORY_DB_PATH,
+        target_db_path=DATABASE_PATH,
+        source_name='history.db-v1',
+    )
+    if migration['diagnoses'] or migration['surveys']:
+        print(
+            '[DB] legacy migration completed: '
+            f"diagnoses={migration['diagnoses']} surveys={migration['surveys']}"
         )
-        conn.execute(
-            """
-            CREATE INDEX IF NOT EXISTS idx_history_user_time
-            ON diagnosis_history(user_id, created_at DESC)
-            """
-        )
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS survey_history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id TEXT NOT NULL,
-                survey_json TEXT NOT NULL,
-                created_at TEXT NOT NULL DEFAULT (datetime('now'))
-            )
-            """
-        )
-        conn.execute(
-            """
-            CREATE INDEX IF NOT EXISTS idx_survey_user_time
-            ON survey_history(user_id, created_at DESC)
-            """
-        )
-        conn.commit()
-    finally:
-        conn.close()
 
 
 def normalize_user_id(user_id):
@@ -648,8 +623,9 @@ def normalize_user_id(user_id):
 def save_history_record(user_id, source_image_bgr, analysis):
     """분석 결과와 원본 이미지를 사용자별로 로컬 저장 + DB 기록"""
     safe_user_id = normalize_user_id(user_id)
+    user_hash = identifier_hash_id(safe_user_id)
 
-    user_dir = os.path.join(config.IMAGE_SAVE_DIR, 'users', safe_user_id)
+    user_dir = os.path.join(config.IMAGE_SAVE_DIR, 'users', user_hash)
     os.makedirs(user_dir, exist_ok=True)
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
@@ -660,25 +636,67 @@ def save_history_record(user_id, source_image_bgr, analysis):
     if not write_ok:
         raise RuntimeError('로컬 이미지 저장 실패')
 
-    image_url = f"/static/captures/users/{safe_user_id}/{filename}"
+    image_url = f"/static/captures/users/{user_hash}/{filename}"
 
-    conn = sqlite3.connect(HISTORY_DB_PATH)
+    conn = get_conn(DATABASE_PATH)
     try:
-        cur = conn.cursor()
-        cur.execute(
+        conn.execute(
+            'INSERT OR IGNORE INTO users (phone_hash) VALUES (?)',
+            (user_hash,)
+        )
+        user_row = conn.execute(
+            'SELECT id FROM users WHERE phone_hash=?',
+            (user_hash,)
+        ).fetchone()
+        if user_row is None:
+            raise RuntimeError('사용자 레코드 생성 실패')
+
+        status = str((analysis or {}).get('status') or 'done')
+        pixel_metrics = (analysis or {}).get('pixel_metrics') or {}
+        guide = (analysis or {}).get('guide') or {}
+        impression = guide.get('summary') if isinstance(guide, dict) else None
+
+        cur = conn.execute(
             """
-            INSERT INTO diagnosis_history (user_id, image_path, image_url, analysis_json)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO diagnosis_sessions (
+              user_id, ai_reading_json, pixel_metrics_json, survey_json,
+              impression, status
+            ) VALUES (?, ?, ?, '{}', ?, ?)
             """,
             (
-                safe_user_id,
-                image_path,
-                image_url,
-                json.dumps(analysis, ensure_ascii=False)
+                int(user_row['id']),
+                json.dumps(analysis, ensure_ascii=False),
+                json.dumps(pixel_metrics, ensure_ascii=False),
+                impression,
+                status,
             )
         )
+        session_id = int(cur.lastrowid)
+        conn.execute(
+            """
+            INSERT INTO session_assets
+              (session_id, asset_type, file_path, public_url, mime_type)
+            VALUES (?, 'image_raw', ?, ?, 'image/jpeg')
+            """,
+            (session_id, image_path, image_url)
+        )
+        conn.execute(
+            """
+            INSERT INTO event_logs (session_id, event_type, payload_json)
+            VALUES (?, 'DIAG_SAVED', ?)
+            """,
+            (session_id, json.dumps({'status': status}, ensure_ascii=False))
+        )
         conn.commit()
-        return int(cur.lastrowid), image_url
+        return session_id, image_url
+    except Exception:
+        conn.rollback()
+        try:
+            if os.path.exists(image_path):
+                os.remove(image_path)
+        except OSError:
+            pass
+        raise
     finally:
         conn.close()
 
@@ -688,7 +706,7 @@ def save_cam_image(user_id, eye_side, cam_image_bgr):
     if cam_image_bgr is None:
         return None
 
-    safe_user_id = normalize_user_id(user_id)
+    safe_user_id = identifier_hash_id(normalize_user_id(user_id))
     safe_eye_side = re.sub(r'[^0-9A-Za-z_-]+', '_', str(eye_side or 'eye')).lower()
 
     user_dir = os.path.join(config.IMAGE_SAVE_DIR, 'users', safe_user_id)
@@ -804,18 +822,31 @@ def build_mediapipe_mesh_overlay(source_bgr):
 def list_history_records(user_id, limit=10):
     """사용자별 최근 히스토리 조회"""
     safe_user_id = normalize_user_id(user_id)
-    conn = sqlite3.connect(HISTORY_DB_PATH)
-    conn.row_factory = sqlite3.Row
+    user_hash = identifier_hash_id(safe_user_id)
+    conn = get_conn(DATABASE_PATH)
     try:
         rows = conn.execute(
             """
-            SELECT id, user_id, image_path, image_url, analysis_json, created_at
-            FROM diagnosis_history
-            WHERE user_id=?
-            ORDER BY datetime(created_at) DESC, id DESC
+            SELECT
+              sessions.id,
+              assets.public_url AS image_url,
+              sessions.ai_reading_json AS analysis_json,
+              sessions.diagnosed_at AS created_at
+            FROM diagnosis_sessions AS sessions
+            JOIN users ON users.id = sessions.user_id
+            LEFT JOIN session_assets AS assets ON assets.id = (
+              SELECT candidate.id
+              FROM session_assets AS candidate
+              WHERE candidate.session_id = sessions.id
+                AND candidate.asset_type = 'image_raw'
+              ORDER BY candidate.id ASC
+              LIMIT 1
+            )
+            WHERE users.phone_hash=?
+            ORDER BY datetime(sessions.diagnosed_at) DESC, sessions.id DESC
             LIMIT ?
             """,
-            (safe_user_id, int(limit))
+            (user_hash, int(limit))
         ).fetchall()
 
         history = []
@@ -828,8 +859,8 @@ def list_history_records(user_id, limit=10):
 
             history.append({
                 'id': row['id'],
-                'user_id': row['user_id'],
-                'image_url': row['image_url'],
+                'user_id': safe_user_id,
+                'image_url': row['image_url'] or '',
                 'created_at': row['created_at'],
                 'analysis': analysis
             })
@@ -842,28 +873,35 @@ def list_history_records(user_id, limit=10):
 def delete_history_record(user_id, history_id):
     """사용자별 히스토리 단건 삭제 (+ 로컬 이미지 파일 삭제)"""
     safe_user_id = normalize_user_id(user_id)
-    conn = sqlite3.connect(HISTORY_DB_PATH)
+    user_hash = identifier_hash_id(safe_user_id)
+    conn = get_conn(DATABASE_PATH)
     try:
         row = conn.execute(
             """
-            SELECT id, image_path
-            FROM diagnosis_history
-            WHERE id=? AND user_id=?
+            SELECT sessions.id, assets.file_path
+            FROM diagnosis_sessions AS sessions
+            JOIN users ON users.id = sessions.user_id
+            LEFT JOIN session_assets AS assets ON assets.id = (
+              SELECT candidate.id
+              FROM session_assets AS candidate
+              WHERE candidate.session_id = sessions.id
+                AND candidate.asset_type = 'image_raw'
+              ORDER BY candidate.id ASC
+              LIMIT 1
+            )
+            WHERE sessions.id=? AND users.phone_hash=?
             """,
-            (int(history_id), safe_user_id)
+            (int(history_id), user_hash)
         ).fetchone()
 
         if row is None:
             return False
 
-        image_path = row[1]
+        image_path = row['file_path']
 
         conn.execute(
-            """
-            DELETE FROM diagnosis_history
-            WHERE id=? AND user_id=?
-            """,
-            (int(history_id), safe_user_id)
+            'DELETE FROM diagnosis_sessions WHERE id=?',
+            (int(history_id),)
         )
         conn.commit()
 
@@ -934,18 +972,29 @@ def normalize_survey_payload(payload):
 def save_survey_record(user_id, survey_payload):
     """사용자 설문 기록 저장"""
     safe_user_id = normalize_user_id(user_id)
+    user_hash = identifier_hash_id(safe_user_id)
     normalized_payload = normalize_survey_payload(survey_payload)
 
-    conn = sqlite3.connect(HISTORY_DB_PATH)
+    conn = get_conn(DATABASE_PATH)
     try:
-        cur = conn.cursor()
-        cur.execute(
+        conn.execute(
+            'INSERT OR IGNORE INTO users (phone_hash) VALUES (?)',
+            (user_hash,)
+        )
+        user_row = conn.execute(
+            'SELECT id FROM users WHERE phone_hash=?',
+            (user_hash,)
+        ).fetchone()
+        if user_row is None:
+            raise RuntimeError('사용자 레코드 생성 실패')
+
+        cur = conn.execute(
             """
-            INSERT INTO survey_history (user_id, survey_json)
+            INSERT INTO survey_responses (user_id, survey_json)
             VALUES (?, ?)
             """,
             (
-                safe_user_id,
+                int(user_row['id']),
                 json.dumps(normalized_payload, ensure_ascii=False)
             )
         )
@@ -958,18 +1007,19 @@ def save_survey_record(user_id, survey_payload):
 def list_survey_records(user_id, limit=50):
     """사용자별 최근 설문 기록 조회"""
     safe_user_id = normalize_user_id(user_id)
-    conn = sqlite3.connect(HISTORY_DB_PATH)
-    conn.row_factory = sqlite3.Row
+    user_hash = identifier_hash_id(safe_user_id)
+    conn = get_conn(DATABASE_PATH)
     try:
         rows = conn.execute(
             """
-            SELECT id, user_id, survey_json, created_at
-            FROM survey_history
-            WHERE user_id=?
-            ORDER BY datetime(created_at) DESC, id DESC
+            SELECT surveys.id, surveys.survey_json, surveys.created_at
+            FROM survey_responses AS surveys
+            JOIN users ON users.id = surveys.user_id
+            WHERE users.phone_hash=?
+            ORDER BY datetime(surveys.created_at) DESC, surveys.id DESC
             LIMIT ?
             """,
-            (safe_user_id, int(limit))
+            (user_hash, int(limit))
         ).fetchall()
 
         surveys = []
@@ -982,7 +1032,7 @@ def list_survey_records(user_id, limit=50):
 
             surveys.append({
                 'id': row['id'],
-                'user_id': row['user_id'],
+                'user_id': safe_user_id,
                 'created_at': row['created_at'],
                 'survey': survey
             })
@@ -995,15 +1045,17 @@ def list_survey_records(user_id, limit=50):
 def delete_survey_record(user_id, survey_id):
     """사용자별 설문 단건 삭제"""
     safe_user_id = normalize_user_id(user_id)
-    conn = sqlite3.connect(HISTORY_DB_PATH)
+    user_hash = identifier_hash_id(safe_user_id)
+    conn = get_conn(DATABASE_PATH)
     try:
-        cur = conn.cursor()
-        cur.execute(
+        cur = conn.execute(
             """
-            DELETE FROM survey_history
-            WHERE id=? AND user_id=?
+            DELETE FROM survey_responses
+            WHERE id=? AND user_id=(
+              SELECT id FROM users WHERE phone_hash=?
+            )
             """,
-            (int(survey_id), safe_user_id)
+            (int(survey_id), user_hash)
         )
         conn.commit()
         return cur.rowcount > 0
