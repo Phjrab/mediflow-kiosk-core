@@ -103,14 +103,21 @@ mkdir -p logs database
 # Database Initialization
 ###############################################################################
 
-if [[ ! -f "database/database.db" ]]; then
-  echo "[INFO] Initializing database/database.db"
-  python - <<'PY'
-from database.db import init_db
-init_db('database/database.db')
-print('database/database.db initialized')
+echo "[INFO] Initializing canonical database/database.db"
+python - <<'PY'
+from dotenv import load_dotenv
+from database.db import init_db, migrate_legacy_history
+
+load_dotenv('.env')
+target = 'database/database.db'
+init_db(target)
+result = migrate_legacy_history(
+    'database/history.db',
+    target_db_path=target,
+    source_name='history.db-v1',
+)
+print(f'database initialized; legacy migration={result}')
 PY
-fi
 
 ###############################################################################
 # Stop Legacy Services

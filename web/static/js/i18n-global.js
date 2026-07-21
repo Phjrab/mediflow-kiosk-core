@@ -8,6 +8,9 @@
  * - Works with all pages that link to i18n.js
  */
 
+(() => {
+'use strict';
+
 const languageMetadata = {
     'ko': { flag: '🇰🇷', name: '한국어' },
     'en': { flag: '🇺🇸', name: 'English' },
@@ -197,3 +200,5 @@ if (document.readyState === 'loading') {
     // DOM is already loaded
     setTimeout(initializeGlobalLanguageSelector, 100);
 }
+
+})();

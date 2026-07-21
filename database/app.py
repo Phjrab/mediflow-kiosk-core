@@ -4,7 +4,6 @@ import json
 import re
 import hashlib
 import socket
-import sqlite3
 import secrets
 import threading
 import time
@@ -12,7 +11,7 @@ import requests
 import qrcode
 from flask import Flask, Response, request, jsonify, send_file, redirect
 from flask_cors import CORS
-from db import init_db
+from db import get_conn as open_database, init_db
 
 # [추가됨] 앱 설정과 런타임 경로를 스크립트 위치 기준으로 고정.
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -434,39 +433,14 @@ def kakao_send_report():
         conn.close()
 
 def get_conn():
-    os.makedirs(os.path.dirname(DB_PATH) or ".", exist_ok=True)
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return open_database(DB_PATH)
 
 
 def initialize_runtime_database() -> None:
     init_db(DB_PATH)
 
 
-# [추가됨] 기존 DB에도 사용자별 카카오 토큰 컬럼이 생기도록 보정.
-def ensure_runtime_schema() -> None:
-    conn = get_conn()
-    try:
-        columns = {
-            row["name"]
-            for row in conn.execute("PRAGMA table_info(users)").fetchall()
-        }
-        if "kakao_refresh_token" not in columns:
-            conn.execute("ALTER TABLE users ADD COLUMN kakao_refresh_token TEXT")
-        if "kakao_refresh_token_expires_in" not in columns:
-            conn.execute("ALTER TABLE users ADD COLUMN kakao_refresh_token_expires_in INTEGER")
-        if "kakao_scope" not in columns:
-            conn.execute("ALTER TABLE users ADD COLUMN kakao_scope TEXT")
-        if "kakao_connected_at" not in columns:
-            conn.execute("ALTER TABLE users ADD COLUMN kakao_connected_at TEXT")
-        conn.commit()
-    finally:
-        conn.close()
-
-
 initialize_runtime_database()
-ensure_runtime_schema()
 
 
 def upsert_user_by_phone(conn, phone: str, display_name: str | None = None) -> int:

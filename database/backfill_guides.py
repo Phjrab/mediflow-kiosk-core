@@ -100,13 +100,15 @@ def backfill(db_path: str, dry_run: bool = False):
     conn.row_factory = sqlite3.Row
 
     try:
-        rows = conn.execute("SELECT id, analysis_json FROM diagnosis_history ORDER BY id ASC").fetchall()
+        rows = conn.execute(
+            "SELECT id, ai_reading_json FROM diagnosis_sessions ORDER BY id ASC"
+        ).fetchall()
         updated = 0
         skipped = 0
 
         for row in rows:
             rec_id = row['id']
-            raw = row['analysis_json'] or '{}'
+            raw = row['ai_reading_json'] or '{}'
             try:
                 analysis = json.loads(raw)
             except Exception:
@@ -121,7 +123,7 @@ def backfill(db_path: str, dry_run: bool = False):
 
             if not dry_run:
                 conn.execute(
-                    "UPDATE diagnosis_history SET analysis_json=? WHERE id=?",
+                    "UPDATE diagnosis_sessions SET ai_reading_json=? WHERE id=?",
                     (json.dumps(analysis, ensure_ascii=False), rec_id)
                 )
             updated += 1
@@ -135,8 +137,8 @@ def backfill(db_path: str, dry_run: bool = False):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Backfill guide field into diagnosis_history.analysis_json')
-    parser.add_argument('--db', default='database/history.db', help='Path to SQLite DB')
+    parser = argparse.ArgumentParser(description='Backfill guide field into diagnosis session readings')
+    parser.add_argument('--db', default='database/database.db', help='Path to SQLite DB')
     parser.add_argument('--dry-run', action='store_true', help='Do not write updates')
     args = parser.parse_args()
 
