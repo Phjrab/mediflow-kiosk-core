@@ -22,13 +22,12 @@ from typing import Any, Iterable, Mapping, Sequence
 
 SCRIPT_PATH = Path(__file__).resolve()
 PROJECT_DIR = SCRIPT_PATH.parent.parent
+COMMAND_NAME = "mediflow-kiosk"
+PROJECT_NAME = "MediFlow Kiosk"
 RUNTIME_DIR = PROJECT_DIR / "runtime"
 RUN_DIR = RUNTIME_DIR / "run"
 LOG_DIR = RUNTIME_DIR / "log"
-LOCK_PATH = RUN_DIR / "mediflow.lock"
-
-COMMAND_NAME = "mediflow"
-PROJECT_NAME = "MediFlow Kiosk"
+LOCK_PATH = RUN_DIR / f"{COMMAND_NAME}.lock"
 DASHBOARD_URL = "http://192.168.0.26:5000"
 ALLOWED_ACTIONS = frozenset({"start", "stop", "restart", "status", "logs"})
 LOG_LINE_LIMIT = 80

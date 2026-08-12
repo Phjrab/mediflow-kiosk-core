@@ -10,7 +10,7 @@ Jetson Orin Nano와 Raspberry Pi 5를 지원하는 엣지 AI 기반 안구 건�
 
 - 운영 웹 서버: `eye_server.py` (기본 포트 `5000`)
 - 카카오 OAuth·PDF 브리지: `database/app.py` (기본 포트 `5001`)
-- 운영 실행·종료: `mediflow start|stop|restart|status|logs`
+- 운영 실행·종료: `mediflow-kiosk start|stop|restart|status|logs`
 - 레거시 플랫폼·브라우저 실행: `start_services.sh`, `stop_services.sh`
 - 운영 DB: `database/database.db`
 - 스키마 단일 원본: `database/schema.sql`
@@ -109,9 +109,9 @@ ADMIN_LOGIN_PASSWORD=replace-with-an-admin-password
 Jetson의 어느 디렉터리에서든 실행할 수 있도록 사용자 PATH에 심볼릭 링크를 한 번 설치합니다.
 
 ```bash
-chmod +x ~/project/eye_project/scripts/mediflow
+chmod +x ~/project/eye_project/scripts/mediflow-kiosk
 mkdir -p ~/.local/bin
-ln -s ~/project/eye_project/scripts/mediflow ~/.local/bin/mediflow
+ln -s ~/project/eye_project/scripts/mediflow-kiosk ~/.local/bin/mediflow-kiosk
 ```
 
 `~/.local/bin`이 현재 셸의 PATH에 반영되지 않았다면 다시 로그인하거나 `source ~/.profile`을 실행합니다.
@@ -121,14 +121,14 @@ ln -s ~/project/eye_project/scripts/mediflow ~/.local/bin/mediflow
 권장 운영 명령:
 
 ```bash
-mediflow start
-mediflow status
-mediflow logs
-mediflow restart
-mediflow stop
+mediflow-kiosk start
+mediflow-kiosk status
+mediflow-kiosk logs
+mediflow-kiosk restart
+mediflow-kiosk stop
 ```
 
-`mediflow`는 `runtime/run/`에 서비스별 PID 메타데이터와 lock을 저장하고 `runtime/log/`에 제한된 운영 로그를 저장합니다. 종료 시 기록된 PID의 사용자, 실행 파일, 명령행, 작업 경로, 부팅 ID와 프로세스 시작 시각을 모두 검증한 뒤 해당 PID만 종료합니다. systemd 자동 시작은 구성하지 않습니다.
+`mediflow-kiosk`는 `runtime/run/`에 서비스별 PID 메타데이터와 lock을 저장하고 `runtime/log/`에 제한된 운영 로그를 저장합니다. 종료 시 기록된 PID의 사용자, 실행 파일, 명령행, 작업 경로, 부팅 ID와 프로세스 시작 시각을 모두 검증한 뒤 해당 PID만 종료합니다. systemd 자동 시작은 구성하지 않습니다.
 
 레거시 키오스크 브라우저 실행이 필요한 경우에만 프로젝트 루트에서 다음 스크립트를 직접 사용할 수 있습니다.
 
@@ -169,7 +169,7 @@ CLOSE_EXISTING_BROWSERS=0 ./start_services.sh
 - `logs/kakao_app.log`
 - `logs/browser.log`
 
-`mediflow logs`는 새 관리 명령으로 시작한 두 Python 서비스의 `runtime/log/eye_server.log`, `runtime/log/kakao_app.log`에서 각각 최근 80줄만 출력합니다.
+`mediflow-kiosk logs`는 새 관리 명령으로 시작한 두 Python 서비스의 `runtime/log/eye_server.log`, `runtime/log/kakao_app.log`에서 각각 최근 80줄만 출력합니다.
 
 ## Jetson과 RPi 실행 경로
 
@@ -411,7 +411,7 @@ eye_project/
 │   ├── Augmented_EffNet_V1_B0_best.pth
 │   └── set_1000_YOLO26s_best.pt
 ├── scripts/
-│   ├── mediflow                  # 안전한 사용자 전용 서비스 관리 명령
+│   ├── mediflow-kiosk            # 안전한 사용자 전용 서비스 관리 명령
 │   ├── export_onnx_rpi.sh
 │   ├── install_git_hooks.sh
 │   └── rpi_preflight.sh
