@@ -185,6 +185,7 @@ DATABASE_PATH = os.getenv(
 LEGACY_HISTORY_DB_PATH = os.path.join(config.BASE_DIR, 'database', 'history.db')
 REPORT_EXPORT_DIR = os.path.join(config.BASE_DIR, 'web', 'static', 'reports')
 KAKAO_BRIDGE_URL = os.getenv('KAKAO_BRIDGE_URL', 'http://127.0.0.1:5001').strip().rstrip('/')
+SCREENING_CONFIG_PATH = os.path.join(config.BASE_DIR, 'config', 'screening_modalities.json')
 
 ADMIN_EDITABLE_CONFIG_KEYS = {
     'SERVER_IP': str,
@@ -208,6 +209,37 @@ MOBILE_PIN_STORE = {}
 MOBILE_PIN_LOCK = threading.Lock()
 MOBILE_PIN_TTL_SECONDS = 300
 ENV_FILE_PATH = os.path.join(config.BASE_DIR, '.env')
+
+
+def load_screening_config():
+    """Load the UI-facing modality registry without coupling it to model code."""
+    try:
+        with open(SCREENING_CONFIG_PATH, 'r', encoding='utf-8') as config_file:
+            payload = json.load(config_file)
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f'[WARNING] 스크리닝 설정 로드 실패: {exc}')
+        payload = {
+            'service_name': '종합 건강 스크리닝',
+            'version': 1,
+            'modalities': [],
+        }
+
+    camera_index = int(getattr(config, 'CAMERA_DEVICE_INDEX', 0))
+    camera_path = f'/dev/video{camera_index}'
+    camera_name = ''
+    try:
+        with open(f'/sys/class/video4linux/video{camera_index}/name', 'r', encoding='utf-8') as name_file:
+            camera_name = name_file.read().strip()
+    except OSError:
+        pass
+
+    payload['camera'] = {
+        'device_index': camera_index,
+        'device_path': camera_path,
+        'connected': os.path.exists(camera_path),
+        'name': camera_name or '카메라 미연결',
+    }
+    return payload
 
 
 def _read_env_int(name, default):
@@ -954,7 +986,29 @@ def normalize_survey_payload(payload):
         except Exception:
             return text[:10]
 
+    screening_types = []
+    for modality in payload.get('screening_types', []):
+        modality_id = str(modality).strip().lower()
+        if modality_id in ('eye', 'skin', 'scalp') and modality_id not in screening_types:
+            screening_types.append(modality_id)
+
+    def clean_section(field_name, allowed_fields):
+        section = payload.get(field_name)
+        if not isinstance(section, dict):
+            return {}
+
+        normalized = {}
+        for key, max_len in allowed_fields.items():
+            value = section.get(key, '')
+            if isinstance(value, list):
+                normalized[key] = [str(item).strip()[:120] for item in value[:30] if str(item).strip()]
+            else:
+                normalized[key] = str(value).strip()[:max_len]
+        return normalized
+
     return {
+        'screening_version': 1,
+        'screening_types': screening_types,
         'age': age,
         'gender': clean_text('gender', 30),
         'wearing': clean_text('wearing', 40),
@@ -965,7 +1019,29 @@ def normalize_survey_payload(payload):
         'smoking': clean_text('smoking', 20),
         'drinking': clean_text('drinking', 20),
         'symptoms': normalized_symptoms,
-        'other_notes': clean_text('other_notes', 500)
+        'other_notes': clean_text('other_notes', 500),
+        'eye': clean_section('eye', {
+            'wearing': 40,
+            'vision_left': 10,
+            'vision_right': 10,
+            'surgery_history': 300,
+            'symptoms': 0,
+            'notes': 500,
+        }),
+        'skin': clean_section('skin', {
+            'body_site': 80,
+            'duration': 80,
+            'symptoms': 0,
+            'changes': 300,
+            'notes': 500,
+        }),
+        'scalp': clean_section('scalp', {
+            'scalp_site': 80,
+            'duration': 80,
+            'symptoms': 0,
+            'treatment_history': 300,
+            'notes': 500,
+        }),
     }
 
 
@@ -2623,6 +2699,12 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/api/screening/config', methods=['GET'])
+def api_screening_config():
+    """Return modality metadata used by the kiosk and mobile UI."""
+    return jsonify({'status': 'ok', **load_screening_config()}), 200
+
+
 @app.route('/api/generate_pin', methods=['POST'])
 def api_generate_pin():
     """키오스크에서 모바일 접속용 4자리 PIN 발급"""
@@ -3879,6 +3961,36 @@ def api_admin_server_shutdown():
 def capture():
     """촬영 페이지"""
     return render_template('capture.html')
+
+
+@app.route('/screening')
+def screening_select():
+    """검사 항목 선택 페이지"""
+    return render_template('screening_select.html')
+
+
+@app.route('/screening/survey')
+def screening_survey():
+    """선택 검사 기반 통합 문진 페이지"""
+    return render_template('screening_survey.html')
+
+
+@app.route('/screening/capture')
+def screening_capture():
+    """피부·두피 촬영 및 업로드 페이지"""
+    return render_template('screening_capture.html')
+
+
+@app.route('/screening/result')
+def screening_result():
+    """모델 연결 전 피부·두피 결과 셸"""
+    return render_template('screening_result.html')
+
+
+@app.route('/screening/summary')
+def screening_summary():
+    """선택 검사 통합 요약 페이지"""
+    return render_template('screening_summary.html')
 
 
 @app.route('/result')

@@ -6,22 +6,22 @@
 const translations = {
   ko: {
     // Main title and subtitle
-    main_title: '안구 건강 진단 서비스',
+    main_title: '종합 건강 스크리닝',
     subtitle_line1: '<strong>NVIDIA Jetson AI</strong> 기술을 활용하여',
-    subtitle_line2: '빠르고 정확하게 눈 상태를 점검하세요.',
+    subtitle_line2: '안구, 피부, 두피 상태를 한 번에 점검하세요.',
     
     // Feature tags
-    tag_conjunctivitis: '#결막염',
-    tag_cataract: '#백내장',
-    tag_pterygium: '#익상편',
+    tag_conjunctivitis: '#안구',
+    tag_cataract: '#피부',
+    tag_pterygium: '#두피',
     
     // Main buttons
-    btn_start_diagnosis: '진단 시작하기',
+    btn_start_diagnosis: '검사 시작하기',
     btn_kakao_link: '💬 카카오 연동',
     btn_mobile_access: '📱 모바일 기기로 접속',
     
     // Helper text
-    helper_disclaimer: '※ 본 서비스는 의료 보조 및 스크리닝 목적으로 제공됩니다.',
+    helper_disclaimer: '※ 본 서비스는 건강 상태 스크리닝 및 의료 의사결정 보조용입니다.',
     
     // Theme toggle
     theme_dark_mode: '다크 모드',
@@ -67,7 +67,7 @@ const translations = {
     btn_use_last_upload: '↺ 최근 업로드 다시 사용',
     btn_restore_camera: '↩️ 실시간 카메라로 복귀',
     btn_view_result: '✅ 결과 보기',
-    btn_confirm_and_survey: '인증 완료 및 설문 시작',
+    btn_confirm_and_survey: '인증 완료 및 검사 선택',
     btn_back: '이전으로 돌아가기',
     btn_retake_photos: '🔄 안구 재촬영',
     btn_generate_report: '📋 리포트 발행',
@@ -79,7 +79,7 @@ const translations = {
     m_dashboard_title: '✅ 모바일 인증 완료',
     m_login_title: '📱 모바일 PIN 인증',
     capture_title: '안구 촬영',
-    login_instruction: '기존 기록 조회 및 설문 시작을 위해 정보를 입력해주세요.',
+    login_instruction: '기존 기록 조회 및 검사 시작을 위해 정보를 입력해주세요.',
     survey_instruction: '정확한 AI 분석을 위해 현재 상태를 솔직하게 답변해 주세요.',
     label_identifier: '전화번호 또는 이메일',
     label_admin_password: '관리자 비밀번호',
@@ -127,17 +127,17 @@ const translations = {
 
   en: {
     // Main title and subtitle
-    main_title: 'Eye Health Diagnosis Service',
+    main_title: 'Comprehensive Health Screening',
     subtitle_line1: 'Powered by <strong>NVIDIA Jetson AI</strong>',
-    subtitle_line2: 'Check your eye condition quickly and accurately.',
+    subtitle_line2: 'Screen eye, skin, and scalp conditions in one flow.',
     
     // Feature tags
-    tag_conjunctivitis: '#Conjunctivitis',
-    tag_cataract: '#Cataract',
-    tag_pterygium: '#Pterygium',
+    tag_conjunctivitis: '#Eye',
+    tag_cataract: '#Skin',
+    tag_pterygium: '#Scalp',
     
     // Main buttons
-    btn_start_diagnosis: 'Start Diagnosis',
+    btn_start_diagnosis: 'Start Screening',
     btn_kakao_link: '💬 Link Kakao Account',
     btn_mobile_access: '📱 Access via Mobile Device',
     
@@ -248,17 +248,17 @@ const translations = {
 
   zh: {
     // Main title and subtitle
-    main_title: '眼健康诊断服务',
+    main_title: '综合健康筛查',
     subtitle_line1: '由 <strong>NVIDIA Jetson AI</strong> 提供支持',
-    subtitle_line2: '快速准确地检查您的眼睛状况。',
+    subtitle_line2: '一次完成眼部、皮肤和头皮状态筛查。',
     
     // Feature tags
-    tag_conjunctivitis: '#结膜炎',
-    tag_cataract: '#白内障',
-    tag_pterygium: '#翼状胬肉',
+    tag_conjunctivitis: '#眼部',
+    tag_cataract: '#皮肤',
+    tag_pterygium: '#头皮',
     
     // Main buttons
-    btn_start_diagnosis: '开始诊断',
+    btn_start_diagnosis: '开始筛查',
     btn_kakao_link: '💬 关联Kakao账户',
     btn_mobile_access: '📱 通过移动设备访问',
     
@@ -360,17 +360,17 @@ const translations = {
 
   vi: {
     // Main title and subtitle
-    main_title: 'Dịch vụ Chẩn đoán Sức khỏe Mắt',
+    main_title: 'Sàng lọc Sức khỏe Tổng hợp',
     subtitle_line1: 'Được hỗ trợ bởi <strong>NVIDIA Jetson AI</strong>',
-    subtitle_line2: 'Kiểm tra tình trạng mắt của bạn nhanh chóng và chính xác.',
+    subtitle_line2: 'Sàng lọc mắt, da và da đầu trong một quy trình.',
     
     // Feature tags
-    tag_conjunctivitis: '#Viêm kết mạc',
-    tag_cataract: '#Đục thủy tinh thể',
-    tag_pterygium: '#Cánh mắt',
+    tag_conjunctivitis: '#Mắt',
+    tag_cataract: '#Da',
+    tag_pterygium: '#Da đầu',
     
     // Main buttons
-    btn_start_diagnosis: 'Bắt đầu Chẩn đoán',
+    btn_start_diagnosis: 'Bắt đầu Sàng lọc',
     btn_kakao_link: '💬 Liên kết Tài khoản Kakao',
     btn_mobile_access: '📱 Truy cập qua Thiết bị Di động',
     
@@ -472,17 +472,17 @@ const translations = {
 
   ru: {
     // Main title and subtitle
-    main_title: 'Сервис диагностики здоровья глаз',
+    main_title: 'Комплексный скрининг здоровья',
     subtitle_line1: 'Работает на базе <strong>NVIDIA Jetson AI</strong>',
-    subtitle_line2: 'Быстро и точно проверьте состояние ваших глаз.',
+    subtitle_line2: 'Проверьте состояние глаз, кожи и кожи головы.',
     
     // Feature tags
-    tag_conjunctivitis: '#Конъюнктивит',
-    tag_cataract: '#Катаракта',
-    tag_pterygium: '#Птеригиум',
+    tag_conjunctivitis: '#Глаза',
+    tag_cataract: '#Кожа',
+    tag_pterygium: '#Кожа головы',
     
     // Main buttons
-    btn_start_diagnosis: 'Начать диагностику',
+    btn_start_diagnosis: 'Начать скрининг',
     btn_kakao_link: '💬 Связать аккаунт Kakao',
     btn_mobile_access: '📱 Доступ с мобильного устройства',
     
@@ -586,17 +586,17 @@ const translations = {
 
   ja: {
     // Main title and subtitle
-    main_title: '眼の健康診断サービス',
+    main_title: '総合健康スクリーニング',
     subtitle_line1: '<strong>NVIDIA Jetson AI</strong>を利用',
-    subtitle_line2: 'あなたの眼の状態を迅速かつ正確に検査してください。',
+    subtitle_line2: '眼・皮膚・頭皮の状態を一度に確認します。',
     
     // Feature tags
-    tag_conjunctivitis: '#結膜炎',
-    tag_cataract: '#白内障',
-    tag_pterygium: '#翼状片',
+    tag_conjunctivitis: '#眼',
+    tag_cataract: '#皮膚',
+    tag_pterygium: '#頭皮',
     
     // Main buttons
-    btn_start_diagnosis: '診断を開始',
+    btn_start_diagnosis: 'スクリーニング開始',
     btn_kakao_link: '💬 Kakaoアカウントをリンク',
     btn_mobile_access: '📱 モバイルデバイスからアクセス',
     
@@ -701,4 +701,3 @@ const translations = {
 
 // Make translations globally accessible
 window.translations = translations;
-

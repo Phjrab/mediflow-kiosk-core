@@ -321,6 +321,7 @@
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-camera-sub { flex: 1; height: 70%; background: #f2f2f7; color: #3a3a3c; }
         .btn-retake { background: #fdf2f2; color: var(--danger); border: 1px solid rgba(255, 59, 48, 0.2); }
+        .btn-next-screening { background: var(--primary); color: #fff; }
         .btn-main { width: 100%; padding: 20px; background: var(--primary); color: white; font-size: 1.1rem; }
 
         .update-notice {
@@ -512,6 +513,7 @@
             <button class="btn btn-camera-sub btn-retake" onclick="retakePhotos()">🔄 안구 재촬영</button>
             <button id="btn-generate-report" class="btn btn-camera-sub" onclick="generateReport()">📋 리포트 발행</button>
             <button class="btn btn-camera-sub" onclick="openNearbyClinicMap()">📍 주변 안과</button>
+            <button id="btn-next-screening" class="btn btn-camera-sub btn-next-screening" type="button" hidden></button>
         </div>
     </div>
 
@@ -571,6 +573,7 @@
         </div>
     </div>
 
+    <script src="/static/js/screening-flow.js"></script>
     <script>
         let gradCamVisible = false;
         let eyeViewMode = 'ORIGINAL';
@@ -1164,12 +1167,30 @@
             }
         }
 
+        function configureScreeningContinuation() {
+            if (!window.ScreeningFlow) return;
+
+            const plan = ScreeningFlow.getPlan();
+            if (!plan.includes('eye')) return;
+
+            ScreeningFlow.markCompleted('eye');
+            sessionStorage.setItem('screening_result_eye_status', isLatestDataReady() ? 'ready' : 'no_data');
+            const nextButton = document.getElementById('btn-next-screening');
+            const next = ScreeningFlow.nextPending();
+            nextButton.textContent = next
+                ? `다음 검사: ${ScreeningFlow.LABELS[next]}`
+                : '통합 결과 보기';
+            nextButton.hidden = false;
+            nextButton.addEventListener('click', () => ScreeningFlow.continueFlow());
+        }
+
         window.onload = () => {
             renderCapturedPhoto();
             renderAiResults();
             localStorage.setItem('data_updated', isLatestDataReady() ? 'true' : 'false');
             refreshReportAvailability();
             toggleGradCam(false);
+            configureScreeningContinuation();
 
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape') {

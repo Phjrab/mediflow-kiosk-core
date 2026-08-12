@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Eye Healthcare Kiosk</title>
+    <title>종합 건강 스크리닝</title>
     <script>
         (function () {
             try {
@@ -746,24 +746,24 @@
     </button>
 
     <div class="main-visual">
-        <span class="eye-scan-icon">👁️</span>
+        <span class="eye-scan-icon" aria-hidden="true">🩺</span>
     </div>
 
-    <h1 data-i18n="main_title">Eye Health Diagnosis Service</h1>
+    <h1 data-i18n="main_title">Comprehensive Health Screening</h1>
     <p class="subtitle">
         <span data-i18n-html="true" data-i18n="subtitle_line1">Powered by <strong>NVIDIA Jetson AI</strong></span><br>
-        <span data-i18n="subtitle_line2">Check your eye condition quickly and accurately.</span>
+        <span data-i18n="subtitle_line2">Screen eye, skin, and scalp conditions in one flow.</span>
     </p>
     
     <div class="feature-tags">
-        <span data-i18n="tag_conjunctivitis">#Conjunctivitis</span>
-        <span data-i18n="tag_cataract">#Cataract</span>
-        <span data-i18n="tag_pterygium">#Pterygium</span>
+        <span data-i18n="tag_conjunctivitis">#Eye</span>
+        <span data-i18n="tag_cataract">#Skin</span>
+        <span data-i18n="tag_pterygium">#Scalp</span>
     </div>
 
     <div class="start-section">
         <a href="{{ url_for('login') }}" class="btn-start" data-i18n="btn_start_diagnosis">
-            Start Diagnosis
+            Start Screening
         </a>
         <button type="button" class="btn-kakao-link" onclick="openKakaoLinkModal()" data-i18n="btn_kakao_link">💬 Link Kakao Account</button>
         <button type="button" class="btn-mobile-access" onclick="openMobileAccessModal()" data-i18n="btn_mobile_access">📱 Access via Mobile Device</button>
