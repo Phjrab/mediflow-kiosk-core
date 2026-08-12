@@ -105,7 +105,7 @@
                 </div>
 
                 <div class="preview">
-                    <img id="live-feed" alt="USB 카메라 실시간 화면">
+                    <img id="live-feed" alt="카메라 실시간 화면">
                     <img id="captured-image" alt="선택한 검사 이미지">
                     <div id="preview-message" class="preview-message"></div>
                     <div id="live-badge" class="live-badge"><span class="live-dot"></span>LIVE</div>
@@ -168,6 +168,12 @@
             message.classList.toggle('error', isError);
         }
 
+        function cameraRoleLabel() {
+            return modalityConfig?.camera_role === 'usb_microscope'
+                ? 'USB 현미경 카메라'
+                : '일반 웹캠';
+        }
+
         function updatePreviewState() {
             const hasCapture = Boolean(captureData);
             capturedImage.classList.toggle('visible', hasCapture);
@@ -191,13 +197,19 @@
 
         async function startCamera() {
             if (isMobile || cameraSessionActive || inputMode !== 'camera') return;
-            setMessage('USB 카메라 세션을 시작하는 중입니다.');
+            const cameraRole = modalityConfig?.camera_role || 'webcam';
+            setMessage(`${cameraRoleLabel()} 세션을 시작하는 중입니다.`);
             updatePreviewState();
             try {
-                const response = await fetch('/camera/session/start', { method: 'POST' });
+                const response = await fetch('/camera/session/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ source: 'screening_capture', camera_role: cameraRole })
+                });
                 const payload = await response.json();
                 if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || '카메라 시작 실패');
                 cameraSessionActive = true;
+                if (payload.camera) renderCameraName(payload.camera);
                 liveFeed.src = `/video_feed?mesh=0&t=${Date.now()}`;
                 setMessage('화면 중앙에 검사 부위를 맞춘 뒤 촬영하세요.');
             } catch (error) {
@@ -210,11 +222,33 @@
             if (!cameraSessionActive) return;
             cameraSessionActive = false;
             liveFeed.removeAttribute('src');
+            const payload = JSON.stringify({
+                source: 'screening_capture',
+                camera_role: modalityConfig?.camera_role || 'webcam'
+            });
             if (useBeacon && navigator.sendBeacon) {
-                navigator.sendBeacon('/camera/session/stop', new Blob([], { type: 'application/json' }));
+                navigator.sendBeacon('/camera/session/stop', new Blob([payload], { type: 'application/json' }));
                 return;
             }
-            try { await fetch('/camera/session/stop', { method: 'POST', keepalive: true }); } catch (error) {}
+            try {
+                await fetch('/camera/session/stop', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: payload,
+                    keepalive: true
+                });
+            } catch (error) {}
+        }
+
+        function renderCameraName(camera) {
+            const cameraName = document.getElementById('camera-name');
+            if (isMobile) {
+                cameraName.textContent = '모바일 기기 카메라';
+                return;
+            }
+            cameraName.textContent = camera?.connected
+                ? `${camera.label || cameraRoleLabel()} · ${camera.name || '카메라'} (${camera.device_path})`
+                : `${camera?.label || cameraRoleLabel()} 미연결`;
         }
 
         function blobToDataUrl(blob) {
@@ -328,11 +362,10 @@
             document.getElementById('page-title').textContent = `${modalityConfig.label || ScreeningFlow.LABELS[active]} 이미지 촬영`;
             document.getElementById('progress').textContent = `${position} / ${plan.length}`;
             document.getElementById('modality-label').textContent = modalityConfig.label || ScreeningFlow.LABELS[active];
-            document.getElementById('capture-label').textContent = modalityConfig.capture_label || '확대 이미지';
-            const camera = config.camera || {};
-            document.getElementById('camera-name').textContent = camera.connected
-                ? `${camera.name || 'USB 카메라'} (${camera.device_path || '/dev/video0'})`
-                : '연결된 카메라 없음';
+            document.getElementById('capture-label').textContent = modalityConfig.capture_label || '검사 이미지';
+            const cameraRole = modalityConfig.camera_role || 'webcam';
+            const camera = config.cameras?.[cameraRole] || config.camera || {};
+            renderCameraName(camera);
             setMode('camera');
         }).catch((error) => {
             setMessage('검사 설정을 불러오지 못했습니다.', true);

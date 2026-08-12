@@ -174,6 +174,8 @@ camera_thread = None  # 카메라 스레드
 camera_running = False  # 카메라 스레드 실행 상태
 camera_session_count = 0  # capture 페이지 활성 세션 수
 camera_session_lock = threading.Lock()
+active_camera_role = None
+active_camera_device_index = None
 debug_boxes_cache = []
 debug_frame_counter = 0
 YOLO_STREAM_DEBUG_OVERLAY = os.getenv('YOLO_STREAM_DEBUG_OVERLAY', '0') == '1'
@@ -192,6 +194,7 @@ ADMIN_EDITABLE_CONFIG_KEYS = {
     'SERVER_PORT': int,
     'DEBUG_MODE': bool,
     'CAMERA_DEVICE_INDEX': int,
+    'MICROSCOPE_CAMERA_DEVICE_INDEX': int,
     'YOLO_CONF_THRESHOLD': float,
     'YOLO_IOU_THRESHOLD': float,
     'YOLO_STATUS_CONF_THRESHOLD': float,
@@ -211,6 +214,49 @@ MOBILE_PIN_TTL_SECONDS = 300
 ENV_FILE_PATH = os.path.join(config.BASE_DIR, '.env')
 
 
+CAMERA_ROLE_LABELS = {
+    'webcam': '일반 웹캠',
+    'usb_microscope': 'USB 현미경 카메라',
+}
+
+
+def normalize_camera_role(value):
+    role = str(value or 'webcam').strip().lower()
+    return role if role in CAMERA_ROLE_LABELS else 'webcam'
+
+
+def get_camera_device_index(camera_role='webcam'):
+    role = normalize_camera_role(camera_role)
+    if role == 'usb_microscope':
+        return int(getattr(
+            config,
+            'MICROSCOPE_CAMERA_DEVICE_INDEX',
+            getattr(config, 'CAMERA_DEVICE_INDEX', 0),
+        ))
+    return int(getattr(config, 'CAMERA_DEVICE_INDEX', 0))
+
+
+def describe_camera(camera_role='webcam'):
+    role = normalize_camera_role(camera_role)
+    camera_index = get_camera_device_index(role)
+    camera_path = f'/dev/video{camera_index}'
+    camera_name = ''
+    try:
+        with open(f'/sys/class/video4linux/video{camera_index}/name', 'r', encoding='utf-8') as name_file:
+            camera_name = name_file.read().strip()
+    except OSError:
+        pass
+
+    return {
+        'role': role,
+        'label': CAMERA_ROLE_LABELS[role],
+        'device_index': camera_index,
+        'device_path': camera_path,
+        'connected': os.path.exists(camera_path),
+        'name': camera_name or '카메라 미연결',
+    }
+
+
 def load_screening_config():
     """Load the UI-facing modality registry without coupling it to model code."""
     try:
@@ -224,21 +270,12 @@ def load_screening_config():
             'modalities': [],
         }
 
-    camera_index = int(getattr(config, 'CAMERA_DEVICE_INDEX', 0))
-    camera_path = f'/dev/video{camera_index}'
-    camera_name = ''
-    try:
-        with open(f'/sys/class/video4linux/video{camera_index}/name', 'r', encoding='utf-8') as name_file:
-            camera_name = name_file.read().strip()
-    except OSError:
-        pass
-
-    payload['camera'] = {
-        'device_index': camera_index,
-        'device_path': camera_path,
-        'connected': os.path.exists(camera_path),
-        'name': camera_name or '카메라 미연결',
+    cameras = {
+        role: describe_camera(role)
+        for role in CAMERA_ROLE_LABELS
     }
+    payload['cameras'] = cameras
+    payload['camera'] = cameras['webcam']
     return payload
 
 
@@ -2342,21 +2379,36 @@ def gstreamer_pipeline(cam_id=0):
 # ========================================
 # [4] 백그라운드 카메라 스레드 
 # ========================================
-def start_camera_thread():
+def start_camera_thread(camera_role='webcam'):
     """
     카메라 프레임을 백그라운드에서 계속 읽고 current_frame 업데이트
     """
     global current_frame, camera_running, camera_thread
+    global active_camera_role, active_camera_device_index
+
+    requested_role = normalize_camera_role(camera_role)
+    requested_device_index = get_camera_device_index(requested_role)
 
     if camera_running and camera_thread is not None and camera_thread.is_alive():
+        if active_camera_device_index != requested_device_index:
+            raise RuntimeError(
+                f'{CAMERA_ROLE_LABELS.get(active_camera_role, "카메라")} 사용 중에는 '
+                f'{CAMERA_ROLE_LABELS[requested_role]}로 전환할 수 없습니다.'
+            )
         return
+
+    active_camera_role = requested_role
+    active_camera_device_index = requested_device_index
     
     def camera_worker():
         global current_frame, camera_running
-        print("[카메라 스레드] 백그라운드 프레임 수집 시작...")
+        print(
+            f"[카메라 스레드] 백그라운드 프레임 수집 시작... "
+            f"role={requested_role}, device=/dev/video{requested_device_index}"
+        )
         time.sleep(1) # 초기화 대기
-        
-        cam_id = getattr(config, 'CAMERA_DEVICE_INDEX', 0)
+
+        cam_id = requested_device_index
         cap = None
         
         capture_candidates = [
@@ -2419,6 +2471,7 @@ def start_camera_thread():
 def stop_camera_thread():
     """카메라 스레드 안전 종료"""
     global camera_running, camera_thread, current_frame
+    global active_camera_role, active_camera_device_index
     camera_running = False
 
     if camera_thread is not None and camera_thread.is_alive():
@@ -2426,17 +2479,35 @@ def stop_camera_thread():
 
     camera_thread = None
     current_frame = None
+    active_camera_role = None
+    active_camera_device_index = None
 
 
-def acquire_camera_session():
+def acquire_camera_session(camera_role='webcam'):
     """capture 페이지 활성화 시 카메라 세션을 획득하고 필요하면 카메라를 시작한다."""
     global camera_session_count
+    requested_role = normalize_camera_role(camera_role)
+    requested_device_index = get_camera_device_index(requested_role)
+
     with camera_session_lock:
+        if (
+            camera_session_count > 0
+            and active_camera_device_index is not None
+            and active_camera_device_index != requested_device_index
+        ):
+            raise RuntimeError(
+                f'{CAMERA_ROLE_LABELS.get(active_camera_role, "카메라")} 세션이 이미 사용 중입니다.'
+            )
         camera_session_count += 1
         active_sessions = camera_session_count
 
-    if not camera_running:
-        start_camera_thread()
+    try:
+        if not camera_running:
+            start_camera_thread(requested_role)
+    except Exception:
+        with camera_session_lock:
+            camera_session_count = max(0, camera_session_count - 1)
+        raise
 
     return active_sessions
 
@@ -2849,19 +2920,33 @@ def video_feed():
 def camera_session_start():
     """capture 화면 진입 시 카메라 세션 시작"""
     try:
+        data = request.get_json(silent=True) or {}
+        requested_role = normalize_camera_role(data.get('camera_role', 'webcam'))
+        session_role = normalize_camera_role(session.get('capture_camera_role', requested_role))
+
         if not session.get('capture_camera_active', False):
-            active_sessions = acquire_camera_session()
+            active_sessions = acquire_camera_session(requested_role)
             session['capture_camera_active'] = True
+            session['capture_camera_role'] = requested_role
         else:
+            if session_role != requested_role:
+                return jsonify({
+                    'status': 'error',
+                    'message': '현재 카메라 세션을 종료한 뒤 다른 카메라를 시작해 주세요.'
+                }), 409
             if not camera_running:
-                start_camera_thread()
+                start_camera_thread(requested_role)
             active_sessions = get_camera_session_count()
 
         return jsonify({
             'status': 'ok',
             'camera_running': camera_running,
-            'active_sessions': active_sessions
+            'active_sessions': active_sessions,
+            'camera_role': requested_role,
+            'camera': describe_camera(requested_role),
         }), 200
+    except RuntimeError as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 409
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
@@ -2873,6 +2958,7 @@ def camera_session_stop():
         if session.get('capture_camera_active', False):
             active_sessions = release_camera_session()
             session['capture_camera_active'] = False
+            session.pop('capture_camera_role', None)
         else:
             active_sessions = get_camera_session_count()
 

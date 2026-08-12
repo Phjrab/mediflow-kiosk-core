@@ -412,9 +412,14 @@
             hint: '개발 중에만 True 권장. 운영/배포는 False 권장.'
         },
         CAMERA_DEVICE_INDEX: {
-            title: '카메라 장치 번호',
-            description: 'OpenCV가 열 카메라 인덱스입니다.',
-            hint: '내장 카메라가 0인 경우가 많음. 인식 안되면 1, 2 순서로 확인.'
+            title: '일반 웹캠 장치 번호',
+            description: '안구 및 피부 검사에 사용할 OpenCV 카메라 인덱스입니다.',
+            hint: 'Logitech 등 일반 웹캠의 /dev/videoN 번호에서 N을 입력하세요.'
+        },
+        MICROSCOPE_CAMERA_DEVICE_INDEX: {
+            title: '두피 현미경 카메라 장치 번호',
+            description: '두피 검사에 사용할 USB 현미경 카메라 인덱스입니다.',
+            hint: 'DASO USB 현미경의 /dev/videoN 번호에서 N을 입력하세요.'
         },
         MEDIAPIPE_CONF_THRESHOLD: {
             title: 'MediaPipe 검출 임계값(분석)',

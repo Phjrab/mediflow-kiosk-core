@@ -15,8 +15,8 @@
       "id": "skin",
       "label": "피부",
       "short_description": "피부 병변 이미지 스크리닝",
-      "capture_label": "피부 확대 이미지",
-      "camera_role": "usb_microscope",
+      "capture_label": "피부 이미지",
+      "camera_role": "webcam",
       "model_status": "not_configured",
       "classes": ["ex1", "ex2"]
     },

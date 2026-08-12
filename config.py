@@ -75,6 +75,10 @@ DEBUG_MODE = _get_env_bool('DEBUG_MODE', False)
 # [3-1] 카메라 설정
 # ========================================
 CAMERA_DEVICE_INDEX = _get_env_int('CAMERA_DEVICE_INDEX', 0)
+MICROSCOPE_CAMERA_DEVICE_INDEX = _get_env_int(
+    'MICROSCOPE_CAMERA_DEVICE_INDEX',
+    CAMERA_DEVICE_INDEX,
+)
 
 # ========================================
 # [4] YOLO 검출 임계값

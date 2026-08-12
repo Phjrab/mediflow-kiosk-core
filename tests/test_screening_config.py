@@ -37,6 +37,12 @@ class ScreeningConfigTest(unittest.TestCase):
         self.assertEqual(by_id['skin']['classes'], ['ex1', 'ex2'])
         self.assertEqual(by_id['scalp']['classes'], ['ex1', 'ex2'])
 
+    def test_camera_roles_match_capture_hardware(self):
+        by_id = {item['id']: item for item in self.config['modalities']}
+        self.assertEqual(by_id['eye']['camera_role'], 'webcam')
+        self.assertEqual(by_id['skin']['camera_role'], 'webcam')
+        self.assertEqual(by_id['scalp']['camera_role'], 'usb_microscope')
+
 
 if __name__ == '__main__':
     unittest.main()

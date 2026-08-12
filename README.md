@@ -206,7 +206,8 @@ curl http://127.0.0.1:5000/health
 | 변수 | 기본값 | 설명 |
 | --- | --- | --- |
 | `MODEL_DEVICE` | `jetson` | `jetson` 또는 `rpi` |
-| `CAMERA_DEVICE_INDEX` | `0` | OpenCV 카메라 인덱스 |
+| `CAMERA_DEVICE_INDEX` | `0` | 안구·피부용 일반 웹캠 인덱스 |
+| `MICROSCOPE_CAMERA_DEVICE_INDEX` | `CAMERA_DEVICE_INDEX` | 두피용 USB 현미경 카메라 인덱스 |
 | `CLASSIFIER_CONFIDENCE_THRESHOLD` | `0.7` | 분류 신뢰도 임계값 |
 | `IRIS_REMOVAL_ENABLED` | `1` | 홍채 영역 제거 사용 여부 |
 | `IRIS_THRESHOLD` | `0.3` | 홍채 제거 임계값 |
@@ -216,6 +217,8 @@ curl http://127.0.0.1:5000/health
 | `AUTO_CAPTURE_HOLD_FRAMES` | `10` | 촬영 조건 유지 프레임 수 |
 | `MEDIAPIPE_ONNX_PATH` | `models/yolo.onnx` | RPi 검출 ONNX 경로 |
 | `CLASSIFIER_ONNX_PATH` | `models/efficientnet.onnx` | RPi 분류 ONNX 경로 |
+
+카메라가 한 대뿐인 개발 환경에서는 두 카메라 인덱스를 동일하게 둘 수 있습니다. 일반 웹캠과 현미경을 함께 연결한 뒤에는 `/dev/video*` 장치 번호를 확인하여 각각 설정합니다.
 
 `MEDIAPIPE_CONF_THRESHOLD`, `MEDIAPIPE_IOU_THRESHOLD`, `MEDIAPIPE_INPUT_SIZE`, `MEDIAPIPE_STATUS_CONF_THRESHOLD`는 기존 설정 키 호환을 위해 유지됩니다. 현재 Jetson MediaPipe Face Mesh 검출기는 이 YOLO 임계값 일부를 직접 사용하지 않습니다.
 
