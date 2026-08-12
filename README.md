@@ -309,6 +309,8 @@ curl http://127.0.0.1:5000/health
 - 관리자: `POST /api/admin/login`, `GET|POST /api/admin/config`, `POST /api/admin/logout`
 - 운영 제어: `GET /api/admin/fallback_stats`, `POST /api/admin/server/restart`, `POST /api/admin/server/shutdown`
 
+브라우저 건강 채팅의 역할과 의료 안전 규칙은 `config/llm_chat_role.txt`에서 관리합니다. 서버는 각 요청에서 이 파일과 `config/screening_modalities.json`을 함께 읽으므로, 모델 상태가 `ready`인 검사만 결과 설명 대상으로 사용합니다. 역할 파일에는 비밀번호나 API 키를 기록하지 않습니다.
+
 ### 카카오·PDF 브리지 API
 
 - `GET /health`
@@ -389,6 +391,9 @@ eye_project/
 ├── eye_server.py                 # 전체 키오스크 Flask 서버
 ├── server.py                     # 경량 /health, /predict API
 ├── config.py                     # 카메라·모델·임계값 설정
+├── config/
+│   ├── llm_chat_role.txt         # 브라우저 건강 채팅 역할·안전 규칙
+│   └── screening_modalities.json # 검사 영역·모델 준비 상태
 ├── model_loader.py               # Jetson/RPi 백엔드 팩토리
 ├── start_services.sh             # 통합 시작 스크립트
 ├── stop_services.sh              # 통합 종료 스크립트
@@ -418,6 +423,7 @@ eye_project/
 ├── tests/
 │   └── test_database.py
 ├── utils/
+│   ├── chat_prompt.py            # 역할과 검사 컨텍스트 기반 시스템 프롬프트 구성
 │   ├── image_proc.py
 │   ├── logger.py
 │   └── security_utils.py

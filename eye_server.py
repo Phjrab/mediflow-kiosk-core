@@ -132,6 +132,7 @@ from PIL import Image, ImageOps
 
 import config as config
 from model_loader import initialize_models, get_models
+from utils.chat_prompt import build_chat_system_prompt
 from utils.image_proc import resize_image, enhance_contrast
 from database.db import get_conn, identifier_hash_id, init_db, migrate_legacy_history
 
@@ -3237,17 +3238,6 @@ def _normalize_diagnosis_result_for_chat(diagnosis_result):
     return {'raw_result': str(diagnosis_result)}
 
 
-def _build_chat_system_prompt(diagnosis_result):
-    diagnosis_text = json.dumps(diagnosis_result, ensure_ascii=False)
-    return (
-        "You are a friendly and professional AI eye-care assistant. "
-        "You must read the provided diagnosis_result and answer the user's question based on that context. "
-        "Provide practical and easy-to-understand guidance in Korean. "
-        "Do not claim a definitive medical diagnosis, and always remind the user to consult a real ophthalmologist for final diagnosis and treatment. "
-        f"diagnosis_result: {diagnosis_text}"
-    )
-
-
 def _call_openai_chat(system_prompt, user_message):
     api_key = os.getenv('OPENAI_API_KEY', '').strip()
     if not api_key:
@@ -3370,7 +3360,7 @@ def generate_llm_chat_reply(user_message, diagnosis_result):
     """LLM 공급자(OpenAI/Gemini)를 선택해 채팅 응답을 생성한다."""
     provider = os.getenv('LLM_PROVIDER', 'openai').strip().lower()
     normalized_result = _normalize_diagnosis_result_for_chat(diagnosis_result)
-    system_prompt = _build_chat_system_prompt(normalized_result)
+    system_prompt = build_chat_system_prompt(normalized_result)
 
     if provider == 'gemini':
         return _call_gemini_chat(system_prompt, user_message), 'gemini'
