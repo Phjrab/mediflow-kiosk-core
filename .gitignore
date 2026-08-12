@@ -7,11 +7,14 @@ __pycache__/
 .mypy_cache/
 .DS_Store
 logs/
+runtime/
 *.log
 *.out
 *.onnx
 *.onnx.data
 database/history.db
+database/*.db-shm
+database/*.db-wal
 eye_photo/
 PHOTO/
 web/static/captures/users/
