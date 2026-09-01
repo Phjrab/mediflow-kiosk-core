@@ -22,6 +22,13 @@ class JetsonDeploymentScriptTest(unittest.TestCase):
         self.assertNotIn('nvarguscamerasrc', source)
         self.assertIn("[str(manager), 'status']", source)
 
+    def test_legacy_wrappers_delegate_without_pattern_kills(self):
+        for filename in ('start_services.sh', 'stop_services.sh'):
+            source = (ROOT / filename).read_text(encoding='utf-8')
+            self.assertIn('scripts/mediflow-kiosk', source)
+            self.assertNotIn('pkill', source)
+            self.assertNotIn('killall', source)
+
 
 if __name__ == '__main__':
     unittest.main()
