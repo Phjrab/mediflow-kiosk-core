@@ -1,124 +1,163 @@
-# AI 안구 건강 스크리닝 키오스크
+# MediFlow Kiosk
 
-Jetson Orin Nano와 Raspberry Pi 5를 지원하는 엣지 AI 기반 안구 건강 스크리닝 프로젝트입니다. 카메라 또는 업로드 이미지에서 양안을 추출하고 질환 분류, 충혈도 분석, Grad-CAM 시각화, 문진, 사용자별 이력, PDF 보고서와 카카오톡 공유를 하나의 웹 UI에서 제공합니다.
+NVIDIA Jetson과 USB UVC 카메라에서 구동하는 엣지 AI 기반 종합 건강 스크리닝 키오스크입니다. 현재 운영 가능한 AI 경로는 안구 스크리닝이며, 피부와 두피는 선택·문진·촬영·결과 UI와 확장 가능한 모델 등록 구조까지 구현되어 있습니다.
 
-> 이 시스템은 의료 진단을 확정하는 장비가 아니라 안구 건강 이상 징후를 선별하는 보조 도구입니다. 최종 판단은 안과 전문의 진료를 통해 확인해야 합니다.
+> 이 시스템은 의료 진단을 확정하는 장비가 아니라 이상 징후 선별과 설명을 돕는 연구용 보조 도구입니다. 최종 판단은 의료 전문가의 진료로 확인해야 합니다.
 
 ## 현재 구현 기준
 
-이 문서는 2026-08-12의 프로젝트 파일을 기준으로 작성되었습니다.
+이 문서는 2026-09-01의 `main` 브랜치 실행 경로를 기준으로 합니다.
 
-- 운영 웹 서버: `eye_server.py` (기본 포트 `5000`)
-- 카카오 OAuth·PDF 브리지: `database/app.py` (기본 포트 `5001`)
-- 운영 실행·종료: `mediflow-kiosk start|stop|restart|status|logs`
-- 레거시 플랫폼·브라우저 실행: `start_services.sh`, `stop_services.sh`
+- 서비스 표시 이름: 종합 건강 스크리닝
+- 검사 선택: 안구, 피부, 두피, 전체 검사
+- 안구 모델: MediaPipe Face Mesh + PyTorch EfficientNet-B0 + Grad-CAM
+- 피부·두피 모델: 미구현 상태로 UI에서 비활성 처리
+- 카메라: `/dev/videoN` USB UVC 웹캠 및 USB 현미경만 지원
+- 안구·피부 카메라 역할: 일반 USB 웹캠
+- 두피 카메라 역할: USB 현미경
+- 운영 웹 서버: `eye_server.py`, 기본 포트 `5000`
+- PDF·카카오 브리지: `database/app.py`, 기본 포트 `5001`
+- 운영 명령: `mediflow-kiosk start|stop|restart|status|logs`
 - 운영 DB: `database/database.db`
 - 스키마 단일 원본: `database/schema.sql`
-- Jetson 추론: MediaPipe Face Mesh + PyTorch EfficientNet-B0 + Grad-CAM
-- RPi 추론: ONNX Runtime 기반 호환 백엔드
 
-`server.py`는 `/health`, `/predict`만 제공하는 경량 추론 API입니다. 키오스크 전체 기능의 기본 실행 파일은 `eye_server.py`입니다.
+CSI 카메라와 `nvarguscamerasrc`는 지원하지 않습니다. systemd, cron, 데스크톱 autostart도 설치하지 않으며 사용자가 명령을 실행할 때만 서비스가 시작됩니다.
 
 ## 주요 기능
 
-- 실시간 카메라 스트림과 눈 정렬 상태 표시
-- 좌안·우안 순차 촬영 및 자동 촬영 상태 관리
-- MediaPipe Face Mesh 기반 양안 검출과 224x224 정방형 크롭
-- EfficientNet-B0 기반 5개 클래스 분류
-  - 결막염
-  - 다래끼
-  - 백내장
-  - 정상
-  - 포도막염
-- 예측 클래스의 Grad-CAM 히트맵 생성
-- 충혈도 등 픽셀 지표 분석
-- 사용자별 진단·문진 이력 저장, 조회, 삭제
-- 모바일 접속용 4자리 PIN과 모바일 전용 화면
-- 한국어·영어·중국어·베트남어 UI와 보고서 템플릿
-- OpenAI 또는 Gemini 기반 진단 결과 질의응답
-- PDF 보고서 생성, QR 코드, 카카오 OAuth 및 나에게 보내기
-- 관리자 로그인, 런타임 설정 변경, 재시작·종료 기능
+- 데스크톱 키오스크와 모바일 화면에서 검사 항목 선택
+- 검사별 문진과 카메라·업로드 입력
+- 실시간 USB 카메라 스트림과 눈 정렬 상태
+- MediaPipe Face Mesh 기반 좌안·우안 검출 및 224x224 크롭
+- EfficientNet-B0 5개 클래스 분류: 결막염, 다래끼, 백내장, 정상, 포도막염
+- 예측 클래스 Grad-CAM 히트맵과 충혈도 등 픽셀 지표
+- 사용자별 진단·문진 이력, PDF 보고서, QR 및 선택적 카카오 공유
+- OpenAI 또는 Gemini 기반 결과 질의응답
+- 관리자 설정, 안전한 서비스 재시작·종료
+- `/status`의 CUDA, 모델 파라미터 장치, 선택 기능 준비 상태
 
 ## 시스템 구성
 
 ```text
-카메라/업로드 이미지
-        |
-        v
-MediaPipe Face Mesh -> 좌안/우안 크롭
-        |
-        v
-EfficientNet-B0 -> 질환 분류 + Grad-CAM
-        |
-        +-> 픽셀 분석/문진/AI 가이드
-        |
-        v
-Flask eye_server.py :5000
-        |
-        +-> SQLite database/database.db
-        +-> web/static/captures/users/<user_hash>/
-        +-> PDF/카카오 브리지 database/app.py :5001
+USB UVC 웹캠/현미경 또는 업로드 이미지
+                    |
+                    v
+       검사 유형 선택 및 문진
+                    |
+       +------------+-------------+
+       |            |             |
+     안구          피부          두피
+ MediaPipe +     모델 추가      모델 추가
+ EfficientNet    예정           예정
+       |
+       v
+ 질환 분류 + Grad-CAM + 픽셀 분석
+                    |
+                    v
+       eye_server.py :5000
+       |        |          |
+     SQLite   모바일 UI   LLM 설명
+       |
+ database/app.py :5001 -> PDF/선택적 Kakao
 ```
 
-## 빠른 실행
+## 새 Jetson 설치
 
-### 1. 가상환경 준비
+### 준비 사항
 
-`start_services.sh`는 프로젝트의 `venv`를 먼저 찾고, 없으면 `.venv`를 사용합니다.
+- NVIDIA Jetson, JetPack/L4T 설치, `aarch64` Ubuntu
+- Python 3
+- 최소 5 GiB 여유 공간
+- JetPack 버전과 맞는 NVIDIA PyTorch 및 torchvision wheel 또는 이미 검증된 설치본
+- `/dev/videoN`으로 표시되는 USB UVC 카메라
+
+저장소는 검증하지 않은 NVIDIA wheel URL을 제공하지 않습니다. 새 장비의 JetPack/L4T/Python 조합에 맞는 wheel을 NVIDIA 공식 자료에서 확인한 뒤 로컬 경로나 사용자가 검증한 URL로 전달해야 합니다.
 
 ```bash
-cd ~/project/eye_project
-python3 -m venv venv
-source venv/bin/activate
-python -m pip install --upgrade pip setuptools wheel
+git clone https://github.com/Phjrab/mediflow-kiosk-core.git
+cd mediflow-kiosk-core
+bash scripts/install_jetson.sh \
+  --torch-wheel /path/to/jetpack-compatible-torch.whl \
+  --torchvision-wheel /path/to/matching-torchvision.whl
 ```
 
-### 2. 의존성 설치
-
-전체 웹 애플리케이션 기준:
+호환되는 PyTorch와 torchvision이 이미 설치되어 있고 CUDA 검사를 통과하면 wheel 인자는 생략할 수 있습니다.
 
 ```bash
-pip install -r requirements.txt
+bash scripts/install_jetson.sh
 ```
 
-Jetson에서는 NVIDIA JetPack 버전에 맞는 PyTorch·torchvision wheel을 우선 사용해야 합니다. 플랫폼별 참고 목록은 `requirements_jetson.txt`, `requirements_rpi.txt`에 있습니다.
+설치 스크립트는 다음 원칙을 지킵니다.
 
-### 3. 환경 파일 설정
+- 기존 `venv`, `.env`, `config.local.json`, DB, 이미지, 보고서를 보존
+- 기존 `.env`의 `HASH_PEPPER`와 다른 값은 자동 변경하지 않음
+- `.env`가 없을 때만 예제에서 생성하고 영구 비밀값을 한 번 생성
+- PyTorch CUDA 검증 실패 시 wheel 인자 없이 일반 PyPI torch를 설치하지 않음
+- `~/.local/bin/mediflow-kiosk` 심볼릭 링크 설치
+- 부팅 자동 실행을 만들지 않음
+
+사용 가능한 옵션은 다음 명령으로 확인합니다.
 
 ```bash
-cp .env.example .env
+bash scripts/install_jetson.sh --help
 ```
 
-최소한 다음 값을 `.env`에 설정합니다.
+## 기존 Jetson 갱신
+
+기존 `.env`는 설치기가 수정하지 않습니다. 다음 배포 키가 없다면 직접 추가합니다.
 
 ```dotenv
 MODEL_DEVICE=jetson
-SERVER_HOST=0.0.0.0
-SERVER_PORT=5000
-HASH_PEPPER=replace-with-a-long-random-secret
-EYE_APP_SECRET_KEY=replace-with-another-long-random-secret
-ADMIN_LOGIN_PASSWORD=replace-with-an-admin-password
+TORCH_DEVICE=cuda
+CUDA_DEVICE_INDEX=0
+CUDA_EMPTY_CACHE_AFTER_ANALYSIS=0
+HASH_PEPPER=<기존 값을 유지하거나 신규 설치 시 한 번 생성>
+EYE_APP_SECRET_KEY=<장기간 유지할 임의 비밀값>
+ADMIN_LOGIN_PASSWORD=<관리자 기능 사용 시 설정>
+CAMERA_DEVICE_INDEX=0
+MICROSCOPE_CAMERA_DEVICE_INDEX=1
 ```
 
-- `HASH_PEPPER`를 변경하면 같은 사용자 식별자의 해시가 달라지므로 운영 시작 후에는 유지해야 합니다.
-- `EYE_APP_SECRET_KEY`는 Flask 관리자 세션 서명에 사용됩니다.
-- 비밀값이 들어 있는 `.env`와 `config.local.json`은 Git에 커밋하지 않습니다.
+운영 데이터가 생성된 이후 `HASH_PEPPER`를 바꾸면 동일 사용자를 이전 기록과 연결할 수 없습니다. `.env`와 `config.local.json`은 Git에 커밋하지 않습니다.
 
-### 4. 서비스 관리 명령 설치
+## 사전점검
 
-Jetson의 어느 디렉터리에서든 실행할 수 있도록 사용자 PATH에 심볼릭 링크를 한 번 설치합니다.
+카메라를 포함한 전체 배포 판정:
 
 ```bash
-chmod +x ~/project/eye_project/scripts/mediflow-kiosk
-mkdir -p ~/.local/bin
-ln -s ~/project/eye_project/scripts/mediflow-kiosk ~/.local/bin/mediflow-kiosk
+bash scripts/jetson_preflight.sh
 ```
 
-`~/.local/bin`이 현재 셸의 PATH에 반영되지 않았다면 다시 로그인하거나 `source ~/.profile`을 실행합니다.
+카메라가 아직 연결되지 않았을 때 나머지 항목만 검사:
 
-### 5. 서비스 시작과 관리
+```bash
+bash scripts/jetson_preflight.sh --allow-no-camera
+```
 
-권장 운영 명령:
+서비스를 잠시 시작해 `/status`까지 검사하고 원래 중지 상태로 되돌리기:
+
+```bash
+bash scripts/jetson_preflight.sh --allow-no-camera --service-smoke-test
+```
+
+이미 서비스가 실행 중이면 사전점검은 해당 서비스를 임의로 종료하지 않습니다. 필수 검사 실패 시 종료 코드는 0이 아니며 마지막에 `OVERALL: NOT READY`를 출력합니다.
+
+검사 범위:
+
+- Jetson/aarch64/L4T, RAM, 저장공간, 포트
+- 필수 환경 설정 존재 여부(비밀값 내용은 표시하지 않음)
+- Python 패키지와 버전
+- 실제 CUDA 텐서 연산과 cuDNN/GPU 정보
+- EfficientNet 체크포인트 SHA-256 및 strict 로딩
+- `cuda:0` 더미 분류와 224x224 Grad-CAM
+- MediaPipe Face Mesh 초기화
+- 임시 DB 스키마·해시·쓰기·읽기
+- USB UVC 장치 권한·포맷·실제 프레임
+- 선택적 LLM·카카오 준비 상태
+
+## 서비스 운영
+
+어느 디렉터리에서든 다음 명령만 사용합니다.
 
 ```bash
 mediflow-kiosk start
@@ -128,321 +167,226 @@ mediflow-kiosk restart
 mediflow-kiosk stop
 ```
 
-`mediflow-kiosk`는 `runtime/run/`에 서비스별 PID 메타데이터와 lock을 저장하고 `runtime/log/`에 제한된 운영 로그를 저장합니다. 종료 시 기록된 PID의 사용자, 실행 파일, 명령행, 작업 경로, 부팅 ID와 프로세스 시작 시각을 모두 검증한 뒤 해당 PID만 종료합니다. systemd 자동 시작은 구성하지 않습니다.
-
-레거시 키오스크 브라우저 실행이 필요한 경우에만 프로젝트 루트에서 다음 스크립트를 직접 사용할 수 있습니다.
-
-```bash
-./start_services.sh
-```
-
-스크립트가 수행하는 작업:
-
-1. Jetson/RPi 플랫폼 및 `venv`/`.venv` 자동 감지
-2. `database/database.db` 초기화
-3. `database/history.db`의 레거시 기록을 중복 없이 마이그레이션
-4. `eye_server.py`와 `database/app.py` 실행
-5. `/status`와 카카오 로그인 엔드포인트 확인
-6. Epiphany 브라우저를 키오스크 화면으로 실행
+`mediflow-kiosk`는 서비스별 PID의 사용자, 실행 파일, 명령행, 작업 경로, 부팅 ID와 시작 시각을 검증합니다. `pkill -f`나 `killall`을 사용하지 않으며 다른 프로젝트 프로세스를 종료하지 않습니다.
 
 기본 접속 주소:
 
-- 키오스크: `http://<device-ip>:5000/`
-- 상태 확인: `http://<device-ip>:5000/status`
-- 카카오 브리지 상태: `http://<device-ip>:5001/health`
+- 키오스크: `http://<jetson-ip>:5000/`
+- 상태 API: `http://<jetson-ip>:5000/status`
+- 카카오 브리지: `http://<jetson-ip>:5001/health`
 
-기존 브라우저를 닫지 않고 서버만 재실행하려면:
+표시 URL은 `EXTERNAL_BASE_URL`, 서버 설정, LAN 주소 순으로 계산됩니다. 여러 네트워크 인터페이스 중 특정 주소를 보여야 하면 `.env`에 `EXTERNAL_BASE_URL=http://<jetson-ip>:5000`을 설정합니다.
 
-```bash
-CLOSE_EXISTING_BROWSERS=0 ./start_services.sh
-```
+로그는 `runtime/log/eye_server.log`, `runtime/log/kakao_app.log`에 저장되며 `mediflow-kiosk logs`는 각 로그의 최근 80줄만 표시합니다.
 
-레거시 서비스 종료:
+### 선택적 로컬 브라우저
 
-```bash
-./stop_services.sh
-```
-
-레거시 로그 파일:
-
-- `logs/server.log`
-- `logs/kakao_app.log`
-- `logs/browser.log`
-
-`mediflow-kiosk logs`는 새 관리 명령으로 시작한 두 Python 서비스의 `runtime/log/eye_server.log`, `runtime/log/kakao_app.log`에서 각각 최근 80줄만 출력합니다.
-
-## Jetson과 RPi 실행 경로
-
-### Jetson Orin Nano
-
-```dotenv
-MODEL_DEVICE=jetson
-```
-
-- `inference/jetson_backend.py`를 사용합니다.
-- 현재 `config.py`는 메모리 사용을 줄이기 위해 EfficientNet 추론 장치를 CPU로 지정합니다.
-- 눈 검출은 `modules/detector.py`의 MediaPipe Face Mesh를 사용합니다.
-- `models/Augmented_EffNet_V1_B0_best.pth`가 분류 가중치입니다.
-- `models/set_1000_YOLO26s_best.pt`는 레거시·ONNX 변환 경로에 남아 있으며 현재 Jetson 눈 검출에는 사용되지 않습니다.
-
-### Raspberry Pi 5
+서버와 브라우저는 별도입니다. 기존 호환 래퍼로 브라우저까지 열 때만 다음을 사용합니다.
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements_rpi.txt
+OPEN_KIOSK_BROWSER=1 ./start_services.sh
 ```
 
-```dotenv
-MODEL_DEVICE=rpi
-MEDIAPIPE_ONNX_PATH=models/yolo.onnx
-CLASSIFIER_ONNX_PATH=models/efficientnet.onnx
-```
+기본 `./start_services.sh`는 서비스만 시작하고, `./stop_services.sh`는 안전 관리자에 종료를 위임합니다. 선택적으로 연 브라우저는 사용자가 별도로 닫습니다.
 
-모델 준비와 점검:
+## GPU 상태 확인
 
 ```bash
-bash scripts/export_onnx_rpi.sh
-bash scripts/rpi_preflight.sh
+source venv/bin/activate
+python - <<'PY'
+import torch
+print(torch.__version__)
+print(torch.version.cuda)
+print(torch.cuda.is_available())
+print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'NO CUDA')
+PY
+
+curl -fsS http://127.0.0.1:5000/status
 ```
 
-`start_services.sh`에는 RPi 브라우저 분기가 포함되어 있지만, 현재 RPi 의존성과 런북에서 검증 대상으로 삼는 경로는 경량 추론 API입니다. RPi에서 전체 `eye_server.py` 키오스크를 사용하려면 PyTorch·MediaPipe를 포함한 추가 의존성과 카메라 흐름을 장비에서 별도로 검증해야 합니다.
+`/status`의 `inference`에서 다음을 확인합니다.
+
+```json
+{
+  "requested_device": "cuda",
+  "resolved_device": "cuda:0",
+  "cuda_available": true,
+  "model_parameter_device": "cuda:0"
+}
+```
+
+`TORCH_DEVICE=cuda`에서 CUDA가 없거나 지정 GPU 연산이 실패하면 서버는 CPU로 폴백하지 않고 JetPack 호환 PyTorch 설치 정보를 포함한 오류로 중단합니다. 개발 PC에서는 `TORCH_DEVICE=cpu` 또는 `auto`를 명시할 수 있습니다.
+
+## USB 카메라 확인
 
 ```bash
-python server.py --device rpi
-curl http://127.0.0.1:5000/health
+v4l2-ctl --list-devices
+ls -l /dev/video*
+v4l2-ctl --device=/dev/video0 --list-formats-ext
 ```
 
-현재 RPi 호환 백엔드는 ONNX 분류를 우선하며, 검출기 출력 파싱은 export 형식에 맞춘 추가 검증이 필요합니다. 세부 절차는 `docs/RPI5_UBUNTU_RUNBOOK.md`를 참고하십시오.
+카메라 열기 순서는 V4L2 인덱스, V4L2 장치 경로, OpenCV가 지원할 때만 USB GStreamer, `CAP_ANY`입니다. 열린 핸들만으로 성공 처리하지 않고 실제 프레임을 받아야 합니다.
+
+카메라가 한 대뿐인 개발 환경에서는 두 인덱스를 같게 둘 수 있습니다. 두 장치를 연결하면 안구·피부용 `CAMERA_DEVICE_INDEX`와 두피용 `MICROSCOPE_CAMERA_DEVICE_INDEX`를 각각 지정합니다.
 
 ## 환경 변수
+
+### 플랫폼·추론
+
+| 변수 | Jetson 권장값 | 설명 |
+| --- | --- | --- |
+| `MODEL_DEVICE` | `jetson` | Jetson PyTorch 백엔드 선택 |
+| `TORCH_DEVICE` | `cuda` | `cuda`, `auto`, `cpu` 정책 |
+| `CUDA_DEVICE_INDEX` | `0` | 사용할 GPU 인덱스 |
+| `CUDA_EMPTY_CACHE_AFTER_ANALYSIS` | `0` | OOM 분석 시에만 캐시 비우기 활성화 |
+| `CAMERA_DEVICE_INDEX` | `0` | 안구·피부 USB 웹캠 |
+| `MICROSCOPE_CAMERA_DEVICE_INDEX` | `1` | 두피 USB 현미경 |
 
 ### 서버·보안
 
 | 변수 | 기본값 | 설명 |
 | --- | --- | --- |
 | `SERVER_HOST` | `0.0.0.0` | Flask 바인딩 주소 |
-| `SERVER_PORT` | `5000` | 키오스크 서버 포트 |
-| `DEBUG_MODE` | `0` | Flask 디버그 모드 |
-| `HASH_PEPPER` | 없음 | 사용자 식별자 해시용 필수 비밀값 |
-| `EYE_APP_SECRET_KEY` | 없음 | Flask 세션 서명 키 |
-| `SESSION_COOKIE_SECURE` | `0` | HTTPS 운영 시 `1` 권장 |
-| `EYE_DATABASE_PATH` | `database/database.db` | 운영 DB 경로 재정의 |
-| `EXTERNAL_BASE_URL` | 자동 감지 | 외부에서 접근할 보고서 기준 URL |
+| `SERVER_PORT` | `5000` | 키오스크 포트 |
+| `EXTERNAL_BASE_URL` | 자동 감지 | 사용자에게 표시할 기준 URL |
+| `HASH_PEPPER` | 없음 | 사용자 식별자 해시용 영구 비밀값 |
+| `EYE_APP_SECRET_KEY` | 없음 | 관리자 세션 서명 키 |
+| `ADMIN_LOGIN_PASSWORD` | 없음 | 관리자 로그인 사용 시 필요 |
+| `SESSION_COOKIE_SECURE` | `0` | HTTPS 운영 시 `1` |
 
-### 카메라·추론
+### 선택 기능
 
-| 변수 | 기본값 | 설명 |
-| --- | --- | --- |
-| `MODEL_DEVICE` | `jetson` | `jetson` 또는 `rpi` |
-| `CAMERA_DEVICE_INDEX` | `0` | 안구·피부용 일반 웹캠 인덱스 |
-| `MICROSCOPE_CAMERA_DEVICE_INDEX` | `CAMERA_DEVICE_INDEX` | 두피용 USB 현미경 카메라 인덱스 |
-| `CLASSIFIER_CONFIDENCE_THRESHOLD` | `0.7` | 분류 신뢰도 임계값 |
-| `IRIS_REMOVAL_ENABLED` | `1` | 홍채 영역 제거 사용 여부 |
-| `IRIS_THRESHOLD` | `0.3` | 홍채 제거 임계값 |
-| `AUTO_DIST_THRESHOLD` | `30` | 자동 촬영 중심 거리 임계값 |
-| `AUTO_SCALE_MIN` | `0.8` | 자동 촬영 최소 눈 크기 비율 |
-| `AUTO_SCALE_MAX` | `1.1` | 자동 촬영 최대 눈 크기 비율 |
-| `AUTO_CAPTURE_HOLD_FRAMES` | `10` | 촬영 조건 유지 프레임 수 |
-| `MEDIAPIPE_ONNX_PATH` | `models/yolo.onnx` | RPi 검출 ONNX 경로 |
-| `CLASSIFIER_ONNX_PATH` | `models/efficientnet.onnx` | RPi 분류 ONNX 경로 |
+- LLM: `LLM_PROVIDER`, `OPENAI_API_KEY`, `OPENAI_MODEL`, `GEMINI_API_KEY`, `GEMINI_MODEL`
+- 카카오: `KAKAO_CLIENT_ID`, `KAKAO_CLIENT_SECRET`, `KAKAO_REDIRECT_URI`, `KAKAO_REFRESH_TOKEN`, `KAKAO_ACCESS_TOKEN`
+- 브리지: `KAKAO_APP_HOST`, `KAKAO_APP_PORT`, `KAKAO_BRIDGE_URL`
 
-카메라가 한 대뿐인 개발 환경에서는 두 카메라 인덱스를 동일하게 둘 수 있습니다. 일반 웹캠과 현미경을 함께 연결한 뒤에는 `/dev/video*` 장치 번호를 확인하여 각각 설정합니다.
+LLM 키가 없으면 채팅만 사용할 수 없고, 카카오 설정이 없으면 카카오 공유만 제한됩니다. 메인 스크리닝 서버와 로컬 PDF 기능은 계속 시작할 수 있습니다. `database/app.py`의 설정 우선순위는 프로세스 환경, 프로젝트 루트 `.env`, 선택적 `config.local.json`, 코드 기본값입니다.
 
-`MEDIAPIPE_CONF_THRESHOLD`, `MEDIAPIPE_IOU_THRESHOLD`, `MEDIAPIPE_INPUT_SIZE`, `MEDIAPIPE_STATUS_CONF_THRESHOLD`는 기존 설정 키 호환을 위해 유지됩니다. 현재 Jetson MediaPipe Face Mesh 검출기는 이 YOLO 임계값 일부를 직접 사용하지 않습니다.
-
-### 관리자·LLM
-
-| 변수 | 기본값 | 설명 |
-| --- | --- | --- |
-| `ADMIN_LOGIN_NAME` | `admin` | 관리자 로그인 이름 |
-| `ADMIN_LOGIN_PASSWORD` | 없음 | 관리자 로그인 비밀번호 |
-| `ADMIN_LOGIN_MAX_ATTEMPTS` | `5` | 제한 시간 내 최대 실패 횟수 |
-| `LLM_PROVIDER` | `openai` | `openai` 또는 `gemini` |
-| `OPENAI_API_KEY` | 없음 | OpenAI 채팅 API 키 |
-| `OPENAI_MODEL` | `gpt-4o-mini` | OpenAI 모델 이름 |
-| `GEMINI_API_KEY` | 없음 | Gemini API 키 |
-| `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini 모델 이름 |
-
-### 카카오 브리지
-
-`database/app.py`는 환경 변수 또는 로컬 전용 `config.local.json`에서 다음 값을 읽습니다.
-
-- `KAKAO_CLIENT_ID`
-- `KAKAO_CLIENT_SECRET`
-- `KAKAO_REDIRECT_URI`
-- `KAKAO_REFRESH_TOKEN`
-- `KAKAO_ACCESS_TOKEN` (키오스크 보고서 공유의 선택적 폴백)
-- `KAKAO_APP_HOST` (기본 `0.0.0.0`)
-- `KAKAO_APP_PORT` (기본 `5001`)
-- `KAKAO_OAUTH_STATE_TTL_SECONDS` (기본 `600`)
-- `KAKAO_BRIDGE_URL` (키오스크에서 브리지에 접근할 주소)
-
-## 웹 페이지와 API
-
-### 주요 페이지
+## 주요 페이지와 API
 
 | 경로 | 용도 |
 | --- | --- |
 | `/` | 키오스크 메인 |
-| `/login` | 사용자·관리자 로그인 |
-| `/capture` | 양안 촬영 |
-| `/result` | 진단 결과 |
-| `/report` | 사용자별 이력과 보고서 |
-| `/report/pdf`, `/report_pdf` | PDF 보고서 화면 |
-| `/survey` | 문진 |
-| `/training` | 안내·훈련 화면 |
-| `/m`, `/m/dashboard` | 모바일 접속 및 대시보드 |
+| `/screening` | 검사 선택 |
+| `/screening/survey` | 통합 문진 |
+| `/screening/capture` | 검사별 촬영 |
+| `/screening/result` | 검사 결과 |
+| `/screening/summary` | 전체 검사 요약 |
+| `/m`, `/m/dashboard` | 모바일 연결과 대시보드 |
 | `/admin/config` | 관리자 설정 |
+| `/status` | 서비스·CUDA·기능 상태 |
 
-### 키오스크 API
+주요 API:
 
-- 상태·카메라: `GET /status`, `GET /video_feed`, `GET /video_frame`, `GET /detect_status`
-- 카메라 세션: `POST /camera/session/start`, `POST /camera/session/stop`
-- 진단: `POST /analyze`, `POST /diagnose`
-- 촬영 상태: `GET /capture/state`, `POST /capture/reset`
-- 진단 이력: `GET /api/history`, `DELETE /api/history/<history_id>`
-- 문진: `POST /api/survey`, `GET /api/survey`, `DELETE /api/survey/<survey_id>`
-- 모바일 PIN: `POST /api/generate_pin`, `GET /api/pin_status`, `POST /api/mobile_connected`, `POST /api/verify_pin`
-- AI 기능: `POST /api/chat`, `POST /api/generate_report`
-- 보고서: `POST /api/report/share`, `GET /api/report/dependencies`
-- 관리자: `POST /api/admin/login`, `GET|POST /api/admin/config`, `POST /api/admin/logout`
-- 운영 제어: `GET /api/admin/fallback_stats`, `POST /api/admin/server/restart`, `POST /api/admin/server/shutdown`
+- 카메라: `GET /video_feed`, `GET /video_frame`, `POST /camera/session/start`, `POST /camera/session/stop`
+- 분석: `POST /analyze`, `POST /diagnose`, `GET /detect_status`
+- 이력·문진: `GET /api/history`, `POST|GET /api/survey`
+- AI·보고서: `POST /api/chat`, `POST /api/generate_report`, `POST /api/report/share`
+- 관리자: `POST /api/admin/login`, `GET|POST /api/admin/config`, `POST /api/admin/server/restart`, `POST /api/admin/server/shutdown`
 
-브라우저 건강 채팅의 역할과 의료 안전 규칙은 `config/llm_chat_role.txt`에서 관리합니다. 서버는 각 요청에서 이 파일과 `config/screening_modalities.json`을 함께 읽으므로, 모델 상태가 `ready`인 검사만 결과 설명 대상으로 사용합니다. 역할 파일에는 비밀번호나 API 키를 기록하지 않습니다.
+브라우저 건강 채팅 역할은 `config/llm_chat_role.txt`에 있고 검사별 준비 상태는 `config/screening_modalities.json`에 있습니다. `model_status=ready`인 검사 결과만 LLM 설명 대상으로 사용합니다.
 
-### 카카오·PDF 브리지 API
+## 데이터 저장
 
-- `GET /health`
-- `GET /kakao/login`
-- `GET /kakao/callback`
-- `POST /kakao/send_report`
-- `POST /diagnosis`
-- `GET /history`
-- `GET /report/<session_id>`
-- `GET /open/<session_id>`
-- `GET /qr/<session_id>`
-
-## 데이터 저장 구조
-
-운영 데이터는 `database/database.db` 하나를 사용합니다. 런타임 코드는 테이블을 직접 만들지 않고 `database/schema.sql`을 읽어 초기화합니다.
-
-| 테이블 | 역할 |
+| 위치 | 내용 |
 | --- | --- |
-| `users` | 해시 사용자 식별자, 표시명, 카카오 토큰 정보 |
-| `diagnosis_sessions` | AI 판독, 픽셀 지표, 문진, FHIR, 소견과 상태 |
-| `session_assets` | 원본 이미지, PDF 등 진단 세션 파일 자산 |
-| `survey_responses` | 사용자별 독립 문진 기록 |
-| `event_logs` | 진단·PDF·카카오 전송 이벤트 |
-| `migration_records` | 레거시 데이터의 중복 이전 방지 |
+| `database/database.db` | 운영 사용자·세션·자산·문진·이벤트 |
+| `database/schema.sql` | 스키마 단일 원본 |
+| `database/history.db` | 레거시 마이그레이션 원본 |
+| `web/static/captures/users/<hash>/` | 사용자 촬영 이미지 |
+| `web/static/reports/`, `reports/` | 보고서 |
+| `database/backups/` | 로컬 DB 백업 |
 
-저장 위치:
+`.env`, `config.local.json`, DB, 사용자 이미지, 보고서, 런타임 로그는 Git 제외 대상입니다.
 
-- 운영 DB: `database/database.db`
-- 레거시 마이그레이션 원본: `database/history.db`
-- 촬영 이미지: `web/static/captures/users/<user_hash>/`
-- 웹 보고서: `web/static/reports/`
-- 카카오 브리지 보고서: `reports/`
-- DB 백업: `database/backups/` (Git 제외)
+## Raspberry Pi 5 경로
 
-서비스 시작 시 `database/history.db`의 `diagnosis_history`, `survey_history`를 읽어 통합 스키마로 이전합니다. `migration_records`를 사용하므로 같은 원본을 다시 실행해도 중복 생성되지 않습니다.
+RPi 백엔드는 ONNX Runtime 기반 연구 경로로 유지됩니다.
 
-## 데이터 마이그레이션과 백필
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements_rpi.txt
+bash scripts/export_onnx_rpi.sh
+bash scripts/rpi_preflight.sh
+python server.py --device rpi
+```
 
-레거시 DB 이전은 `start_services.sh`가 자동 실행합니다. 수동 실행이 필요한 경우:
+전체 키오스크의 공식 GPU·USB 배포 대상은 현재 Jetson입니다. RPi 세부 내용은 `docs/RPI5_UBUNTU_RUNBOOK.md`를 참고합니다.
+
+## 테스트
 
 ```bash
 source venv/bin/activate
-python -c "from dotenv import load_dotenv; load_dotenv(); from database.db import migrate_legacy_history; print(migrate_legacy_history('database/history.db'))"
-```
-
-기존 진단 JSON에 AI 가이드 필드를 보강하려면:
-
-```bash
-python database/backfill_guides.py --db database/database.db --dry-run
-python database/backfill_guides.py --db database/database.db
-```
-
-운영 DB를 변경하기 전에 `database/database.db`와 `database/history.db`를 별도 백업하십시오.
-
-## 테스트와 운영 점검
-
-```bash
-source venv/bin/activate
+python -m compileall -q .
 python -m unittest discover -s tests -v
-python -m py_compile eye_server.py database/db.py database/app.py
-curl http://127.0.0.1:5000/status
-curl http://127.0.0.1:5001/health
+bash -n scripts/install_jetson.sh
+bash -n scripts/jetson_preflight.sh
+bash -n start_services.sh
+bash -n stop_services.sh
+git diff --check
 ```
 
-SQLite 무결성 점검:
+## 문제 해결
 
-```bash
-sqlite3 database/database.db 'PRAGMA integrity_check;'
-sqlite3 database/database.db 'PRAGMA foreign_key_check;'
-```
+| 오류 | 가능한 원인 | 조치 |
+| --- | --- | --- |
+| `torch.cuda.is_available() == False` | CPU용 torch 또는 JetPack 불일치 | 현재 L4T와 맞는 NVIDIA wheel로 torch·torchvision 재설치 |
+| `operator torchvision::nms does not exist` | torch/torchvision 조합 불일치 | 공식 호환 버전 쌍으로 함께 재설치 |
+| `No module named mediapipe` | Jetson 앱 의존성 누락 | `requirements_jetson.txt` 설치 후 preflight 재실행 |
+| `libGL.so.1` 누락 | OpenCV 런타임 라이브러리 누락 | `sudo apt-get install libgl1` |
+| 카메라 open 실패 | 잘못된 인덱스·권한·포맷 | `v4l2-ctl`, `/dev/videoN`, `video` 그룹 확인 |
+| `HASH_PEPPER environment variable is required` | 영구 해시 키 누락 | `.env`에 한 번 설정하고 이후 값 유지 |
+| 모델 시작 중 인터넷 접근 | 외부 pretrained 가중치 코드 | `efficientnet_b0(weights=None)` 유지 확인 |
+| 체크포인트 SHA 실패 | 파일 손상 또는 다른 모델 | 올바른 모델 복구 후 `models/SHA256SUMS` 확인 |
+| 관리자 restart 실패 | 관리자 외 경로로 시작한 프로세스 | 기존 프로세스를 안전하게 종료하고 `mediflow-kiosk start` 사용 |
+| PDF 한글 깨짐 | 한글 폰트 누락 | `sudo apt-get install fonts-noto-cjk fontconfig` |
 
-`/status`의 `camera_connected`가 `false`이면 서버와 모델이 정상이어도 카메라 프레임이 들어오지 않은 상태입니다. 카메라 장치 인덱스와 권한을 확인하십시오.
+장시간 GPU 메모리 안정성, 실제 환자 데이터 정확도, 장치별 USB 포맷 차이는 별도 검증 대상입니다.
 
 ## 프로젝트 구조
 
 ```text
-eye_project/
-├── eye_server.py                 # 전체 키오스크 Flask 서버
-├── server.py                     # 경량 /health, /predict API
-├── config.py                     # 카메라·모델·임계값 설정
-├── config/
-│   ├── llm_chat_role.txt         # 브라우저 건강 채팅 역할·안전 규칙
-│   └── screening_modalities.json # 검사 영역·모델 준비 상태
-├── model_loader.py               # Jetson/RPi 백엔드 팩토리
-├── start_services.sh             # 통합 시작 스크립트
-├── stop_services.sh              # 통합 종료 스크립트
-├── requirements*.txt
+mediflow-kiosk-core/
+├── eye_server.py
+├── config.py
+├── model_loader.py
 ├── database/
-│   ├── app.py                    # 카카오 OAuth·PDF 브리지
-│   ├── app3.py                   # 대체/실험 브리지 구현
-│   ├── db.py                     # 통합 DB 접근·마이그레이션
-│   ├── schema.sql                # 운영 스키마 단일 원본
-│   └── backfill_guides.py
+│   ├── app.py
+│   ├── db.py
+│   └── schema.sql
 ├── inference/
-│   ├── base.py
-│   ├── jetson_backend.py
-│   └── rpi_backend.py
 ├── modules/
-│   ├── detector.py               # MediaPipe 양안 검출
-│   ├── classifier.py             # EfficientNet + Grad-CAM
-│   └── analyzer.py               # 충혈도 등 픽셀 분석
+│   ├── detector.py
+│   ├── classifier.py
+│   └── analyzer.py
 ├── models/
 │   ├── Augmented_EffNet_V1_B0_best.pth
-│   └── set_1000_YOLO26s_best.pt
+│   └── SHA256SUMS
 ├── scripts/
-│   ├── mediflow-kiosk            # 안전한 사용자 전용 서비스 관리 명령
-│   ├── export_onnx_rpi.sh
-│   ├── install_git_hooks.sh
-│   └── rpi_preflight.sh
-├── tests/
-│   └── test_database.py
+│   ├── install_jetson.sh
+│   ├── jetson_preflight.sh
+│   ├── jetson_preflight.py
+│   └── mediflow-kiosk
 ├── utils/
-│   ├── chat_prompt.py            # 역할과 검사 컨텍스트 기반 시스템 프롬프트 구성
-│   ├── image_proc.py
-│   ├── logger.py
-│   └── security_utils.py
+│   ├── service_control.py
+│   └── uvc_camera.py
+├── tests/
 ├── web/
-│   ├── static/                   # CSS, JS, 이미지, 캡처, 보고서
-│   └── templates/                # 키오스크·모바일·관리자 화면
 └── docs/
+    ├── JETSON_USB_GPU_RUNBOOK.md
     └── RPI5_UBUNTU_RUNBOOK.md
 ```
 
 ## Git 훅
 
-RPi 작업 중 Jetson 전용 파일의 실수 커밋을 막으려면:
+Jetson 전용 파일의 의도치 않은 변경을 막는 선택적 훅:
 
 ```bash
 bash scripts/install_git_hooks.sh
 ```
 
-보호 대상은 `inference/jetson_backend.py`, `requirements_jetson.txt`입니다. 의도적으로 변경할 때만 다음과 같이 우회합니다.
+의도적인 Jetson 변경 커밋에서는 다음 환경변수를 사용합니다.
 
 ```bash
 ALLOW_JETSON_CHANGES=1 git commit -m "Describe intentional Jetson change"

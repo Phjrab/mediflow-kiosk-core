@@ -29,6 +29,16 @@ class JetsonDeploymentScriptTest(unittest.TestCase):
             self.assertNotIn('pkill', source)
             self.assertNotIn('killall', source)
 
+    def test_jetson_docs_use_the_supported_manual_commands(self):
+        for path in (ROOT / 'README.md', ROOT / 'docs' / 'JETSON_USB_GPU_RUNBOOK.md'):
+            source = path.read_text(encoding='utf-8')
+            self.assertIn('scripts/install_jetson.sh', source)
+            self.assertIn('scripts/jetson_preflight.sh', source)
+            self.assertIn('mediflow-kiosk start', source)
+            self.assertIn('mediflow-kiosk stop', source)
+            self.assertNotIn('start_services_jetson.sh', source)
+            self.assertNotIn('stop_services_jetson.sh', source)
+
 
 if __name__ == '__main__':
     unittest.main()
