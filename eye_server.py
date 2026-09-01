@@ -134,6 +134,7 @@ import config as config
 from model_loader import initialize_models, get_models
 from utils.chat_prompt import build_chat_system_prompt
 from utils.image_proc import resize_image, enhance_contrast
+from utils.uvc_camera import UvcCameraError, open_usb_uvc_camera
 from database.db import get_conn, identifier_hash_id, init_db, migrate_legacy_history
 
 MP_FACE_MESH = mp.solutions.face_mesh.FaceMesh(
@@ -2410,39 +2411,27 @@ def start_camera_thread(camera_role='webcam'):
         time.sleep(1) # 초기화 대기
 
         cam_id = requested_device_index
-        cap = None
-        
-        capture_candidates = [
-            (f"gstreamer:/dev/video{cam_id}", lambda: cv2.VideoCapture(gstreamer_pipeline(cam_id), cv2.CAP_GSTREAMER)),
-            (f"v4l2-index:{cam_id}", lambda: cv2.VideoCapture(cam_id, cv2.CAP_V4L2)),
-            (f"v4l2-path:/dev/video{cam_id}", lambda: cv2.VideoCapture(f"/dev/video{cam_id}", cv2.CAP_V4L2)),
-            (f"any:/dev/video{cam_id}", lambda: cv2.VideoCapture(f"/dev/video{cam_id}", cv2.CAP_ANY)),
-        ]
-
-        for source_name, opener in capture_candidates:
-            try:
-                candidate = opener()
-                if candidate.isOpened():
-                    cap = candidate
-                    print(f"[카메라 스레드] ✓ 카메라 소스 연결 성공: {source_name}")
-                    break
-                candidate.release()
-            except Exception as e:
-                print(f"[카메라 스레드] 카메라 소스 시도 실패 ({source_name}): {e}")
-
-        if cap is None:
-            print(f"[카메라 스레드] ✗ 카메라 열기 실패 (/dev/video{cam_id})")
+        try:
+            cap, first_frame, camera_metadata = open_usb_uvc_camera(
+                cam_id,
+                gstreamer_pipeline=gstreamer_pipeline,
+            )
+        except UvcCameraError as error:
+            print(f"[카메라 스레드] 카메라 열기 실패: {error}")
             camera_running = False
             return
 
-        # 로지텍 카메라 권장 포맷/해상도로 고정
-        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        cap.set(cv2.CAP_PROP_FPS, 30)
+        current_frame = first_frame.copy()
+        print(
+            '[카메라 스레드] USB UVC 연결 성공: '
+            f"role={requested_role}, path={camera_metadata['role_path']}, "
+            f"backend={camera_metadata['backend']}, "
+            f"resolution={camera_metadata['width']}x{camera_metadata['height']}, "
+            f"fps={camera_metadata['fps']:.1f}, fourcc={camera_metadata['fourcc'] or 'unknown'}"
+        )
         
         print("[카메라 스레드] ✓ 카메라 초기화 완료, 프레임 수집 중...")
-        frame_count = 0
+        frame_count = 1
         
         while camera_running:
             ret, frame = cap.read()

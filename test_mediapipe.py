@@ -15,7 +15,9 @@ print("\n[1] Testing OpenCV (cv2)...")
 try:
     import cv2
     print(f"    ✓ cv2 version: {cv2.__version__}")
-    print(f"    ✓ cv2 CUDA support: {cv2.cuda.getCudaEnabledDeviceCount() >= 0}")
+    opencv_cuda_devices = cv2.cuda.getCudaEnabledDeviceCount()
+    print(f"    ✓ OpenCV CUDA device count: {opencv_cuda_devices}")
+    print(f"    ✓ OpenCV CUDA available: {opencv_cuda_devices > 0}")
 except Exception as e:
     print(f"    ✗ OpenCV import failed: {e}")
     sys.exit(1)
