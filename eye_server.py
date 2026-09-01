@@ -134,6 +134,7 @@ import config as config
 from model_loader import initialize_models, get_models
 from utils.chat_prompt import build_chat_system_prompt
 from utils.image_proc import resize_image, enhance_contrast
+from utils.service_control import service_manager_argv
 from utils.uvc_camera import UvcCameraError, open_usb_uvc_camera
 from database.db import get_conn, identifier_hash_id, init_db, migrate_legacy_history
 
@@ -3914,110 +3915,44 @@ def schedule_server_action(action):
     thread.start()
 
 
-def resolve_service_script_paths():
-    """환경(MODEL_DEVICE)에 맞는 서비스 제어 스크립트 경로를 반환한다."""
-    project_dir = config.BASE_DIR
-    model_device = os.getenv('MODEL_DEVICE', 'jetson').strip().lower()
-
-    if model_device == 'rpi':
-        start_name = 'start_services_rpi.sh'
-        stop_name = 'stop_services_rpi.sh'
-    else:
-        start_name = 'start_services_jetson.sh'
-        stop_name = 'stop_services_jetson.sh'
-
-    start_path = os.path.join(project_dir, start_name)
-    stop_path = os.path.join(project_dir, stop_name)
-
-    # 선택된 디바이스 스크립트가 없으면 Jetson 기본 스크립트로 폴백
-    if not (os.path.exists(start_path) and os.path.exists(stop_path)):
-        start_name = 'start_services_jetson.sh'
-        stop_name = 'stop_services_jetson.sh'
-        start_path = os.path.join(project_dir, start_name)
-        stop_path = os.path.join(project_dir, stop_name)
-
-    if not os.path.exists(start_path) or not os.path.exists(stop_path):
-        raise FileNotFoundError('서비스 제어 스크립트를 찾을 수 없습니다.')
-
-    return {
-        'start_name': start_name,
-        'stop_name': stop_name,
-        'start_path': start_path,
-        'stop_path': stop_path,
-        'device': model_device,
-    }
-
-
-def launch_service_control_script(restart=False):
-    """서비스 제어 스크립트를 별도 세션에서 실행한다."""
-    scripts = resolve_service_script_paths()
+def launch_service_control(action):
+    """Run the fixed service manager in a separate session without a shell."""
     project_dir = config.BASE_DIR
     log_dir = os.path.join(project_dir, 'logs')
     os.makedirs(log_dir, exist_ok=True)
     log_path = os.path.join(log_dir, 'admin_server_control.log')
+    argv = service_manager_argv(project_dir, action)
 
-    if restart:
-        command = f"cd '{project_dir}' && bash '{scripts['stop_path']}' && bash '{scripts['start_path']}'"
-    else:
-        command = f"cd '{project_dir}' && bash '{scripts['stop_path']}'"
-
-    log_file = open(log_path, 'a', encoding='utf-8')
-    log_file.write(
-        f"\n[{datetime.now().isoformat()}] action={'restart' if restart else 'shutdown'} "
-        f"device={scripts['device']} start={scripts['start_name']} stop={scripts['stop_name']}\n"
-    )
-    log_file.flush()
-
-    subprocess.Popen(
-        ['/bin/bash', '-lc', command],
-        stdout=log_file,
-        stderr=log_file,
-        start_new_session=True
-    )
+    with open(log_path, 'a', encoding='utf-8') as log_file:
+        log_file.write(
+            f"\n[{datetime.now().isoformat()}] action={action} manager={argv[0]}\n"
+        )
+        log_file.flush()
+        subprocess.Popen(
+            argv,
+            cwd=project_dir,
+            stdin=subprocess.DEVNULL,
+            stdout=log_file,
+            stderr=log_file,
+            close_fds=True,
+            start_new_session=True,
+        )
 
 
 def shutdown_process_delayed():
     time.sleep(1.0)
     try:
-        launch_service_control_script(restart=False)
+        launch_service_control('stop')
     except Exception as error:
-        print(f"[ERROR] shutdown script 실행 실패, 프로세스 종료로 폴백: {error}")
-        try:
-            cleanup_resources()
-        finally:
-            os._exit(0)
+        print(f"[ERROR] service manager stop failed: {error}")
 
 
 def restart_process_delayed():
     time.sleep(0.7)
-
     try:
-        launch_service_control_script(restart=True)
+        launch_service_control('restart')
     except Exception as error:
-        print(f"[ERROR] 재시작 스크립트 실행 실패, 기존 방식으로 폴백: {error}")
-
-        project_dir = config.BASE_DIR
-        python_exec = sys.executable
-        restart_cmd = (
-            f"sleep 2; cd '{project_dir}' && "
-            f"nohup '{python_exec}' eye_server.py > logs/server.out 2>&1 &"
-        )
-
-        try:
-            subprocess.Popen(
-                ['/bin/bash', '-lc', restart_cmd],
-                start_new_session=True
-            )
-        except Exception as fallback_error:
-            print(f"[ERROR] 재시작 폴백 실패: {fallback_error}")
-            return
-
-        try:
-            cleanup_resources()
-        except Exception as cleanup_error:
-            print(f"[WARNING] 재시작 전 리소스 정리 중 오류: {cleanup_error}")
-        finally:
-            os._exit(0)
+        print(f"[ERROR] service manager restart failed: {error}")
 
 
 @app.route('/api/admin/server/restart', methods=['POST'])

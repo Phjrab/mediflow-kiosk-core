@@ -10,11 +10,13 @@ import fcntl
 import json
 import os
 import signal
+import shlex
 import socket
 import subprocess
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
@@ -28,13 +30,82 @@ RUNTIME_DIR = PROJECT_DIR / "runtime"
 RUN_DIR = RUNTIME_DIR / "run"
 LOG_DIR = RUNTIME_DIR / "log"
 LOCK_PATH = RUN_DIR / f"{COMMAND_NAME}.lock"
-DASHBOARD_URL = "http://192.168.0.26:5000"
 ALLOWED_ACTIONS = frozenset({"start", "stop", "restart", "status", "logs"})
 LOG_LINE_LIMIT = 80
 START_TIMEOUT_SECONDS = 90.0
 STOP_TIMEOUT_SECONDS = 12.0
 KILL_TIMEOUT_SECONDS = 3.0
 PORT_RELEASE_TIMEOUT_SECONDS = 5.0
+
+
+def read_env_file(path: Path) -> dict[str, str]:
+    values: dict[str, str] = {}
+    if not path.is_file():
+        return values
+    for raw_line in path.read_text(encoding="utf-8-sig").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[len("export ") :].lstrip()
+        if "=" not in line:
+            continue
+        key, raw_value = line.split("=", 1)
+        key = key.strip()
+        if not key or not key.replace("_", "").isalnum():
+            continue
+        try:
+            parsed = shlex.split(raw_value, comments=True, posix=True)
+        except ValueError:
+            continue
+        values[key] = " ".join(parsed) if parsed else ""
+    return values
+
+
+PROJECT_ENV = read_env_file(PROJECT_DIR / ".env")
+
+
+def setting(name: str, default: str) -> str:
+    value = os.environ.get(name)
+    if value is None:
+        value = PROJECT_ENV.get(name, default)
+    value = str(value).strip()
+    return value if value else default
+
+
+def setting_port(name: str, default: int) -> int:
+    raw_value = setting(name, str(default))
+    try:
+        port = int(raw_value)
+    except ValueError as exc:
+        raise ManagerError(f"{name} must be an integer, got {raw_value!r}") from exc
+    if not 1 <= port <= 65535:
+        raise ManagerError(f"{name} must be between 1 and 65535, got {port}")
+    return port
+
+
+def get_lan_ip() -> str | None:
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
+            probe.connect(("8.8.8.8", 80))
+            address = probe.getsockname()[0]
+        return address if address and not address.startswith("127.") else None
+    except OSError:
+        return None
+
+
+def resolve_dashboard_url() -> str:
+    external_url = setting("EXTERNAL_BASE_URL", "")
+    if external_url:
+        parsed = urllib.parse.urlsplit(external_url)
+        if parsed.scheme in {"http", "https"} and parsed.netloc and not parsed.username:
+            return external_url.rstrip("/")
+
+    port = setting_port("SERVER_PORT", 5000)
+    host = setting("SERVER_IP", setting("SERVER_HOST", "0.0.0.0"))
+    if host in {"0.0.0.0", "::", "[::]"}:
+        host = get_lan_ip() or "127.0.0.1"
+    return f"http://{host}:{port}"
 
 
 class ManagerError(RuntimeError):
@@ -109,6 +180,8 @@ def service_specs() -> tuple[ServiceSpec, ...]:
     python_path = resolve_python()
     executable = str(python_path.resolve())
     cwd = str(PROJECT_DIR)
+    server_port = setting_port("SERVER_PORT", 5000)
+    kakao_port = setting_port("KAKAO_APP_PORT", 5001)
     return (
         ServiceSpec(
             key="eye_server",
@@ -116,8 +189,8 @@ def service_specs() -> tuple[ServiceSpec, ...]:
             launch_argv=(str(python_path), str(PROJECT_DIR / "eye_server.py")),
             executable=executable,
             cwd=cwd,
-            port=5000,
-            health_url="http://127.0.0.1:5000/status",
+            port=server_port,
+            health_url=f"http://127.0.0.1:{server_port}/status",
         ),
         ServiceSpec(
             key="kakao_app",
@@ -125,9 +198,9 @@ def service_specs() -> tuple[ServiceSpec, ...]:
             launch_argv=(str(python_path), str(PROJECT_DIR / "database" / "app.py")),
             executable=executable,
             cwd=cwd,
-            port=5001,
-            health_url="http://127.0.0.1:5001/health",
-            environment={"KAKAO_APP_PORT": "5001"},
+            port=kakao_port,
+            health_url=f"http://127.0.0.1:{kakao_port}/health",
+            environment={"KAKAO_APP_PORT": str(kakao_port)},
         ),
     )
 
@@ -423,7 +496,7 @@ def start_all(specs: Sequence[ServiceSpec]) -> dict[str, dict[str, Any]]:
         raise
 
     print(f"[{PROJECT_NAME}] service started")
-    print(f"[{PROJECT_NAME}] URL: {DASHBOARD_URL}")
+    print(f"[{PROJECT_NAME}] URL: {resolve_dashboard_url()}")
     return records
 
 
@@ -495,7 +568,7 @@ def print_status(specs: Sequence[ServiceSpec]) -> None:
     else:
         overall = "degraded"
     print(f"[{PROJECT_NAME}] status: {overall}")
-    print(f"[{PROJECT_NAME}] URL: {DASHBOARD_URL}")
+    print(f"[{PROJECT_NAME}] URL: {resolve_dashboard_url()}")
 
 
 def tail_lines(path: Path, limit: int = LOG_LINE_LIMIT) -> list[str]:

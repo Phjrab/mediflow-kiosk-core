@@ -5,6 +5,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 COMMAND_PATH = Path(__file__).resolve().parents[1] / "scripts" / "mediflow-kiosk"
@@ -36,6 +37,35 @@ class MediflowKioskCommandTest(unittest.TestCase):
             path = Path(directory) / "service.log"
             path.write_text("one\ntwo\nthree\n", encoding="utf-8")
             self.assertEqual(mediflow_kiosk.tail_lines(path, 2), ["two\n", "three\n"])
+
+    def test_dashboard_url_uses_external_override(self):
+        with mock.patch.dict(
+            os.environ,
+            {"EXTERNAL_BASE_URL": "https://kiosk.example.test/base/"},
+            clear=False,
+        ):
+            self.assertEqual(
+                mediflow_kiosk.resolve_dashboard_url(),
+                "https://kiosk.example.test/base",
+            )
+
+    def test_dashboard_url_resolves_wildcard_host_to_lan(self):
+        environment = {
+            "EXTERNAL_BASE_URL": "",
+            "SERVER_HOST": "0.0.0.0",
+            "SERVER_IP": "",
+            "SERVER_PORT": "5050",
+        }
+        with mock.patch.dict(os.environ, environment, clear=False):
+            with mock.patch.object(mediflow_kiosk, "get_lan_ip", return_value="10.0.0.25"):
+                self.assertEqual(
+                    mediflow_kiosk.resolve_dashboard_url(),
+                    "http://10.0.0.25:5050",
+                )
+
+    def test_manager_source_has_no_private_ip_literal(self):
+        source = COMMAND_PATH.read_text(encoding="utf-8")
+        self.assertNotRegex(source, r"192\.168\.\d+\.\d+")
 
     @unittest.skipUnless(Path("/proc/self/stat").exists(), "requires Linux /proc")
     def test_process_record_detects_start_time_tampering(self):
