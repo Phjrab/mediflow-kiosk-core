@@ -11,7 +11,12 @@ import requests
 import qrcode
 from flask import Flask, Response, request, jsonify, send_file, redirect
 from flask_cors import CORS
-from db import get_conn as open_database, init_db
+from dotenv import load_dotenv
+
+try:
+    from .db import get_conn as open_database, init_db
+except ImportError:
+    from db import get_conn as open_database, init_db
 
 # [추가됨] 앱 설정과 런타임 경로를 스크립트 위치 기준으로 고정.
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -65,7 +70,16 @@ def update_json_config(updates: dict[str, str], path: str = CONFIG_PATH) -> None
         json.dump(config, config_file, ensure_ascii=False, indent=2)
 
 
-load_json_config()
+def load_project_environment(
+    project_root: str = PROJECT_ROOT,
+    config_path: str = CONFIG_PATH,
+) -> None:
+    """Load process env, root .env, then optional JSON defaults in that order."""
+    load_dotenv(os.path.join(project_root, ".env"), override=False)
+    load_json_config(config_path)
+
+
+load_project_environment()
 
 APP_HOST = os.environ.get("KAKAO_APP_HOST", "0.0.0.0")
 APP_PORT = int(os.environ.get("KAKAO_APP_PORT", "5001"))
