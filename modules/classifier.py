@@ -9,6 +9,8 @@ import torchvision.models as models
 import numpy as np
 import cv2
 import threading
+from collections.abc import Mapping
+from pathlib import Path
 from PIL import Image
 import config as config
 
@@ -38,14 +40,15 @@ class DiseaseClassifier:
         # ========================================
         # [1] EfficientNet-B0 모델 로드
         # ========================================
-        self.model = models.efficientnet_b0(pretrained=True)
+        self.model = models.efficientnet_b0(weights=None)
         self.model.classifier[1] = nn.Linear(self.model.classifier[1].in_features, num_classes)
         
         # ========================================
         # [2] 학습된 가중치 로드
         # ========================================
-        checkpoint = torch.load(model_path, map_location=self.device)
-        self.model.load_state_dict(checkpoint)
+        checkpoint = self._load_checkpoint(model_path)
+        state_dict = self._extract_state_dict(checkpoint)
+        self._load_state_dict_strict(state_dict, model_path)
         self.model.to(self.device)
         self.model.eval()
         parameter_device = next(self.model.parameters()).device
@@ -67,6 +70,63 @@ class DiseaseClassifier:
         self.target_layers = [self.model.features[-1]]
         self.grad_cam = GradCAM(model=self.model, target_layers=self.target_layers)
         self.grad_cam_lock = threading.Lock()
+
+    def _load_checkpoint(self, model_path):
+        checkpoint_path = Path(model_path)
+        if not checkpoint_path.is_file():
+            raise FileNotFoundError(f"Classifier checkpoint not found: {checkpoint_path}")
+        if checkpoint_path.stat().st_size <= 0:
+            raise RuntimeError(f"Classifier checkpoint is empty: {checkpoint_path}")
+
+        try:
+            return torch.load(checkpoint_path, map_location=self.device, weights_only=True)
+        except TypeError:
+            return torch.load(checkpoint_path, map_location=self.device)
+        except Exception as exc:
+            raise RuntimeError(f"Unable to load classifier checkpoint {checkpoint_path}: {exc}") from exc
+
+    @staticmethod
+    def _extract_state_dict(checkpoint):
+        if not isinstance(checkpoint, Mapping):
+            raise RuntimeError(
+                f"Unsupported classifier checkpoint type: {type(checkpoint).__name__}; "
+                "expected a state dict mapping"
+            )
+
+        state_dict = checkpoint
+        for wrapper_key in ('state_dict', 'model_state_dict'):
+            wrapped = checkpoint.get(wrapper_key)
+            if isinstance(wrapped, Mapping):
+                state_dict = wrapped
+                break
+
+        if not state_dict or not all(isinstance(key, str) for key in state_dict):
+            raise RuntimeError('Classifier checkpoint state dict is empty or contains non-string keys')
+
+        if all(key.startswith('module.') for key in state_dict):
+            state_dict = {
+                key[len('module.'):]: value
+                for key, value in state_dict.items()
+            }
+        return state_dict
+
+    def _load_state_dict_strict(self, state_dict, model_path):
+        expected_keys = set(self.model.state_dict())
+        actual_keys = set(state_dict)
+        missing_keys = sorted(expected_keys - actual_keys)
+        unexpected_keys = sorted(actual_keys - expected_keys)
+        if missing_keys or unexpected_keys:
+            raise RuntimeError(
+                f"Classifier checkpoint keys do not match {model_path}: "
+                f"missing={missing_keys[:10]} (total={len(missing_keys)}), "
+                f"unexpected={unexpected_keys[:10]} (total={len(unexpected_keys)})"
+            )
+        try:
+            self.model.load_state_dict(state_dict, strict=True)
+        except RuntimeError as exc:
+            raise RuntimeError(
+                f"Classifier checkpoint tensors do not match {model_path}: {exc}"
+            ) from exc
     
     def preprocess(self, image):
         """
@@ -91,7 +151,13 @@ class DiseaseClassifier:
         # ========================================
         # [2] 텐서 변환 및 정규화
         # ========================================
-        img = torch.from_numpy(np.array(img)).permute(2, 0, 1).float() / 255.0
+        img = (
+            torch.from_numpy(np.array(img))
+            .permute(2, 0, 1)
+            .float()
+            .to(self.device)
+            / 255.0
+        )
         
         # ImageNet 표준 정규화
         img = (img - self.mean) / self.std
