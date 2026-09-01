@@ -53,10 +53,80 @@ def _get_env_bool(name, default):
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, 'models')
 
+def _cuda_failure_message(requested, cuda_index, reason):
+    return (
+        f"PyTorch device request failed: requested={requested}, cuda_index={cuda_index}, "
+        f"reason={reason}, torch={torch.__version__}, torch_cuda={torch.version.cuda}, "
+        f"cuda_available={torch.cuda.is_available()}, cuda_device_count={torch.cuda.device_count()}. "
+        "Jetson에서는 현재 JetPack/L4T와 호환되는 NVIDIA PyTorch 및 torchvision "
+        "빌드가 설치되어 있는지 확인하세요."
+    )
+
+
+def _probe_cuda_device(device):
+    """Run a small real CUDA operation before accepting a CUDA device."""
+    with torch.cuda.device(device):
+        probe = torch.ones(4, device=device, dtype=torch.float32)
+        result = (probe * 2).sum()
+        torch.cuda.synchronize(device)
+    if float(result.cpu()) != 8.0:
+        raise RuntimeError('CUDA tensor probe returned an unexpected result')
+
+
+def resolve_torch_device(requested=None, cuda_index=None):
+    """Resolve cpu/auto/cuda policy and fail explicitly for unusable CUDA."""
+    requested_value = requested if requested is not None else os.getenv('TORCH_DEVICE', 'auto')
+    requested_value = str(requested_value).strip().lower()
+    if requested_value not in ('auto', 'cuda', 'cpu'):
+        raise ValueError(
+            f"Invalid TORCH_DEVICE={requested_value!r}; expected one of: auto, cuda, cpu"
+        )
+
+    if cuda_index is None:
+        raw_index = os.getenv('CUDA_DEVICE_INDEX', '0')
+        try:
+            cuda_index = int(str(raw_index).strip())
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Invalid CUDA_DEVICE_INDEX={raw_index!r}; expected a non-negative integer") from exc
+    if cuda_index < 0:
+        raise ValueError(f"Invalid CUDA_DEVICE_INDEX={cuda_index}; expected a non-negative integer")
+
+    if requested_value == 'cpu':
+        return torch.device('cpu')
+
+    cuda_available = torch.cuda.is_available()
+    device_count = torch.cuda.device_count()
+    if not cuda_available or device_count <= cuda_index:
+        if requested_value == 'auto':
+            return torch.device('cpu')
+        reason = 'CUDA is unavailable' if not cuda_available else 'requested GPU index was not detected'
+        raise RuntimeError(_cuda_failure_message(requested_value, cuda_index, reason))
+
+    device = torch.device(f'cuda:{cuda_index}')
+    try:
+        _probe_cuda_device(device)
+    except Exception as exc:
+        if requested_value == 'auto':
+            print(f"[Inference] CUDA probe failed in auto mode; using CPU: {exc}")
+            return torch.device('cpu')
+        raise RuntimeError(_cuda_failure_message(requested_value, cuda_index, str(exc))) from exc
+    return device
+
+
 # ========================================
-# [1-1] Device 설정 (CPU 우선, Jetson Orin Nano 메모리 절약)
+# [1-1] PyTorch inference device
 # ========================================
-DEVICE = torch.device('cpu')  # Jetson Orin Nano의 제한된 CUDA 메모리 때문에 CPU 사용
+TORCH_DEVICE_REQUESTED = _get_env_str('TORCH_DEVICE', 'auto').lower()
+CUDA_DEVICE_INDEX = _get_env_int('CUDA_DEVICE_INDEX', 0)
+CUDA_EMPTY_CACHE_AFTER_ANALYSIS = _get_env_bool('CUDA_EMPTY_CACHE_AFTER_ANALYSIS', False)
+DEVICE = resolve_torch_device(TORCH_DEVICE_REQUESTED, CUDA_DEVICE_INDEX)
+
+print(
+    f"[Inference] requested_device={TORCH_DEVICE_REQUESTED} "
+    f"resolved_device={DEVICE}"
+)
+if DEVICE.type == 'cuda':
+    print(f"[Inference] cuda_device={torch.cuda.get_device_name(DEVICE.index or 0)}")
 
 # ========================================
 # [2] 모델 경로

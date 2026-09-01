@@ -48,7 +48,12 @@ class DiseaseClassifier:
         self.model.load_state_dict(checkpoint)
         self.model.to(self.device)
         self.model.eval()
-        self.device = next(self.model.parameters()).device
+        parameter_device = next(self.model.parameters()).device
+        if parameter_device != self.device:
+            raise RuntimeError(
+                f"Classifier device mismatch after initialization: "
+                f"configured={self.device}, parameters={parameter_device}"
+            )
         
         # ========================================
         # [3] 정규화 파라미터
@@ -143,8 +148,14 @@ class DiseaseClassifier:
             dict: 분류 결과 + heatmap 이미지
         """
         input_tensor = self.preprocess(image).to(self.device)
+        parameter_device = next(self.model.parameters()).device
+        if input_tensor.device != parameter_device:
+            raise RuntimeError(
+                f"Classifier input/model device mismatch: "
+                f"input={input_tensor.device}, parameters={parameter_device}"
+            )
 
-        with torch.no_grad():
+        with torch.inference_mode():
             outputs = self.model(input_tensor)
             probabilities = torch.softmax(outputs, dim=1)[0]
 
@@ -154,6 +165,13 @@ class DiseaseClassifier:
         heatmap_image = None
         if generate_cam:
             heatmap_image = self._generate_cam_image(input_tensor, image, predicted_class)
+
+        if (
+            config.CUDA_EMPTY_CACHE_AFTER_ANALYSIS
+            and self.device.type == 'cuda'
+            and torch.cuda.is_available()
+        ):
+            torch.cuda.empty_cache()
 
         return {
             'class': predicted_class,

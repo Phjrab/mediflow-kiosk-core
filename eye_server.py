@@ -3723,11 +3723,35 @@ def status():
     
     report_dep = get_report_dependency_status()
 
+    model_parameter_device = None
+    if model_manager is not None:
+        classifier = model_manager.get_classifier()
+        if classifier is not None:
+            try:
+                model_parameter_device = str(next(classifier.model.parameters()).device)
+            except (AttributeError, StopIteration):
+                model_parameter_device = None
+
+    resolved_cuda_index = config.DEVICE.index if config.DEVICE.type == 'cuda' else None
+    cuda_device_name = None
+    if resolved_cuda_index is not None and torch.cuda.is_available():
+        cuda_device_name = torch.cuda.get_device_name(resolved_cuda_index)
+
     return jsonify({
         'status': 'running',
         'models_loaded': model_manager is not None,
         'camera_connected': current_frame is not None,
         'gpu_info': gpu_info,
+        'inference': {
+            'requested_device': config.TORCH_DEVICE_REQUESTED,
+            'resolved_device': str(config.DEVICE),
+            'cuda_available': torch.cuda.is_available(),
+            'cuda_device_count': torch.cuda.device_count(),
+            'cuda_device_name': cuda_device_name,
+            'torch_version': torch.__version__,
+            'torch_cuda_version': torch.version.cuda,
+            'model_parameter_device': model_parameter_device,
+        },
         'report_feature': {
             'pdf_generation_ready': report_dep['pdf_generation_ready'],
             'kakao_send_ready': report_dep['kakao_send_ready'],
