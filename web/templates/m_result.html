@@ -324,7 +324,7 @@
         .red-level-very-severe { color: #dc2626; font-weight: 800; }
 
         /* 하단 버튼 스타일 */
-        .btn { border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn { border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: 0.2s; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-camera-sub { flex: 1; height: 70%; background: #f2f2f7; color: #3a3a3c; }
         .btn-retake { background: #fdf2f2; color: var(--danger); border: 1px solid rgba(255, 59, 48, 0.2); }
@@ -674,7 +674,7 @@
         <div class="camera-bottom-btns">
             <button class="btn btn-camera-sub btn-retake" onclick="retakePhotos()" data-i18n="btn_retake_photos">🔄 안구 재촬영</button>
             <button id="btn-generate-report" class="btn btn-camera-sub" onclick="generateReport()" data-i18n="btn_generate_report">📋 리포트 발행</button>
-            <button class="btn btn-camera-sub" onclick="openNearbyClinicMap()">📍 주변 안과</button>
+            <a class="btn btn-camera-sub" href="https://map.naver.com/p/search/%EC%95%88%EA%B3%BC" target="_blank" rel="noopener noreferrer">📍 주변 안과</a>
         </div>
     </div>
 
@@ -709,22 +709,6 @@
         </div>
     </div>
 
-    <div id="map-overlay" class="map-overlay" onclick="closeNearbyClinicMap(event)">
-        <div class="map-panel" onclick="event.stopPropagation()">
-            <div class="map-header">
-                <div class="map-title">📍 주변 안과 (네이버 지도)</div>
-                <button class="map-close-btn" onclick="closeNearbyClinicMap()">대시보드로 돌아가기</button>
-            </div>
-            <iframe
-                id="map-frame"
-                class="map-frame"
-                src="about:blank"
-                loading="lazy"
-                referrerpolicy="strict-origin-when-cross-origin"
-                title="네이버 지도"
-            ></iframe>
-        </div>
-    </div>
 
     <div id="confirm-toast" class="confirm-toast" role="dialog" aria-modal="true" aria-live="assertive">
         <div id="confirm-toast-message" class="confirm-toast-message"></div>
@@ -1300,21 +1284,6 @@
             }
         }
 
-        function openNearbyClinicMap() {
-            const overlay = document.getElementById('map-overlay');
-            const frame = document.getElementById('map-frame');
-            if (!frame.src || frame.src === 'about:blank') {
-                frame.src = 'https://map.naver.com/v5/search/%EC%95%88%EA%B3%BC';
-            }
-            overlay.style.display = 'flex';
-        }
-
-        function closeNearbyClinicMap(event) {
-            if (event && event.target && event.target.id !== 'map-overlay') {
-                return;
-            }
-            document.getElementById('map-overlay').style.display = 'none';
-        }
 
         function extractDiseaseScores(analysis) {
             const scores = {
