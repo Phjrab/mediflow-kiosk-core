@@ -318,8 +318,10 @@ python server.py --device rpi
 
 ```bash
 source venv/bin/activate
+python -m pip install -r requirements-dev.txt
 python -m compileall -q .
 python -m unittest discover -s tests -v
+python -m pytest -q
 bash -n scripts/install_jetson.sh
 bash -n scripts/jetson_preflight.sh
 bash -n start_services.sh
