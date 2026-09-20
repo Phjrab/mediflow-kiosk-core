@@ -127,11 +127,16 @@ import uuid
 import socket
 import subprocess
 import hmac
+import shutil
+import tempfile
 from datetime import datetime
 from PIL import Image, ImageOps
 
 import config as config
 from model_loader import initialize_models, get_models
+from utils.ai_config import AIError, LocalConfig, provider_from, validate_llm_settings
+from utils.llm_client import generate_chat
+from utils.chat_context import summarize_result
 from utils.chat_prompt import build_chat_system_prompt
 from utils.image_proc import resize_image, enhance_contrast
 from utils.service_control import service_manager_argv
@@ -173,6 +178,7 @@ app.config['SESSION_COOKIE_SECURE'] = os.getenv('SESSION_COOKIE_SECURE', '0').st
 current_frame = None  # 실시간 카메라 프레임
 model_manager = None  # 싱글톤 모델 매니저
 models_initialized = False  # 모델 초기화 완료 여부
+model_init_lock = threading.Lock()
 camera_thread = None  # 카메라 스레드
 camera_running = False  # 카메라 스레드 실행 상태
 camera_session_count = 0  # capture 페이지 활성 세션 수
@@ -302,8 +308,22 @@ ADMIN_LLM_EDITABLE_KEYS = {
     'OPENAI_MODEL': str,
     'GEMINI_MODEL': str,
     'OPENAI_API_KEY': str,
-    'GEMINI_API_KEY': str
+    'GEMINI_API_KEY': str,
+    'LOCAL_LLM_BASE_URL': str,
+    'LOCAL_LLM_MODEL': str,
+    'LOCAL_LLM_API_KEY': str,
+    'LOCAL_LLM_CONNECT_TIMEOUT': float,
+    'LOCAL_LLM_READ_TIMEOUT': float,
+    'LOCAL_LLM_REQUEST_DEADLINE': float,
+    'LOCAL_LLM_MAX_TOKENS': int,
+    'LOCAL_LLM_MAX_INFLIGHT': int,
+    'AI_ALLOWED_ENDPOINTS': str,
+    'OPENAI_API_KEY_DELETE': bool,
+    'GEMINI_API_KEY_DELETE': bool,
+    'LOCAL_LLM_API_KEY_DELETE': bool,
 }
+
+LLM_SECRET_KEYS = ('OPENAI_API_KEY', 'GEMINI_API_KEY', 'LOCAL_LLM_API_KEY')
 
 
 def is_admin_session():
@@ -438,14 +458,31 @@ def _env_serialize_value(value):
     return str(value)
 
 
+def apply_env_updates_atomic(updates):
+    """Replace .env only after every update has been validated and staged."""
+    if not updates:
+        return
+    os.makedirs(config.BASE_DIR, exist_ok=True)
+    file_descriptor, temporary_path = tempfile.mkstemp(
+        prefix='.env.update-', dir=config.BASE_DIR, text=True
+    )
+    os.close(file_descriptor)
+    try:
+        if os.path.exists(ENV_FILE_PATH):
+            shutil.copyfile(ENV_FILE_PATH, temporary_path)
+        for key, value in updates.items():
+            set_key(temporary_path, key, str(value))
+        os.replace(temporary_path, ENV_FILE_PATH)
+    finally:
+        if os.path.exists(temporary_path):
+            os.unlink(temporary_path)
+    for key, value in updates.items():
+        os.environ[key] = str(value)
+
+
 def apply_admin_config_updates(updates):
     if not updates:
         return {}
-
-    os.makedirs(config.BASE_DIR, exist_ok=True)
-    if not os.path.exists(ENV_FILE_PATH):
-        with open(ENV_FILE_PATH, 'a', encoding='utf-8'):
-            pass
 
     normalized_updates = {}
     for key, value in updates.items():
@@ -453,15 +490,16 @@ def apply_admin_config_updates(updates):
             continue
 
         env_value = _env_serialize_value(value)
-        set_key(ENV_FILE_PATH, key, env_value)
-        os.environ[key] = env_value
         normalized_updates[key] = value
 
         # SERVER_HOST를 사용하는 기존 환경과의 호환 유지
         if key == 'SERVER_IP':
-            set_key(ENV_FILE_PATH, 'SERVER_HOST', env_value)
-            os.environ['SERVER_HOST'] = env_value
+            normalized_updates['SERVER_HOST'] = env_value
 
+    apply_env_updates_atomic({
+        key: _env_serialize_value(value)
+        for key, value in normalized_updates.items()
+    })
     return normalized_updates
 
 
@@ -484,50 +522,92 @@ def mask_secret_value(value):
 def get_admin_llm_settings_snapshot():
     openai_key = os.getenv('OPENAI_API_KEY', '')
     gemini_key = os.getenv('GEMINI_API_KEY', '')
+    local_key = os.getenv('LOCAL_LLM_API_KEY', '')
+    local_key_file = os.getenv('LOCAL_LLM_API_KEY_FILE', '').strip()
+    local_key_source = 'file' if local_key_file else ('inline' if local_key.strip() else 'none')
 
     provider = os.getenv('LLM_PROVIDER', 'openai').strip().lower()
-    if provider not in ('openai', 'gemini'):
-        provider = 'openai'
+    if provider not in ('openai', 'gemini', 'local'):
+        provider = 'misconfigured'
 
     return {
         'LLM_PROVIDER': provider,
         'OPENAI_MODEL': os.getenv('OPENAI_MODEL', 'gpt-4o-mini'),
         'GEMINI_MODEL': os.getenv('GEMINI_MODEL', 'gemini-2.5-flash'),
+        'LOCAL_LLM_BASE_URL': os.getenv('LOCAL_LLM_BASE_URL', ''),
+        'LOCAL_LLM_MODEL': os.getenv('LOCAL_LLM_MODEL', ''),
+        'LOCAL_LLM_CONNECT_TIMEOUT': os.getenv('LOCAL_LLM_CONNECT_TIMEOUT', '3'),
+        'LOCAL_LLM_READ_TIMEOUT': os.getenv('LOCAL_LLM_READ_TIMEOUT', '90'),
+        'LOCAL_LLM_REQUEST_DEADLINE': os.getenv('LOCAL_LLM_REQUEST_DEADLINE', '120'),
+        'LOCAL_LLM_MAX_TOKENS': os.getenv('LOCAL_LLM_MAX_TOKENS', '512'),
+        'LOCAL_LLM_MAX_INFLIGHT': os.getenv('LOCAL_LLM_MAX_INFLIGHT', '1'),
+        'AI_ALLOWED_ENDPOINTS': os.getenv('AI_ALLOWED_ENDPOINTS', ''),
+        'AI_DEPLOYMENT_PROFILE': os.getenv('AI_DEPLOYMENT_PROFILE', 'chat_only'),
         'OPENAI_API_KEY_MASKED': mask_secret_value(openai_key),
         'GEMINI_API_KEY_MASKED': mask_secret_value(gemini_key),
+        'LOCAL_LLM_API_KEY_MASKED': mask_secret_value(local_key) if local_key else ('********' if local_key_file else ''),
         'OPENAI_API_KEY_CONFIGURED': bool(str(openai_key).strip()),
-        'GEMINI_API_KEY_CONFIGURED': bool(str(gemini_key).strip())
+        'GEMINI_API_KEY_CONFIGURED': bool(str(gemini_key).strip()),
+        'LOCAL_LLM_API_KEY_CONFIGURED': bool(str(local_key).strip() or local_key_file),
+        'LOCAL_LLM_API_KEY_SOURCE': local_key_source,
     }
 
 
-def apply_admin_llm_updates(updates):
+def normalize_admin_llm_updates(updates):
     if not updates:
         return {}
 
-    os.makedirs(config.BASE_DIR, exist_ok=True)
-    if not os.path.exists(ENV_FILE_PATH):
-        with open(ENV_FILE_PATH, 'a', encoding='utf-8'):
-            pass
+    unknown = set(updates) - set(ADMIN_LLM_EDITABLE_KEYS)
+    if unknown:
+        raise ValueError(f'수정 불가 LLM 항목: {sorted(unknown)[0]}')
 
+    candidate = dict(os.environ)
     normalized_updates = {}
     for key, raw_value in updates.items():
-        if key not in ADMIN_LLM_EDITABLE_KEYS:
+        if key.endswith('_DELETE'):
+            if normalize_bool(raw_value):
+                secret_key = key[:-7]
+                candidate[secret_key] = ''
+                normalized_updates[secret_key] = ''
             continue
 
-        value = str(raw_value or '').strip()
+        target_type = ADMIN_LLM_EDITABLE_KEYS[key]
+        value = str(raw_value if raw_value is not None else '').strip()
         if key == 'LLM_PROVIDER':
             value = value.lower()
-            if value not in ('openai', 'gemini'):
-                raise ValueError('LLM_PROVIDER는 openai 또는 gemini만 허용됩니다.')
+            if value not in ('openai', 'gemini', 'local'):
+                raise ValueError('LLM_PROVIDER는 openai, gemini, local만 허용됩니다.')
+
+        if target_type is int:
+            value = str(int(value))
+        elif target_type is float:
+            value = str(float(value))
 
         # API 키는 빈 값이면 "변경 안 함"으로 처리
-        if key in ('OPENAI_API_KEY', 'GEMINI_API_KEY') and value == '':
+        if key in LLM_SECRET_KEYS and value == '':
             continue
+        if key in LLM_SECRET_KEYS and (len(value) > 4096 or any(c in value for c in '\r\n')):
+            raise ValueError(f'{key} 값이 유효하지 않습니다.')
+        if key not in LLM_SECRET_KEYS and len(value) > 4096:
+            raise ValueError(f'{key} 값이 너무 깁니다.')
 
-        set_key(ENV_FILE_PATH, key, value)
-        os.environ[key] = value
+        candidate[key] = value
         normalized_updates[key] = value
 
+    provider = provider_from(candidate)
+    if provider == 'local':
+        LocalConfig.from_env(candidate)
+    else:
+        model_key = 'OPENAI_MODEL' if provider == 'openai' else 'GEMINI_MODEL'
+        if not candidate.get(model_key, '').strip():
+            raise ValueError(f'{model_key} 값이 필요합니다.')
+
+    return normalized_updates
+
+
+def apply_admin_llm_updates(updates):
+    normalized_updates = normalize_admin_llm_updates(updates)
+    apply_env_updates_atomic(normalized_updates)
     return normalized_updates
 
 
@@ -3228,12 +3308,13 @@ def _normalize_diagnosis_result_for_chat(diagnosis_result):
     return {'raw_result': str(diagnosis_result)}
 
 
-def _call_openai_chat(system_prompt, user_message):
-    api_key = os.getenv('OPENAI_API_KEY', '').strip()
+def _call_openai_chat(system_prompt, user_message, env=None):
+    env = dict(os.environ) if env is None else env
+    api_key = env.get('OPENAI_API_KEY', '').strip()
     if not api_key:
         raise RuntimeError('OPENAI_API_KEY is not configured')
 
-    model_name = os.getenv('OPENAI_MODEL', 'gpt-4o-mini').strip() or 'gpt-4o-mini'
+    model_name = env.get('OPENAI_MODEL', 'gpt-4o-mini').strip() or 'gpt-4o-mini'
     url = 'https://api.openai.com/v1/chat/completions'
     payload = {
         'model': model_name,
@@ -3271,8 +3352,9 @@ def _call_openai_chat(system_prompt, user_message):
     return content
 
 
-def _call_gemini_chat(system_prompt, user_message):
-    api_key = os.getenv('GEMINI_API_KEY', '').strip()
+def _call_gemini_chat(system_prompt, user_message, env=None):
+    env = dict(os.environ) if env is None else env
+    api_key = env.get('GEMINI_API_KEY', '').strip()
     if not api_key:
         raise RuntimeError('GEMINI_API_KEY is not configured')
 
@@ -3292,7 +3374,7 @@ def _call_gemini_chat(system_prompt, user_message):
         }
     }
 
-    configured_model = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash').strip() or 'gemini-2.5-flash'
+    configured_model = env.get('GEMINI_MODEL', 'gemini-2.5-flash').strip() or 'gemini-2.5-flash'
     candidate_models = []
     for model_name in [
         configured_model,
@@ -3347,16 +3429,34 @@ def _call_gemini_chat(system_prompt, user_message):
 
 
 def generate_llm_chat_reply(user_message, diagnosis_result):
-    """LLM 공급자(OpenAI/Gemini)를 선택해 채팅 응답을 생성한다."""
-    provider = os.getenv('LLM_PROVIDER', 'openai').strip().lower()
-    normalized_result = _normalize_diagnosis_result_for_chat(diagnosis_result)
-    system_prompt = build_chat_system_prompt(normalized_result)
+    """Dispatch exactly once to the explicitly selected provider."""
+    env = dict(os.environ)
+    system_prompt = build_chat_system_prompt(summarize_result(diagnosis_result))
+    return generate_chat(
+        env,
+        system_prompt,
+        user_message,
+        _call_openai_chat,
+        _call_gemini_chat,
+    )
 
-    if provider == 'gemini':
-        return _call_gemini_chat(system_prompt, user_message), 'gemini'
 
-    # 기본값은 openai
-    return _call_openai_chat(system_prompt, user_message), 'openai'
+def get_chat_configuration_status():
+    """Return public-safe configuration state without probing or generating."""
+    try:
+        env = dict(os.environ)
+        provider = validate_llm_settings(env)
+        state = 'configured'
+        if provider == 'local' and env.get('AI_DEPLOYMENT_PROFILE', 'chat_only') == 'vlm_only':
+            state = 'unavailable'
+        return {'status': state, 'provider': provider}
+    except AIError:
+        return {'status': 'misconfigured'}
+
+
+@app.route('/api/chat/status', methods=['GET'])
+def api_chat_status():
+    return jsonify(get_chat_configuration_status())
 
 
 @app.route('/api/chat', methods=['POST'])
@@ -3370,6 +3470,8 @@ def api_chat():
     """
     try:
         data = request.get_json(silent=True) or {}
+        if not isinstance(data, dict):
+            return jsonify({'status': 'error', 'message': 'JSON object required'}), 400
         user_message = str(data.get('user_message', '')).strip()
         diagnosis_result = data.get('diagnosis_result', {})
 
@@ -3395,13 +3497,15 @@ def api_chat():
     except RuntimeError as e:
         return jsonify({
             'status': 'error',
-            'message': str(e)
+            'message': '채팅 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.',
+            'error_code': e.code if isinstance(e, AIError) else 'backend_unavailable'
         }), 503
     except Exception as e:
-        print(f"[ERROR] /api/chat failed: {e}")
+        app.logger.warning('chat request failed')
         return jsonify({
             'status': 'error',
-            'message': str(e)
+            'message': '채팅 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.',
+            'error_code': e.code if isinstance(e, AIError) else 'backend_unavailable'
         }), 500
 
 
@@ -3853,19 +3957,27 @@ def api_admin_config_update():
                 continue
             casted_updates[key] = cast_config_value(key, raw_value)
 
-        applied_llm_updates = apply_admin_llm_updates(llm_updates_raw)
+        applied_llm_updates = normalize_admin_llm_updates(llm_updates_raw)
 
         if not casted_updates and not applied_llm_updates:
             return jsonify({'status': 'error', 'message': '유효한 설정 항목이 없습니다.'}), 400
 
-        persisted_updates = apply_admin_config_updates(casted_updates)
+        persisted_updates = dict(casted_updates)
+        env_updates = {
+            key: _env_serialize_value(value)
+            for key, value in persisted_updates.items()
+        }
+        if 'SERVER_IP' in persisted_updates:
+            env_updates['SERVER_HOST'] = _env_serialize_value(persisted_updates['SERVER_IP'])
+        env_updates.update(applied_llm_updates)
+        apply_env_updates_atomic(env_updates)
         for key, value in persisted_updates.items():
             setattr(config, key, value)
 
         safe_llm_updates = {}
         for key, value in applied_llm_updates.items():
-            if key in ('OPENAI_API_KEY', 'GEMINI_API_KEY'):
-                safe_llm_updates[key] = 'updated'
+            if key in LLM_SECRET_KEYS:
+                safe_llm_updates[key] = 'deleted' if value == '' else 'updated'
             else:
                 safe_llm_updates[key] = value
 
@@ -3875,6 +3987,8 @@ def api_admin_config_update():
             'updated': persisted_updates,
             'llm_updated': safe_llm_updates
         }), 200
+    except (ValueError, AIError) as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 400
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
@@ -4062,13 +4176,20 @@ def survey():
 def initialize_on_first_request():
     """서버 시작 시 모델만 로드 (Flask 2.3+ 호환)"""
     global model_manager, models_initialized
-    if not models_initialized:
-        models_initialized = True
+    if request.path in ('/api/chat', '/api/chat/status'):
+        return
+    if models_initialized:
+        return
+    with model_init_lock:
+        if models_initialized:
+            return
         init_history_db()
         print("\n" + "="*50)
         print("[Eye Disease Detection Server]")
         print("="*50)
-        model_manager = initialize_models()
+        loaded_model_manager = initialize_models()
+        model_manager = loaded_model_manager
+        models_initialized = True
 
         print("\n✓ 서버 준비 완료! http://0.0.0.0:5000 에서 접속하세요\n")
 
@@ -4092,12 +4213,13 @@ if __name__ == '__main__':
 
     # 서버 시작 전에 모델만 초기화
     if not models_initialized:
-        models_initialized = True
         init_history_db()
         print("\n" + "="*50)
         print("[Eye Disease Detection Server]")
         print("="*50)
-        model_manager = initialize_models()
+        loaded_model_manager = initialize_models()
+        model_manager = loaded_model_manager
+        models_initialized = True
 
         print("\n✓ 서버 준비 완료! http://0.0.0.0:5000 에서 접속하세요\n")
     

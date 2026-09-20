@@ -105,23 +105,9 @@
 
     async function checkApiKeyStatus() {
         try {
-            var response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_message: 'test',
-                    diagnosis_result: buildDiagnosisResultPayload()
-                })
-            });
-
-            var data = {};
-            try {
-                data = await response.json();
-            } catch (e) {}
-
-            // API key is configured if response is not 503 (SERVICE UNAVAILABLE)
-            // or if response is 200 (success)
-            apiKeyConfigured = response.status !== 503 && response.status !== 500;
+            var response = await fetch('/api/chat/status');
+            var data = await response.json();
+            apiKeyConfigured = response.ok && data.status === 'configured';
             return apiKeyConfigured;
         } catch (e) {
             apiKeyConfigured = false;
@@ -188,7 +174,7 @@
             // Check API key status when opening chat
             checkApiKeyStatus().then(function (hasKey) {
                 if (!hasKey) {
-                    var apiMsg = getTranslation('chat_api_unconfigured') || '⚠️ API 키가 연결되어 있지 않습니다. 관리자에게 문의해주세요. OpenAI API 키를 설정한 후 서비스를 이용할 수 있습니다.';
+                    var apiMsg = '채팅 서비스 설정을 확인해 주세요. 관리자에게 문의해 주세요.';
                     appendMessage('ai', apiMsg);
                     input.disabled = true;
                     sendBtn.disabled = true;
@@ -202,7 +188,7 @@
 
     function sendMessage() {
         var text = (input.value || '').trim();
-        if (!text) return;
+        if (!text || sendBtn.disabled) return;
 
         appendMessage('user', text);
         input.value = '';
@@ -214,11 +200,11 @@
             try {
                 var reply = await requestLlmReply(text);
                 typingRow.remove();
-                appendMessage('ai', reply || buildAiReply(text));
+                appendMessage('ai', reply);
             } catch (err) {
-                console.warn('[chat-widget] LLM API failed, fallback reply used:', err);
+                console.warn('[chat-widget] Chat service unavailable');
                 typingRow.remove();
-                appendMessage('ai', buildAiReply(text));
+                appendMessage('ai', '채팅 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.');
             } finally {
                 sendBtn.disabled = false;
                 input.focus();
@@ -345,7 +331,7 @@
                     
                     // Check API key status and show message if needed
                     if (!apiKeyConfigured) {
-                        var newApiMsg = getTranslation('chat_api_unconfigured') || '⚠️ API 키가 연결되어 있지 않습니다. 관리자에게 문의해주세요. OpenAI API 키를 설정한 후 서비스를 이용할 수 있습니다.';
+                        var newApiMsg = '채팅 서비스 설정을 확인해 주세요. 관리자에게 문의해 주세요.';
                         appendMessage('ai', newApiMsg);
                     }
                 }
