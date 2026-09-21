@@ -104,6 +104,7 @@ No LLM or VLM was started, stopped, restarted, or switched. No cloud fallback, m
   the expected research schema version to 4.
 - `python -m py_compile`, `bash -n scripts/run_local_llm_candidate.sh`, and
   `git diff --check` passed.
+- Committed the C4 implementation as `b870500` on `codex/admin-control`.
 - The pre-existing Mac dependency exclusions remain: the two modules requiring
   unavailable `pytorch_grad_cam` and `qrcode` were not included. No package was
   installed and no medical-quality or real-device inference claim is made.

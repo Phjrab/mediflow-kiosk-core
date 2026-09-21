@@ -1,6 +1,6 @@
 # Admin Control Handoff
 
-Current phase: C0-C4 CODE/MOCK complete and C1/C2 DEVICE_READ_ONLY deployed; C5 remains PARTIAL/CODE/MOCK. C4 is uncommitted at the time of this handoff edit and is based on pushed source `6fa9e91`; replace this sentence with the final pushed SHA after commit.
+Current phase: C0-C4 CODE/MOCK complete and C1/C2 DEVICE_READ_ONLY deployed; C5 remains PARTIAL/CODE/MOCK. The C4 implementation commit is `b870500`, based on the prior pushed source `6fa9e91`.
 
 The existing LLM/VLM, F1, regression, and synthetic E0-E4 device evidence is preserved. A runs `codex/admin-control-a-deploy`; its runtime-code merge is `1dffc7a` and later branch commits only update this deployment record. B has release `/home/jetson2/mediflow-ai/control/releases/f0f0555`. A's `.env`, database and user data and B's inference keys, models and lifecycle records were not changed.
 
