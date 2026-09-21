@@ -11,6 +11,17 @@ MODEL_ALIAS="qwen2.5-3b-instruct-q4-k-m"
 : "${LOCAL_LLM_MODEL_DIR:?set LOCAL_LLM_MODEL_DIR to the private model directory}"
 : "${LOCAL_LLM_API_KEY_FILE:?set LOCAL_LLM_API_KEY_FILE to a private mode-0600 key file}"
 
+LOCAL_LLM_HOST="${LOCAL_LLM_HOST:-0.0.0.0}"
+LOCAL_LLM_PORT="${LOCAL_LLM_PORT:-8080}"
+if [[ "$LOCAL_LLM_HOST" != "0.0.0.0" && "$LOCAL_LLM_HOST" != "127.0.0.1" ]]; then
+  echo "LOCAL_LLM_HOST must be 0.0.0.0 or 127.0.0.1" >&2
+  exit 1
+fi
+if [[ ! "$LOCAL_LLM_PORT" =~ ^[0-9]+$ ]] || (( LOCAL_LLM_PORT < 1 || LOCAL_LLM_PORT > 65535 )); then
+  echo "LOCAL_LLM_PORT must be an integer from 1 to 65535" >&2
+  exit 1
+fi
+
 python3 "$PROJECT_ROOT/scripts/verify_ai_artifacts.py" \
   --component general_llm \
   --root "$LOCAL_LLM_MODEL_DIR" >/dev/null
@@ -45,8 +56,8 @@ PY
 exec "$server" \
   --model "$LOCAL_LLM_MODEL_DIR/$MODEL_FILENAME" \
   --alias "$MODEL_ALIAS" \
-  --host 0.0.0.0 \
-  --port 8080 \
+  --host "$LOCAL_LLM_HOST" \
+  --port "$LOCAL_LLM_PORT" \
   --api-key-file "$LOCAL_LLM_API_KEY_FILE" \
   --n-gpu-layers all \
   --parallel 1 \

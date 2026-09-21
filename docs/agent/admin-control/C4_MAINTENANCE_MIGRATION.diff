@@ -1,0 +1,38 @@
+This is a review-only private-runtime configuration diff. It was not applied.
+Paths are labels for device-owned files and are not repository files.
+
+--- Jetson-B/private-inference.env.before
++++ Jetson-B/private-inference.env.after
+@@
++AI_DEVICE_LIFECYCLE_LOCK=/home/jetson2/.local/state/mediflow-ai/device-lifecycle.lock
++LOCAL_LLM_HOST=127.0.0.1
++LOCAL_LLM_PORT=18080
++MEDGEMMA_HOST=127.0.0.1
++MEDGEMMA_PORT=18081
++AI_INGRESS_STATE_DIR=/home/jetson2/.local/state/mediflow-ai/managed-ingress
++AI_INGRESS_RUNTIME_RECEIPT_FILE=/home/jetson2/.local/state/mediflow-ai/applied-runtime.json
++AI_INGRESS_CHAT_UPSTREAM_PORT=18080
++AI_INGRESS_VLM_UPSTREAM_PORT=18081
++AI_INGRESS_HOST=0.0.0.0
++AI_INGRESS_PORT=8080
++# Set to 1 only after socket inspection proves both raw ports are loopback-only
++# and the former externally reachable VLM listener on 8081 is closed.
++AI_INGRESS_RAW_BYPASS_VERIFIED=0
+
+--- Jetson-A/private-kiosk.env.before
++++ Jetson-A/private-kiosk.env.after
+@@
+ LOCAL_LLM_BASE_URL=http://192.168.50.11:8080/v1
+-VLM_BASE_URL=http://192.168.50.11:8081
++VLM_BASE_URL=http://192.168.50.11:8080
+
+--- Jetson-B/private-admin-control.env.before
++++ Jetson-B/private-admin-control.env.after
+@@
++AI_DEVICE_LIFECYCLE_LOCK=/home/jetson2/.local/state/mediflow-ai/device-lifecycle.lock
++AI_CONTROL_INGRESS_STATE_DIR=/home/jetson2/.local/state/mediflow-ai/managed-ingress
+ AI_CONTROL_DRAFTS_ENABLED=0
+ AI_CONTROL_MUTATIONS_ENABLED=0
++# Drafts and mutations remain 0 throughout ingress migration and rollback proof.
++# A later gate may set them to 1 only after adapter identity, drain, receipt,
++# synthetic inference, and rollback checks all pass.

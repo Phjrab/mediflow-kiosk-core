@@ -255,7 +255,8 @@ class ControlService:
                  observe_runtime: Callable[[], RuntimeObservation] = unavailable_runtime,
                  telemetry: TelemetrySampler | None = None,
                  drafts_enabled: bool = False, mutations_enabled: bool = False,
-                 controller_instance_id: str | None = None, operation_coordinator=None):
+                 controller_instance_id: str | None = None, operation_coordinator=None,
+                 managed_ingress_verified: bool = False):
         if not node_id or len(node_id) > 120:
             raise ValueError("invalid node_id")
         self.node_id = node_id
@@ -267,6 +268,7 @@ class ControlService:
         self.mutations_enabled = mutations_enabled
         self.controller_instance_id = controller_instance_id or uuid.uuid4().hex
         self.operation_coordinator = operation_coordinator
+        self.managed_ingress_verified = managed_ingress_verified
 
     def _applied(self) -> dict[str, Any]:
         return self.store.read("applied.json", {
@@ -289,8 +291,8 @@ class ControlService:
             "runtime_override_fields": ["context_tokens"],
             "plan_actions": ["apply_config"],
             "operations": ["apply_config"] if self.mutations_enabled and self.operation_coordinator else [],
-            "managed_ingress_verified": False,
-            "activity_authoritative": False,
+            "managed_ingress_verified": self.managed_ingress_verified,
+            "activity_authoritative": self.managed_ingress_verified,
             "medical_quality_evaluated": False,
         }
 
@@ -423,6 +425,8 @@ class ControlService:
             raise ControlError("stale_plan", 409)
         state = self.state()
         blocking = []
+        if not self.managed_ingress_verified:
+            blocking.append("raw_ingress_bypass")
         if state["activity"]["source"] != "managed_ingress" or state["activity"]["unknown_inflight"] is None:
             blocking.append("activity_unknown")
         if not self.mutations_enabled:

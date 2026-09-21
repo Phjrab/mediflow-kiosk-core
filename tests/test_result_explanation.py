@@ -8,7 +8,7 @@ from unittest import mock
 from PIL import Image
 
 from experiments.evaluate import evaluate_run
-from experiments.explanation import process_explanation_one
+from experiments.explanation import process_explanation_one, prompt_digest
 from experiments.store import ExperimentStore
 from utils.ai_config import AIError
 
@@ -77,10 +77,21 @@ class ResultExplanationTest(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
-    def create_e3(self):
+    def runtime_expectation(self):
+        return {
+            'node_id': 'jetson-b', 'artifact_id': 'fixture-chat',
+            'artifact_manifest_digest': 'a' * 64,
+            'runtime_revision': 'fixture-runtime', 'config_revision': 2,
+            'deployment_generation': 3, 'effective_config_digest': 'b' * 64,
+        }
+
+    def create_e3(self, *, runtime_expectation=None):
+        config = {'source_run_id': self.source_run['run_id'], 'question_id': 'explain-result-ko-v1'}
+        if runtime_expectation is not None:
+            config['runtime_expectation'] = runtime_expectation
         return self.store.create_run(
             'E3_result_explanation',
-            {'source_run_id': self.source_run['run_id'], 'question_id': 'explain-result-ko-v1'},
+            config,
             {'origin_model': 'fixture-local-model'},
             engineering_fixture=True,
         )
@@ -161,8 +172,37 @@ class ResultExplanationTest(unittest.TestCase):
             table = connection.execute(
                 "SELECT name FROM sqlite_master WHERE type='table' AND name='explanations'"
             ).fetchone()
-        self.assertEqual(version, '3')
+        self.assertEqual(version, '4')
         self.assertEqual(table[0], 'explanations')
+
+    def test_e3_requires_and_persists_matching_runtime_receipt_when_pinned(self):
+        expected = self.runtime_expectation()
+        run = self.create_e3(runtime_expectation=expected)
+        job, _ = self.store.enqueue(self.sample['sample_id'], run['run_id'])
+        receipt = {**expected, 'prompt_digest': prompt_digest()}
+        self.assertTrue(process_explanation_one(
+            self.store, self.env,
+            generate=lambda *_: ('고정 런타임 설명', receipt),
+        ))
+        summary = next(item for item in self.store.list_job_summaries() if item['job_id'] == job['job_id'])
+        self.assertEqual(summary['explanation']['runtime_receipt'], receipt)
+
+        second = self.create_e3(runtime_expectation=expected)
+        second_job, _ = self.store.enqueue(self.sample['sample_id'], second['run_id'])
+        self.assertTrue(process_explanation_one(
+            self.store, self.env, generate=lambda *_: 'receipt 없는 설명',
+        ))
+        self.assertEqual(self.store.get_job(second_job['job_id'])['state'], 'failed')
+        self.assertEqual(self.store.get_job(second_job['job_id'])['error_code'], 'runtime_receipt_mismatch')
+
+        third = self.create_e3(runtime_expectation=expected)
+        third_job, _ = self.store.enqueue(self.sample['sample_id'], third['run_id'])
+        mismatched = {**receipt, 'deployment_generation': 4}
+        self.assertTrue(process_explanation_one(
+            self.store, self.env, generate=lambda *_: ('잘못된 receipt', mismatched),
+        ))
+        self.assertEqual(self.store.get_job(third_job['job_id'])['state'], 'failed')
+        self.assertEqual(self.store.get_job(third_job['job_id'])['error_code'], 'runtime_receipt_mismatch')
 
 
 if __name__ == '__main__':

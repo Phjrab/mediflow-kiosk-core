@@ -5,6 +5,9 @@ from pathlib import Path
 from unittest import mock
 
 from scripts import local_llm_service as service
+from utils.lifecycle_lock import (
+    acquire_lifecycle_lock, open_lifecycle_lock, release_lifecycle_lock,
+)
 
 
 class LocalLlmServiceTest(unittest.TestCase):
@@ -22,6 +25,7 @@ class LocalLlmServiceTest(unittest.TestCase):
             log_path=root / "service.log",
             lock_path=root / "service.lock",
             health_url="http://127.0.0.1:8080/health",
+            port=8080,
         )
 
     def snapshot(self, spec: service.ServiceSpec, *, pid: int = 42, ticks: int = 99):
@@ -98,10 +102,43 @@ class LocalLlmServiceTest(unittest.TestCase):
                     service.start_service(spec)
             popen.assert_not_called()
 
+    def test_unmanaged_probe_uses_configured_raw_port(self):
+        with tempfile.TemporaryDirectory() as directory:
+            spec = service.dataclasses.replace(self.make_spec(Path(directory)), port=18080)
+            with mock.patch.object(service, 'load_record', return_value=None), mock.patch.object(
+                service, 'port_is_open', return_value=False,
+            ) as probe:
+                self.assertEqual(service.inspect_service(spec)[0], 'stopped')
+            probe.assert_called_once_with(18080)
+
     def test_source_contains_no_autostart_download_or_broad_kill(self):
         source = Path(service.__file__).read_text(encoding="utf-8")
         for forbidden in ("systemctl", "crontab", "@reboot", "pkill", "killall", "git clone"):
             self.assertNotIn(forbidden, source)
+
+    def test_shared_device_lock_override_must_be_absolute(self):
+        with tempfile.TemporaryDirectory() as directory:
+            spec = self.make_spec(Path(directory))
+            with mock.patch.dict(service.os.environ, {'AI_DEVICE_LIFECYCLE_LOCK': 'relative.lock'}):
+                with self.assertRaisesRegex(service.ManagerError, 'must be absolute'):
+                    service.run_locked('status', spec)
+
+    def test_shared_device_lock_blocks_cli_lifecycle_action(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            spec = self.make_spec(root)
+            shared = root / 'device-lifecycle.lock'
+            controller_handle = open_lifecycle_lock(shared)
+            acquire_lifecycle_lock(controller_handle)
+            try:
+                with mock.patch.dict(
+                    service.os.environ, {'AI_DEVICE_LIFECYCLE_LOCK': str(shared)}
+                ), mock.patch.object(service, 'print_status') as print_status:
+                    with self.assertRaisesRegex(service.ManagerError, 'another device lifecycle'):
+                        service.run_locked('status', spec)
+                print_status.assert_not_called()
+            finally:
+                release_lifecycle_lock(controller_handle)
 
 
 if __name__ == "__main__":

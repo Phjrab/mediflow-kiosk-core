@@ -57,3 +57,62 @@ No Jetson deployment, service start/stop, model transition, `.env`, DB, key, mod
 - A proposed POST-to-disabled-endpoints check was rejected by automatic approval review because the approval allowed authenticated GET verification only. No POST was sent; the device evidence uses GET capabilities plus existing mock tests.
 
 No LLM or VLM was started, stopped, restarted, or switched. No cloud fallback, medical-quality evaluation, real-user-data test, or unverified co-residency test was performed.
+
+## 2026-09-21 — C4 controller-authoritative ingress code/mock
+
+- Continued from pushed `6fa9e91` on `codex/admin-control` with the existing
+  read-only A/B deployment untouched. The repository had moved to
+  `/Users/hajoonpark/자율설계/mediflow-kiosk-core`; the uncommitted C4 work was
+  present there and was preserved.
+- Added a private durable managed-ingress journal. Admission requires verified
+  raw-bypass closure and the expected deployment generation. Active leases drain;
+  transport loss after forwarding becomes `unknown`, closes admission, survives
+  restart, and requires positive backend-completion evidence before reconciliation.
+- Added a fixed loopback forwarder for the chat and VLM raw runtimes. It keeps
+  their separate inference credentials, exposes only the two fixed API paths,
+  strips control-only expectation fields, bounds bodies/responses, and emits an
+  E3 receipt only after matching the applied runtime. Chat receipts are bound to
+  the actual system-prompt digest received by ingress.
+- Added sequential lifecycle adapters. The existing general LLM reuses
+  `local_llm_service` exact PID ownership. The MedGemma adapter validates a
+  private PID record against live UID/executable/argv/cwd/boot-id/start-tick
+  evidence and never passes a mismatched or reused PID to its stop callback.
+  Unmanaged engines and unverified co-residency block before any stop.
+- Added one shared owner-only lifecycle-lock implementation for controller and
+  CLI. It rejects relative paths, unsafe directories/files and final symlinks;
+  a real cross-entrypoint flock-contention mock proves that a CLI action cannot
+  enter while the controller owns the lock.
+- Kept the general LLM default on port 8080 while adding strict, opt-in
+  `LOCAL_LLM_HOST`/`LOCAL_LLM_PORT` support needed for an approved future raw
+  loopback migration. No device environment was changed.
+- Completed E3 runtime expectation/receipt persistence. Pinned runs send the
+  expected artifact/runtime/config generation through local chat, reject a
+  missing or mismatched receipt before success, and store the closed receipt in
+  `explanations.runtime_receipt_json`. Existing databases migrate forward from
+  schema version 3 to 4; no operational DB was opened or altered.
+- Corrected operation commit order: the applied state is durable before admission
+  reopens with the new generation. If reopening fails, rollback restores the
+  previous actual and applied states or enters manual intervention.
+- Added the review-only migration plan and configuration delta in
+  `C4_MAINTENANCE_MIGRATION.md` and `C4_MAINTENANCE_MIGRATION.diff`.
+
+### Tests
+
+- Focused C4/E3 suite: 67 passed, then 31 passed after the final prompt/config
+  receipt hardening.
+- Available integrated local suite: 157 passed, 1 skipped, 0 failed after updating
+  the expected research schema version to 4.
+- `python -m py_compile`, `bash -n scripts/run_local_llm_candidate.sh`, and
+  `git diff --check` passed.
+- The pre-existing Mac dependency exclusions remain: the two modules requiring
+  unavailable `pytorch_grad_cam` and `qrcode` were not included. No package was
+  installed and no medical-quality or real-device inference claim is made.
+
+### Device and data scope
+
+- No SSH/device command was run for this C4 task. A/B ports, services, processes,
+  models, keys, private environment files, databases, and user data were not
+  changed.
+- Managed ingress activation, raw-port migration, process-manager bootstrap,
+  synthetic device receipt verification, draft/mutation enablement, and a real
+  apply/restore operation remain `BLOCKED_GATE` for a separate maintenance window.

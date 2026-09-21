@@ -4,7 +4,6 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 import datetime as dt
-import fcntl
 import json
 import os
 from pathlib import Path
@@ -14,6 +13,12 @@ import uuid
 from typing import Any, Callable
 
 from services.ai_control.core import ControlError, canonical_json, digest, utc_now
+from utils.lifecycle_lock import (
+    LifecycleLockError,
+    acquire_lifecycle_lock,
+    open_lifecycle_lock,
+    release_lifecycle_lock,
+)
 
 
 TERMINAL_STATES = frozenset({"succeeded", "failed", "rolled_back", "manual_intervention_required", "cancelled"})
@@ -270,13 +275,11 @@ class OperationCoordinator:
         admission_closed = False
         lock_handle = None
         try:
-            self.lifecycle_lock_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-            lock_handle = self.lifecycle_lock_path.open("a+")
-            os.chmod(self.lifecycle_lock_path, 0o600)
             try:
-                fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-            except BlockingIOError:
-                raise LifecycleFailure("operation_in_progress") from None
+                lock_handle = open_lifecycle_lock(self.lifecycle_lock_path)
+                acquire_lifecycle_lock(lock_handle)
+            except LifecycleLockError as exc:
+                raise LifecycleFailure(exc.code) from None
             transitioned = self.journal.update(
                 operation_id, "validating", expected_states={"accepted"}
             )
@@ -304,10 +307,13 @@ class OperationCoordinator:
                 "effective_config_digest": digest(draft["desired"]),
                 "receipt": receipt,
             }
-            self.lifecycle.restore_admission(previous_runtime)
-            admission_closed = False
             self.save_applied(next_applied)
             applied_written = True
+            self.lifecycle.restore_admission({
+                **previous_runtime,
+                "deployment_generation": next_applied["deployment_generation"],
+            })
+            admission_closed = False
             self.journal.update(operation_id, "succeeded", result={
                 "config_revision": next_applied["config_revision"],
                 "deployment_generation": next_applied["deployment_generation"],
@@ -334,10 +340,7 @@ class OperationCoordinator:
                     )
         finally:
             if lock_handle is not None:
-                try:
-                    fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)
-                finally:
-                    lock_handle.close()
+                release_lifecycle_lock(lock_handle)
 
     def get(self, operation_id: str) -> dict[str, Any]:
         return self.journal.get(operation_id)

@@ -172,7 +172,7 @@ class SurveyHybridTest(unittest.TestCase):
         with closing(sqlite3.connect(self.store.db_path)) as connection:
             version = connection.execute("SELECT value FROM schema_metadata WHERE key='schema_version'").fetchone()[0]
             tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-        self.assertEqual(version, '3')
+        self.assertEqual(version, '4')
         self.assertTrue({'survey_inputs', 'hybrid_reviews'} <= tables)
 
         real = self.store.register_sample(png('red'), {

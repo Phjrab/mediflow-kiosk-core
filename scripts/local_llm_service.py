@@ -6,7 +6,6 @@ from __future__ import annotations
 import collections
 import dataclasses
 import datetime as dt
-import fcntl
 import json
 import os
 import signal
@@ -19,12 +18,19 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from utils.lifecycle_lock import (
+    LifecycleLockError,
+    acquire_lifecycle_lock,
+    open_lifecycle_lock,
+    release_lifecycle_lock,
+)
+
 
 SCRIPT_PATH = Path(__file__).resolve()
 PROJECT_ROOT = SCRIPT_PATH.parent.parent
 COMMAND_NAME = "local_llm_service.py"
 ALLOWED_ACTIONS = frozenset({"start", "stop", "restart", "status", "logs"})
-PORT = 8080
+DEFAULT_PORT = 8080
 START_TIMEOUT_SECONDS = 120.0
 STOP_TIMEOUT_SECONDS = 15.0
 KILL_TIMEOUT_SECONDS = 3.0
@@ -61,6 +67,7 @@ class ServiceSpec:
     log_path: Path
     lock_path: Path
     health_url: str
+    port: int = DEFAULT_PORT
 
 
 def parse_action(argv: Sequence[str]) -> str:
@@ -125,6 +132,13 @@ def build_spec(*, require_start_inputs: bool) -> ServiceSpec:
 
     control_dir = control_directory()
     ensure_private_directory(control_dir)
+    raw_port = os.environ.get("LOCAL_LLM_PORT", str(DEFAULT_PORT)).strip()
+    try:
+        port = int(raw_port)
+    except ValueError:
+        raise ManagerError("LOCAL_LLM_PORT must be an integer from 1 to 65535") from None
+    if str(port) != raw_port or not 1 <= port <= 65535:
+        raise ManagerError("LOCAL_LLM_PORT must be an integer from 1 to 65535")
     return ServiceSpec(
         project_root=PROJECT_ROOT,
         launcher=launcher,
@@ -133,7 +147,8 @@ def build_spec(*, require_start_inputs: bool) -> ServiceSpec:
         pid_path=control_dir / "local-llm.pid.json",
         log_path=control_dir / "local-llm.log",
         lock_path=control_dir / "local-llm.lock",
-        health_url=f"http://127.0.0.1:{PORT}/health",
+        health_url=f"http://127.0.0.1:{port}/health",
+        port=port,
     )
 
 
@@ -267,7 +282,7 @@ def validate_record(
     return True, "running", snapshot
 
 
-def port_is_open(port: int = PORT) -> bool:
+def port_is_open(port: int = DEFAULT_PORT) -> bool:
     try:
         with socket.create_connection(("127.0.0.1", port), timeout=0.25):
             return True
@@ -289,7 +304,7 @@ def inspect_service(
 ) -> tuple[str, dict[str, Any] | None, ProcessSnapshot | None]:
     record = load_record(spec.pid_path)
     if record is None:
-        return ("unmanaged-port" if port_is_open() else "stopped"), None, None
+        return ("unmanaged-port" if port_is_open(spec.port) else "stopped"), None, None
     valid, reason, snapshot = validate_record(spec, record)
     if valid:
         return "running", record, snapshot
@@ -325,12 +340,12 @@ def terminate_unrecorded_child(process: subprocess.Popen[bytes]) -> None:
 def start_service(spec: ServiceSpec) -> None:
     state, record, _ = inspect_service(spec, remove_stale=True)
     if state == "running" and record is not None:
-        print(f"local-llm: already running | PID={record['pid']} | port={PORT}")
+        print(f"local-llm: already running | PID={record['pid']} | port={spec.port}")
         return
     if state != "stopped":
         raise ManagerError(f"refusing to start: {state}")
-    if port_is_open():
-        raise ManagerError(f"refusing to start: port {PORT} is used by an unmanaged process")
+    if port_is_open(spec.port):
+        raise ManagerError(f"refusing to start: port {spec.port} is used by an unmanaged process")
 
     descriptor = os.open(spec.log_path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
     os.chmod(spec.log_path, 0o600)
@@ -358,7 +373,7 @@ def start_service(spec: ServiceSpec) -> None:
             if not valid:
                 raise ManagerError(f"llama-server exited during startup: {reason}")
             if health_is_ready(spec.health_url):
-                print(f"local-llm: running | PID={snapshot.pid} | port={PORT}")
+                print(f"local-llm: running | PID={snapshot.pid} | port={spec.port}")
                 return
             time.sleep(0.5)
         raise ManagerError("llama-server health check timed out")
@@ -421,13 +436,13 @@ def print_status(spec: ServiceSpec) -> None:
     if state == "running" and record is not None and snapshot is not None:
         health = "ready" if health_is_ready(spec.health_url) else "not-ready"
         print(
-            f"local-llm: running | PID={snapshot.pid} | port={PORT} | health={health} "
+            f"local-llm: running | PID={snapshot.pid} | port={spec.port} | health={health} "
             f"| started={record.get('started_at', 'unknown')}"
         )
     elif state == "unmanaged-port":
-        print(f"local-llm: unmanaged process detected on port {PORT}")
+        print(f"local-llm: unmanaged process detected on port {spec.port}")
     else:
-        print(f"local-llm: {state} | port={PORT}")
+        print(f"local-llm: {state} | port={spec.port}")
 
 
 def print_logs(spec: ServiceSpec) -> None:
@@ -441,14 +456,12 @@ def print_logs(spec: ServiceSpec) -> None:
 
 
 def run_locked(action: str, spec: ServiceSpec) -> None:
-    descriptor = os.open(spec.lock_path, os.O_RDWR | os.O_CREAT, 0o600)
-    os.chmod(spec.lock_path, 0o600)
-    with os.fdopen(descriptor, "r+") as lock_handle:
-        try:
-            fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError as exc:
-            raise ManagerError("another local LLM lifecycle action is already running") from exc
-
+    configured_lock = os.environ.get("AI_DEVICE_LIFECYCLE_LOCK", "").strip()
+    lock_path = Path(configured_lock) if configured_lock else spec.lock_path
+    lock_handle = None
+    try:
+        lock_handle = open_lifecycle_lock(lock_path)
+        acquire_lifecycle_lock(lock_handle)
         if action == "start":
             start_service(spec)
         elif action == "stop":
@@ -462,6 +475,15 @@ def run_locked(action: str, spec: ServiceSpec) -> None:
             print_logs(spec)
         else:
             raise AssertionError(f"unsupported action: {action}")
+    except LifecycleLockError as exc:
+        if exc.code == "operation_in_progress":
+            raise ManagerError("another device lifecycle action is already running") from exc
+        if configured_lock and not lock_path.is_absolute():
+            raise ManagerError("AI_DEVICE_LIFECYCLE_LOCK must be absolute") from exc
+        raise ManagerError("unsafe lifecycle lock") from exc
+    finally:
+        if lock_handle is not None:
+            release_lifecycle_lock(lock_handle)
 
 
 def main(argv: Sequence[str] | None = None) -> int:

@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS explanations (
     explanation_text TEXT NOT NULL,
     provider TEXT NOT NULL CHECK (provider = 'local'),
     model TEXT NOT NULL,
+    runtime_receipt_json TEXT,
     duration_ms REAL,
     created_at TEXT NOT NULL
 );
@@ -136,5 +137,5 @@ CREATE TABLE IF NOT EXISTS audit_events (
     created_at TEXT NOT NULL
 );
 
-INSERT INTO schema_metadata(key, value) VALUES ('schema_version', '3')
+INSERT INTO schema_metadata(key, value) VALUES ('schema_version', '4')
 ON CONFLICT(key) DO UPDATE SET value=excluded.value;

@@ -10,7 +10,8 @@ from typing import Any, Callable
 
 from experiments.store import ExperimentStore, canonical_json
 from utils.ai_config import AIError, LocalConfig, provider_from
-from utils.llm_client import local_chat
+from utils.llm_client import local_chat_with_receipt
+from utils.runtime_receipt import validate_runtime_expectation, validate_runtime_receipt
 from utils.vlm_client import validate_analysis
 
 
@@ -33,8 +34,9 @@ def prompt_digest() -> str:
     return hashlib.sha256(role_text().encode('utf-8')).hexdigest()
 
 
-def validate_run_config(value: dict[str, Any]) -> dict[str, str]:
-    if not isinstance(value, dict) or set(value) != {'source_run_id', 'question_id'}:
+def validate_run_config(value: dict[str, Any]) -> dict[str, Any]:
+    required = {'source_run_id', 'question_id'}
+    if not isinstance(value, dict) or set(value) not in (required, required | {'runtime_expectation'}):
         raise ValueError('invalid E3 configuration')
     source_run_id = str(value.get('source_run_id') or '')
     question_id = str(value.get('question_id') or '')
@@ -42,7 +44,10 @@ def validate_run_config(value: dict[str, Any]) -> dict[str, str]:
         raise ValueError('invalid E3 source run')
     if question_id not in QUESTION_IDS:
         raise ValueError('invalid E3 question')
-    return {'source_run_id': source_run_id, 'question_id': question_id}
+    result = {'source_run_id': source_run_id, 'question_id': question_id}
+    if 'runtime_expectation' in value:
+        result['runtime_expectation'] = validate_runtime_expectation(value['runtime_expectation'])
+    return result
 
 
 def build_input(source_result: dict[str, Any], question_id: str) -> tuple[str, str]:
@@ -85,7 +90,7 @@ def process_explanation_one(
     store: ExperimentStore,
     env: dict[str, str] | None = None,
     *,
-    generate: Callable[[LocalConfig, str, str], str] = local_chat,
+    generate: Callable[[LocalConfig, str, str], Any] | None = None,
 ) -> bool:
     env = dict(os.environ) if env is None else env
     validate_mode(env)
@@ -101,7 +106,23 @@ def process_explanation_one(
             job['sample_id'], run_config['source_run_id'], required_arm='E0_baseline'
         )
         message, input_digest = build_input(source['result'], run_config['question_id'])
-        reply = generate(config, role_text(), message)
+        expectation = run_config.get('runtime_expectation')
+        if generate is None:
+            reply, runtime_receipt = local_chat_with_receipt(
+                config, role_text(), message, runtime_expectation=expectation,
+            )
+        else:
+            generated = generate(config, role_text(), message)
+            if isinstance(generated, tuple) and len(generated) == 2:
+                reply, runtime_receipt = generated
+            else:
+                reply, runtime_receipt = generated, None
+        if expectation is not None:
+            runtime_receipt = validate_runtime_receipt(
+                runtime_receipt, expectation, prompt_digest=prompt_digest(),
+            )
+        elif runtime_receipt is not None:
+            raise AIError('runtime_receipt_mismatch')
         if not isinstance(reply, str) or not reply.strip() or len(reply.strip()) > 6000:
             raise AIError('invalid_output')
         store.finish_explanation(
@@ -113,6 +134,7 @@ def process_explanation_one(
             explanation_text=reply.strip(),
             provider='local',
             model=config.model,
+            runtime_receipt=runtime_receipt,
             duration_ms=(time.monotonic() - started) * 1000,
         )
     except AIError as exc:

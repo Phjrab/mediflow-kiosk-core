@@ -114,7 +114,9 @@ class AIControlServiceTest(unittest.TestCase):
             "drain_policy": "wait_then_abort", "drain_timeout_seconds": 120,
         })
         self.assertEqual(plan_response.status_code, 201)
-        self.assertEqual(set(plan_response.get_json()["blocking_reasons"]), {"activity_unknown", "mutations_disabled"})
+        self.assertEqual(set(plan_response.get_json()["blocking_reasons"]), {
+            "raw_ingress_bypass", "activity_unknown", "mutations_disabled",
+        })
         operation = self.client.post("/control/v1/operations", headers=self.headers, json={})
         self.assertEqual(operation.status_code, 403)
         self.assertEqual(operation.get_json()["error_code"], "mutations_disabled")

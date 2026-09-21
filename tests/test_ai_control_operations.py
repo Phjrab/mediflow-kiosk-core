@@ -54,7 +54,10 @@ class FakeLifecycle(LifecycleAdapter):
             raise RuntimeError("fixture restore failure")
 
     def restore_admission(self, previous):
-        self.events.append(("restore_admission", previous["admission"]))
+        self.events.append((
+            "restore_admission", previous["admission"],
+            previous.get("deployment_generation"),
+        ))
 
 
 class OperationTest(unittest.TestCase):
@@ -73,6 +76,7 @@ class OperationTest(unittest.TestCase):
             telemetry=TelemetrySampler(lambda: {"status": "unavailable"}),
             drafts_enabled=True,
             mutations_enabled=True,
+            managed_ingress_verified=True,
         )
         journal = OperationJournal(root / "state" / "operations.sqlite3")
         coordinator = OperationCoordinator(
@@ -125,6 +129,7 @@ class OperationTest(unittest.TestCase):
             duplicate = service.accept_operation(request, idempotency_key="fixture-key")
             self.assertEqual(duplicate["operation_id"], accepted["operation_id"])
             self.assertEqual(lifecycle.events.count(("apply", "vlm_only")), 1)
+            self.assertIn(("restore_admission", "open", 1), lifecycle.events)
             changed = dict(request, acknowledgements=[])
             with self.assertRaisesRegex(Exception, "idempotency_conflict"):
                 service.accept_operation(changed, idempotency_key="fixture-key")

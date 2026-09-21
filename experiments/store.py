@@ -112,6 +112,12 @@ class ExperimentStore:
             ):
                 if name not in columns:
                     connection.execute(f'ALTER TABLE samples ADD COLUMN {name} TEXT')
+            explanation_columns = {
+                str(row['name'])
+                for row in connection.execute('PRAGMA table_info(explanations)')
+            }
+            if 'runtime_receipt_json' not in explanation_columns:
+                connection.execute('ALTER TABLE explanations ADD COLUMN runtime_receipt_json TEXT')
             connection.execute(
                 '''CREATE UNIQUE INDEX IF NOT EXISTS samples_source_import_idx
                    ON samples(source_system, source_record_ref, selected_eye, preprocessing_version)
@@ -849,6 +855,7 @@ class ExperimentStore:
         explanation_text: str,
         provider: str,
         model: str,
+        runtime_receipt: dict[str, Any] | None = None,
         duration_ms: float | None = None,
     ) -> dict[str, Any]:
         text = str(explanation_text).strip()
@@ -859,6 +866,13 @@ class ExperimentStore:
             or not re.fullmatch(r'[0-9a-f]{64}', input_digest)
         ):
             raise AIError('invalid_output')
+        receipt_json = None
+        if runtime_receipt is not None:
+            from utils.runtime_receipt import RECEIPT_FIELDS
+
+            if not isinstance(runtime_receipt, dict) or set(runtime_receipt) != RECEIPT_FIELDS:
+                raise AIError('invalid_output')
+            receipt_json = canonical_json(runtime_receipt)
         now = utc_now()
         with self._connection() as connection:
             connection.execute('BEGIN IMMEDIATE')
@@ -895,11 +909,15 @@ class ExperimentStore:
                 )
             else:
                 connection.execute(
-                    '''INSERT INTO explanations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                    '''INSERT INTO explanations (
+                         explanation_id, job_id, source_prediction_id,
+                         source_result_digest, input_digest, explanation_text,
+                         provider, model, runtime_receipt_json, duration_ms, created_at
+                       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                     (
                         uuid.uuid4().hex, job_id, source_prediction_id,
                         source_result_digest, input_digest, text, provider,
-                        model, duration_ms, now,
+                        model, receipt_json, duration_ms, now,
                     ),
                 )
                 connection.execute(
@@ -1042,6 +1060,7 @@ class ExperimentStore:
                           p.result_json,
                           e.explanation_text, e.provider AS explanation_provider,
                           e.model AS explanation_model,
+                          e.runtime_receipt_json AS explanation_runtime_receipt_json,
                           e.source_result_digest, e.input_digest AS explanation_input_digest,
                           h.review_json, h.input_digest AS hybrid_input_digest,
                           h.baseline_result_digest, h.vlm_result_digest
@@ -1064,6 +1083,7 @@ class ExperimentStore:
             explanation_text = item.pop('explanation_text', None)
             explanation_provider = item.pop('explanation_provider', None)
             explanation_model = item.pop('explanation_model', None)
+            explanation_runtime_receipt = item.pop('explanation_runtime_receipt_json', None)
             source_result_digest = item.pop('source_result_digest', None)
             explanation_input_digest = item.pop('explanation_input_digest', None)
             item['explanation'] = ({
@@ -1072,6 +1092,10 @@ class ExperimentStore:
                 'model': explanation_model,
                 'source_result_digest': source_result_digest,
                 'input_digest': explanation_input_digest,
+                'runtime_receipt': (
+                    json.loads(explanation_runtime_receipt)
+                    if explanation_runtime_receipt else None
+                ),
             } if explanation_text is not None else None)
             review_json = item.pop('review_json', None)
             hybrid_input_digest = item.pop('hybrid_input_digest', None)

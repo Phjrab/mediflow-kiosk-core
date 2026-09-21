@@ -1,11 +1,13 @@
 """Bounded local HTTP transport; never invokes a cloud provider or follows redirects."""
 import http.client
+import hashlib
 import json
 import socket
 import threading
 import time
 from utils.ai_config import AIError, LocalConfig, provider_from
 from utils.ai_generation import GenerationSettings, settings_from_env
+from utils.runtime_receipt import validate_runtime_expectation, validate_runtime_receipt
 
 # Process-local admission, deliberately single-flight. Unknown remote completion
 # quarantines this client until an operator verifies remote idle and restarts A.
@@ -89,7 +91,9 @@ def post_json(config, suffix, payload):
         _slot.release()
 
 
-def local_chat(config, system_prompt, user_message, generation=None):
+def local_chat_with_receipt(
+    config, system_prompt, user_message, generation=None, *, runtime_expectation=None,
+):
     if len((system_prompt + user_message).encode('utf-8')) > 24000:
         raise AIError('context_too_long')
     if generation is None:
@@ -102,6 +106,10 @@ def local_chat(config, system_prompt, user_message, generation=None):
                      {'role': 'user', 'content': user_message}],
     }
     payload.update(generation.request_values())
+    prompt_digest = hashlib.sha256(system_prompt.encode('utf-8')).hexdigest()
+    if runtime_expectation is not None:
+        payload['expected_runtime'] = validate_runtime_expectation(runtime_expectation)
+        payload['prompt_digest'] = prompt_digest
     data = post_json(config, '/chat/completions', payload)
     try:
         choice = data['choices'][0]
@@ -110,9 +118,22 @@ def local_chat(config, system_prompt, user_message, generation=None):
         reply = choice['message']['content']
         if not isinstance(reply, str) or not reply.strip():
             raise AIError('empty_response')
-        return reply.strip()
+        receipt = None
+        if runtime_expectation is not None:
+            receipt = validate_runtime_receipt(
+                data.get('runtime_receipt'), runtime_expectation,
+                prompt_digest=prompt_digest,
+            )
+        return reply.strip(), receipt
     except (KeyError, IndexError, TypeError):
         raise AIError('empty_response') from None
+
+
+def local_chat(config, system_prompt, user_message, generation=None):
+    reply, _receipt = local_chat_with_receipt(
+        config, system_prompt, user_message, generation,
+    )
+    return reply
 
 
 def generate_chat(env, system_prompt, user_message, openai_call, gemini_call):
