@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-21T05:59:12Z",
+  "host_role": "B_general_llm_or_research_vlm",
+  "platform": {
+    "architecture": "aarch64",
+    "l4t": "36.5.2",
+    "device": "Orin",
+    "memory_class_gib": 8
+  },
+  "source": {
+    "repository": "google/medgemma-1.5-4b-it",
+    "revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+    "access_probe_http": 200,
+    "local_files_verified": true,
+    "files": [
+      {
+        "path": "model-00001-of-00002.safetensors",
+        "size": 4961251752,
+        "sha256": "5e4c75b0ef1fb009caee567ab244f9e354e915fda748d1b76179cc453a39b4b5"
+      },
+      {
+        "path": "model-00002-of-00002.safetensors",
+        "size": 3639026128,
+        "sha256": "958e39df78c35ddb812fbcb8b5e7f46e07f1b153c1589f2d3f0b41c3b0748d30"
+      }
+    ]
+  },
+  "runtimes": {
+    "pytorch_container": {
+      "reference": "nvcr.io/nvidia/pytorch@sha256:c7a797978bfcdd5b9046b448c5defa290e7662be0f4c63497599c8428d3d6efb",
+      "torch": "2.8.0a0+5228986c39.nv25.05",
+      "torch_cuda": "12.9",
+      "transformers": "4.57.6"
+    },
+    "llama_cpp": {
+      "revision": "391fac16460f15233a7740550d858ac96df3419d",
+      "version": "0.4.1-dev",
+      "build": 10969,
+      "backend": "CUDA architecture 87"
+    }
+  },
+  "transformers_probes": {
+    "processor": {
+      "status": "READY_PROCESSOR",
+      "model_loaded": false,
+      "vision_processor_present": true,
+      "evidence": "medgemma-processor-probe-2026-09-21.json"
+    },
+    "bf16_full_cuda": {
+      "status": "FAILED_MEMORY",
+      "model_loaded": false,
+      "full_cuda_placement": false,
+      "stage": "model_load_full_cuda",
+      "evidence": "medgemma-bf16-model-load-probe-2026-09-21.json"
+    }
+  },
+  "conversion": {
+    "network": "none",
+    "local_files_only": true,
+    "general_llm_co_resident": false,
+    "use_temp_file": true,
+    "converter": "llama.cpp convert_hf_to_gguf.py at pinned revision",
+    "quantizer": "llama-quantize Q4_K_M at pinned revision",
+    "quantize_max_buffer_mib": 512,
+    "quantize_threads": 2,
+    "failed_attempt": {
+      "result": "DEVICE_REBOOTED",
+      "conditions": "general LLM remained resident; BF16 conversion used 4 GiB cgroup without --use-temp-file",
+      "decision": "do_not_repeat_co_resident_conversion"
+    }
+  },
+  "derived_artifacts": [
+    {
+      "role": "text_intermediate",
+      "path": "medgemma-1.5-4b-it-bf16.gguf",
+      "format": "GGUF",
+      "dtype": "BF16",
+      "size": 7767803392,
+      "sha256": "25d13265bee94884d9ad8db94134afeae30adfd9268f8e514fd1ba66375bbe16"
+    },
+    {
+      "role": "text_runtime",
+      "path": "medgemma-1.5-4b-it-q4_k_m.gguf",
+      "format": "GGUF",
+      "quantization": "Q4_K_M",
+      "size": 2489893632,
+      "sha256": "c39d76e3cb4678bec663cab92b39ac45ad86378c26c978c023b4f6d81ce0f45c"
+    },
+    {
+      "role": "vision_projector",
+      "path": "medgemma-1.5-4b-it-mmproj-f16.gguf",
+      "format": "GGUF",
+      "dtype": "F16",
+      "size": 851251232,
+      "sha256": "77bcbe7f2847d5f6c098c02ca99aeb4defadd3482469928fbf5e5924acb78733"
+    }
+  ],
+  "synthetic_probe": {
+    "status": "PASSED_SYNTHETIC_IMAGE_INGESTION",
+    "return_code": 0,
+    "user_or_medical_data_used": false,
+    "image": {
+      "description": "generated red/blue split with centered white square",
+      "size": 531,
+      "sha256": "89dbbdb88016000f5fc1ba75f0c5c039a4824fabc762f7b14f9158e1819b2b74"
+    },
+    "prompt": "Describe this synthetic image in one short sentence. Do not make medical claims.",
+    "response": "The image displays a split-screen design with a large red area on the left and a blue area on the right, featuring a small white square centered in the middle.",
+    "settings": {
+      "context_tokens": 2048,
+      "batch": 512,
+      "ubatch": 512,
+      "kv_cache": "q8_0",
+      "text_gpu_layers": "all",
+      "vision_projector_offload": "cpu",
+      "image_max_tokens": 256,
+      "temperature": 0,
+      "max_output_tokens": 64
+    },
+    "image_encode_elapsed_seconds": 47.685,
+    "evidence": "medgemma-llama-mtmd-synthetic-probe-2026-09-21.log"
+  },
+  "service_isolation": {
+    "max_gpu_heavy_services": 1,
+    "general_llm_stopped_for_conversion_and_probe": true,
+    "general_llm_restored_after_each_bounded_run": true,
+    "final_health_status": "ok",
+    "autostart_installed": false
+  },
+  "limitations": [
+    "llama-mtmd-cli identifies itself as experimental",
+    "vision projector GPU offload exhausted memory; successful probe kept the projector on CPU",
+    "no API service or E1 worker end-to-end request was verified with this GGUF runtime",
+    "no real image, user data, reference label, medical accuracy, clinical quality, concurrency, or soak test was performed"
+  ]
+}

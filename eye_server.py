@@ -127,6 +127,7 @@ import uuid
 import socket
 import subprocess
 import hmac
+import hashlib
 import shutil
 import tempfile
 from datetime import datetime
@@ -138,6 +139,7 @@ from utils.ai_config import AIError, LocalConfig, provider_from, validate_llm_se
 from utils.llm_client import generate_chat
 from utils.chat_context import summarize_result
 from utils.chat_prompt import build_chat_system_prompt
+from utils.gradcam_policy import gradcam_result_state, should_generate_gradcam
 from utils.image_proc import resize_image, enhance_contrast
 from utils.service_control import service_manager_argv
 from utils.uvc_camera import UvcCameraError, open_usb_uvc_camera
@@ -873,6 +875,104 @@ def save_cam_image(user_id, eye_side, cam_image_bgr):
         return None
 
     return f"/static/captures/users/{safe_user_id}/{filename}"
+
+
+def _file_sha256(path):
+    digest = hashlib.sha256()
+    with open(path, 'rb') as source:
+        for block in iter(lambda: source.read(1024 * 1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def generate_saved_gradcam(history_id, selected_eye):
+    """Generate a CAM from the immutable saved snapshot without updating its result."""
+    if config.GRADCAM_MODE != 'on_demand':
+        raise AIError('gradcam_mode_unavailable')
+    side = normalize_selected_eye(selected_eye)
+    if side is None:
+        raise ValueError('selected_eye must be L or R')
+    side_key = 'left_eye' if side == 'L' else 'right_eye'
+    conn = get_conn(DATABASE_PATH)
+    try:
+        row = conn.execute(
+            '''SELECT sessions.ai_reading_json, assets.file_path
+               FROM diagnosis_sessions AS sessions
+               JOIN session_assets AS assets ON assets.id = (
+                 SELECT candidate.id FROM session_assets AS candidate
+                 WHERE candidate.session_id = sessions.id
+                   AND candidate.asset_type = 'image_raw'
+                 ORDER BY candidate.id LIMIT 1
+               )
+               WHERE sessions.id = ?''',
+            (int(history_id),),
+        ).fetchone()
+    finally:
+        conn.close()
+    if row is None:
+        raise KeyError('history_not_found')
+
+    source_path = os.path.realpath(row['file_path'])
+    image_root = os.path.realpath(config.IMAGE_SAVE_DIR)
+    if os.path.commonpath([source_path, image_root]) != image_root or not os.path.isfile(source_path):
+        raise AIError('asset_unavailable')
+    try:
+        stored_analysis = json.loads(row['ai_reading_json'])
+    except (TypeError, json.JSONDecodeError):
+        raise AIError('baseline_unverified') from None
+    stored_eye = stored_analysis.get(side_key)
+    if not isinstance(stored_eye, dict):
+        raise AIError('unsupported_input')
+    bbox = stored_eye.get('bbox')
+    if not isinstance(bbox, (list, tuple)) or len(bbox) != 4:
+        raise AIError('baseline_unverified')
+
+    source = cv2.imread(source_path, cv2.IMREAD_COLOR)
+    if source is None:
+        raise AIError('asset_unavailable')
+    height, width = source.shape[:2]
+    try:
+        x1, y1, x2, y2 = [int(value) for value in bbox]
+    except (TypeError, ValueError):
+        raise AIError('baseline_unverified') from None
+    x1, y1 = max(0, x1), max(0, y1)
+    x2, y2 = min(width, x2), min(height, y2)
+    if x1 >= x2 or y1 >= y2:
+        raise AIError('baseline_unverified')
+    prepared = upscale_eye_crop_for_classifier(source[y1:y2, x1:x2])
+    if prepared is None:
+        raise AIError('unsupported_input')
+
+    classifier = get_models().get_classifier()
+    classification = classifier.classify_with_details(prepared, generate_cam=True)
+    stored_class = stored_eye.get('class', stored_eye.get('disease_class'))
+    if type(stored_class) is not int or stored_class != classification['class']:
+        raise AIError('baseline_changed')
+    heatmap = classification.get('heatmap_image')
+    if heatmap is None:
+        raise AIError('gradcam_failed')
+
+    cache_material = ':'.join((
+        _file_sha256(source_path),
+        _file_sha256(config.CLASSIFIER_MODEL_PATH),
+        str(classification['class']),
+        'efficientnet-preprocess-v1',
+    ))
+    cache_key = hashlib.sha256(cache_material.encode()).hexdigest()
+    cache_path = os.path.join(os.path.dirname(source_path), f'ondemand_cam_{side}_{cache_key}.jpg')
+    if not os.path.isfile(cache_path) and not cv2.imwrite(cache_path, heatmap):
+        raise AIError('gradcam_failed')
+    static_root = os.path.realpath(app.static_folder)
+    if os.path.commonpath([os.path.realpath(cache_path), static_root]) != static_root:
+        raise AIError('asset_unavailable')
+    relative = os.path.relpath(cache_path, static_root).replace(os.sep, '/')
+    return {
+        'history_id': int(history_id),
+        'selected_eye': side,
+        'cam_image_url': '/static/' + relative,
+        'cache_key': cache_key,
+        'classification_unchanged': True,
+    }
 
 
 def build_mediapipe_mesh_overlay(source_bgr):
@@ -1982,7 +2082,10 @@ def analyze_uploaded_single_eye_from_image(img_bgr, user_id='anonymous', selecte
             }
 
         cls_start = time.time()
-        classification = classifier.classify_with_details(prepared_eye, generate_cam=True)
+        classification = classifier.classify_with_details(
+            prepared_eye,
+            generate_cam=should_generate_gradcam(config.GRADCAM_MODE),
+        )
         eye_analysis = analyzer.analyze(prepared_eye)
         cls_elapsed_ms = (time.time() - cls_start) * 1000.0
 
@@ -1997,6 +2100,7 @@ def analyze_uploaded_single_eye_from_image(img_bgr, user_id='anonymous', selecte
             'redness': round(float(eye_analysis.get('redness', 0.0)), 4),
             'bbox': (0, 0, source_w, source_h),
             'cam_image_url': cam_image_url,
+            'gradcam_status': gradcam_result_state(config.GRADCAM_MODE, bool(cam_image_url)),
             'detection_confidence': None,
             'process_time_ms': round(cls_elapsed_ms, 1),
             'detection_method': 'upload_single_image'
@@ -2304,7 +2408,10 @@ def analyze_bilateral_from_image(img_bgr, user_id='anonymous', selected_eye=None
                     }
                 }
 
-            classification = classifier.classify_with_details(prepared_eye, generate_cam=True)
+            classification = classifier.classify_with_details(
+                prepared_eye,
+                generate_cam=should_generate_gradcam(config.GRADCAM_MODE),
+            )
             eye_analysis = analyzer.analyze(prepared_eye)
             cls_elapsed_ms = (time.time() - cls_start) * 1000.0
 
@@ -2317,6 +2424,7 @@ def analyze_bilateral_from_image(img_bgr, user_id='anonymous', selected_eye=None
                 'redness': round(float(eye_analysis.get('redness', 0.0)), 4),
                 'bbox': eye_item['bbox'],
                 'cam_image_url': cam_image_url,
+                'gradcam_status': gradcam_result_state(config.GRADCAM_MODE, bool(cam_image_url)),
                 'detection_confidence': 100.0,  # MediaPipe는 신뢰도를 직접 제공하지 않음
                 'process_time_ms': round(cls_elapsed_ms, 1)
             }
@@ -2770,7 +2878,10 @@ def run_diagnosis_pipeline(snapshot, language='ko'):
             # Stage 2: 질환 분류
             print(f"  Stage 2: 질환 분류 중...")
             start_time = time.time()
-            classification = classifier.classify_with_details(crop_image, generate_cam=True)
+            classification = classifier.classify_with_details(
+                crop_image,
+                generate_cam=should_generate_gradcam(config.GRADCAM_MODE),
+            )
             elapsed_classify = time.time() - start_time
             print(f"    ✓ {classification['disease']} (신뢰도: {classification['confidence']*100:.1f}%)")
             
@@ -2793,6 +2904,7 @@ def run_diagnosis_pipeline(snapshot, language='ko'):
                 'redness': float(analysis['redness']),
                 'bbox': eye_crop['bbox'],
                 'cam_image_url': cam_image_url,
+                'gradcam_status': gradcam_result_state(config.GRADCAM_MODE, bool(cam_image_url)),
                 'detection_confidence': float(eye_crop['confidence']),
                 'processing_time_ms': f"{elapsed_classify + elapsed_analyze:.1f}"
             }
@@ -3456,6 +3568,7 @@ def get_chat_configuration_status():
 
 @app.route('/api/chat/status', methods=['GET'])
 def api_chat_status():
+    # Configuration only: no model generation, no internal URL/token disclosure.
     return jsonify(get_chat_configuration_status())
 
 
@@ -3851,7 +3964,12 @@ def status():
             'kakao_send_ready': report_dep['kakao_send_ready'],
             'kakao_token_configured': report_dep['kakao_token_configured'],
             'missing_packages': report_dep['missing_packages']
-        }
+        },
+        'chat_feature': get_chat_configuration_status(),
+        'ai_experiments': {
+            'status': 'disabled' if os.getenv('AI_EXPERIMENTS_ENABLED', '0') != '1' else 'configured',
+            'mode': os.getenv('AI_EXPERIMENT_MODE', 'shadow'),
+        },
     })
 
 
@@ -3867,6 +3985,13 @@ def admin_config_page():
     if not is_admin_session():
         return redirect(url_for('login'))
     return render_template('admin_config.html')
+
+
+@app.route('/admin/ai-experiments')
+def admin_ai_experiments_page():
+    if not is_admin_session():
+        return redirect(url_for('login'))
+    return render_template('admin_ai_experiments.html')
 
 
 @app.route('/api/admin/login', methods=['POST'])
@@ -3991,6 +4116,237 @@ def api_admin_config_update():
         return jsonify({'status': 'error', 'message': str(e)}), 400
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+def _experiment_store():
+    from experiments.worker import store_from_env
+    return store_from_env()
+
+
+@app.route('/api/admin/gradcam/on-demand', methods=['POST'])
+def api_admin_gradcam_on_demand():
+    csrf_error = require_admin_csrf()
+    if csrf_error:
+        return csrf_error
+    try:
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict) or set(data) - {'history_id', 'selected_eye', 'csrf_token'}:
+            raise ValueError('invalid request')
+        history_id = int(data.get('history_id'))
+        if history_id < 1:
+            raise ValueError('invalid history id')
+        return jsonify({'status': 'ok', **generate_saved_gradcam(history_id, data.get('selected_eye'))})
+    except KeyError as exc:
+        return jsonify({'status': 'error', 'error_code': str(exc).strip("'")}), 404
+    except (ValueError, AIError) as exc:
+        code = exc.code if isinstance(exc, AIError) else 'invalid_request'
+        return jsonify({'status': 'error', 'error_code': code}), 409 if isinstance(exc, AIError) else 400
+
+
+def _experiment_capabilities():
+    enabled = os.getenv('AI_EXPERIMENTS_ENABLED', '0') == '1'
+    vlm_enabled = os.getenv('VLM_ENABLED', '0') == '1'
+    baseline_enabled = os.getenv('BASELINE_EXPERIMENTS_ENABLED', '0') == '1'
+    explanation_enabled = os.getenv('EXPLANATION_EXPERIMENTS_ENABLED', '0') == '1'
+    survey_enabled = os.getenv('SURVEY_VLM_EXPERIMENTS_ENABLED', '0') == '1'
+    hybrid_enabled = os.getenv('HYBRID_REVIEW_EXPERIMENTS_ENABLED', '0') == '1'
+    real_data_enabled = os.getenv('EXPERIMENT_ALLOW_REAL_DATA', '0') == '1'
+    supported_arms = []
+    if enabled and baseline_enabled:
+        supported_arms.append('E0_baseline')
+    if enabled and vlm_enabled:
+        supported_arms.append('E1_vlm_image')
+        if survey_enabled:
+            supported_arms.append('E2_vlm_survey')
+    if enabled and explanation_enabled and os.getenv('LLM_PROVIDER', 'openai').strip().lower() == 'local':
+        supported_arms.append('E3_result_explanation')
+    if enabled and hybrid_enabled:
+        supported_arms.append('E4_hybrid_review')
+    return {
+        'enabled': enabled,
+        'vlm_enabled': vlm_enabled,
+        'baseline_enabled': baseline_enabled,
+        'explanation_enabled': explanation_enabled,
+        'survey_enabled': survey_enabled,
+        'hybrid_enabled': hybrid_enabled,
+        'operational_import_ready': (
+            enabled and real_data_enabled
+            and os.getenv('AI_EXPERIMENT_MODE', 'shadow') == 'shadow'
+        ),
+        'mode': os.getenv('AI_EXPERIMENT_MODE', 'shadow'),
+        'deployment_profile': os.getenv('AI_DEPLOYMENT_PROFILE', 'chat_only'),
+        'enqueue_ready': bool(supported_arms),
+        'supported_arms': supported_arms,
+        'user_results_affected': False,
+    }
+
+
+def _experiment_error(exc):
+    if isinstance(exc, KeyError):
+        return jsonify({'status': 'error', 'error_code': str(exc).strip("'")}), 404
+    if isinstance(exc, ValueError):
+        return jsonify({'status': 'error', 'error_code': 'invalid_request'}), 400
+    code = exc.code if isinstance(exc, AIError) else 'invalid_request'
+    status = 503 if code in ('misconfigured', 'disabled') else 409
+    return jsonify({'status': 'error', 'error_code': code}), status
+
+
+@app.route('/api/admin/ai-experiments/capabilities', methods=['GET'])
+def api_admin_experiment_capabilities():
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+    csrf_token = str(session.get('admin_csrf_token', '')).strip() or create_admin_csrf_token()
+    return jsonify({
+        'status': 'ok',
+        'capabilities': _experiment_capabilities(),
+        'csrf_token': csrf_token,
+    })
+
+
+@app.route('/api/admin/ai-experiments/samples/from-history', methods=['POST'])
+def api_admin_experiment_sample_from_history():
+    csrf_error = require_admin_csrf()
+    if csrf_error:
+        return csrf_error
+    try:
+        capabilities = _experiment_capabilities()
+        if not capabilities['operational_import_ready']:
+            raise AIError('real_data_not_allowed')
+        data = request.get_json(silent=True)
+        allowed = {
+            'history_id', 'selected_eye', 'permission_ref',
+            'retention_policy_ref', 'retention_until', 'split', 'csrf_token',
+        }
+        if not isinstance(data, dict) or set(data) - allowed:
+            raise ValueError('invalid request')
+        try:
+            history_id = int(data.get('history_id'))
+        except (TypeError, ValueError):
+            raise ValueError('invalid history id') from None
+        from experiments.import_operational import import_history_eye
+        sample, created = import_history_eye(
+            _experiment_store(),
+            database_path=DATABASE_PATH,
+            image_root=config.IMAGE_SAVE_DIR,
+            history_id=history_id,
+            selected_eye=data.get('selected_eye'),
+            permission_ref=data.get('permission_ref'),
+            retention_policy_ref=data.get('retention_policy_ref'),
+            retention_until=data.get('retention_until'),
+            split=str(data.get('split') or ''),
+        )
+        return jsonify({
+            'status': 'ok',
+            'sample_id': sample['sample_id'],
+            'selected_eye': sample['selected_eye'],
+            'created': created,
+        }), 201 if created else 200
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
+
+
+@app.route('/api/admin/ai-experiments/jobs', methods=['GET'])
+def api_admin_experiment_jobs_list():
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+    try:
+        limit = max(1, min(int(request.args.get('limit', 100)), 500))
+        return jsonify({'status': 'ok', 'jobs': _experiment_store().list_job_summaries(limit)})
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
+
+
+@app.route('/api/admin/ai-experiments/jobs', methods=['POST'])
+def api_admin_experiment_jobs_create():
+    csrf_error = require_admin_csrf()
+    if csrf_error:
+        return csrf_error
+    try:
+        capabilities = _experiment_capabilities()
+        if not capabilities['enqueue_ready']:
+            raise AIError('disabled')
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict) or set(data) - {'sample_id', 'run_id', 'csrf_token'}:
+            raise ValueError('invalid request')
+        sample_id = str(data.get('sample_id') or '')
+        run_id = str(data.get('run_id') or '')
+        if not re.fullmatch(r'[0-9a-f]{32}', sample_id) or not re.fullmatch(r'[0-9a-f]{32}', run_id):
+            raise ValueError('invalid identifiers')
+        store = _experiment_store()
+        run = store.get_run(run_id)
+        if run['arm_id'] not in capabilities['supported_arms']:
+            raise AIError('unsupported_arm')
+        job, created = store.enqueue(sample_id, run_id)
+        return jsonify({
+            'status': 'ok', 'job_id': job['job_id'],
+            'job_status': job['state'], 'created': created,
+        }), 202 if created else 200
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
+
+
+@app.route('/api/admin/ai-experiments/jobs/<job_id>', methods=['GET'])
+def api_admin_experiment_job_get(job_id):
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+    try:
+        if not re.fullmatch(r'[0-9a-f]{32}', job_id):
+            raise ValueError('invalid job id')
+        jobs = _experiment_store().list_job_summaries(500)
+        job = next((item for item in jobs if item['job_id'] == job_id), None)
+        if job is None:
+            raise KeyError('job_not_found')
+        return jsonify({'status': 'ok', 'job': job})
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
+
+
+@app.route('/api/admin/ai-experiments/runs/<run_id>', methods=['GET'])
+def api_admin_experiment_run_get(run_id):
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+    try:
+        if not re.fullmatch(r'[0-9a-f]{32}', run_id):
+            raise ValueError('invalid run id')
+        from experiments.evaluate import evaluate_run
+        store = _experiment_store()
+        return jsonify({
+            'status': 'ok',
+            'run': store.get_run(run_id),
+            'evaluation': evaluate_run(store, run_id),
+        })
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
+
+
+@app.route('/api/admin/ai-experiments/compare', methods=['GET'])
+def api_admin_experiment_compare():
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+    try:
+        left = str(request.args.get('left_run_id') or '')
+        right = str(request.args.get('right_run_id') or '')
+        if not re.fullmatch(r'[0-9a-f]{32}', left) or not re.fullmatch(r'[0-9a-f]{32}', right):
+            raise ValueError('invalid run ids')
+        from experiments.evaluate import compare_runs
+        comparison = compare_runs(_experiment_store(), left, right)
+        return jsonify({'status': 'ok', 'comparison': comparison})
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
+
+
+@app.route('/api/admin/ai-experiments/jobs/<job_id>/cancel', methods=['POST'])
+def api_admin_experiment_job_cancel(job_id):
+    csrf_error = require_admin_csrf()
+    if csrf_error:
+        return csrf_error
+    try:
+        if not re.fullmatch(r'[0-9a-f]{32}', job_id):
+            raise ValueError('invalid job id')
+        job = _experiment_store().request_cancel(job_id)
+        return jsonify({'status': 'ok', 'job_id': job_id, 'job_status': job['state']})
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
 
 
 @app.route('/api/admin/logout', methods=['POST'])

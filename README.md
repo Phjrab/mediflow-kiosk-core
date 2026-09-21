@@ -32,7 +32,8 @@ CSI 카메라와 `nvarguscamerasrc`는 지원하지 않습니다. systemd, cron,
 - EfficientNet-B0 5개 클래스 분류: 결막염, 다래끼, 백내장, 정상, 포도막염
 - 예측 클래스 Grad-CAM 히트맵과 충혈도 등 픽셀 지표
 - 사용자별 진단·문진 이력, PDF 보고서, QR 및 선택적 카카오 공유
-- OpenAI 또는 Gemini 기반 결과 질의응답
+- OpenAI, Gemini 또는 별도 Jetson 로컬 LLM 기반 결과 질의응답
+- 기존 EfficientNet과 독립 MedGemma 분석을 분리 저장하는 관리자 연구 경로
 - 관리자 설정, 안전한 서비스 재시작·종료
 - `/status`의 CUDA, 모델 파라미터 장치, 선택 기능 준비 상태
 
@@ -256,8 +257,14 @@ v4l2-ctl --device=/dev/video0 --list-formats-ext
 
 ### 선택 기능
 
-- LLM: `LLM_PROVIDER`, `OPENAI_API_KEY`, `OPENAI_MODEL`, `GEMINI_API_KEY`, `GEMINI_MODEL`
+- LLM: `LLM_PROVIDER`, `OPENAI_API_KEY`, `OPENAI_MODEL`, `GEMINI_API_KEY`, `GEMINI_MODEL`, `LOCAL_LLM_BASE_URL`, `LOCAL_LLM_MODEL`, and exactly one of `LOCAL_LLM_API_KEY` or `LOCAL_LLM_API_KEY_FILE`
 - 카카오: `KAKAO_CLIENT_ID`, `KAKAO_CLIENT_SECRET`, `KAKAO_REDIRECT_URI`, `KAKAO_REFRESH_TOKEN`, `KAKAO_ACCESS_TOKEN`
+
+로컬 AI와 연구 기능은 기본 비활성입니다. 로컬 LLM 장애는 클라우드로 자동
+전환되지 않으며 MedGemma 결과는 기존 사용자 결과·DB·PDF를 덮어쓰지 않습니다.
+설치, 프로필 전환, smoke test는 [Local AI runbook](docs/LOCAL_AI_RUNBOOK.md),
+동일 샘플 E0/E1 저장·비교·평가는 [AI experiment protocol](docs/AI_EXPERIMENT_PROTOCOL.md)을
+따릅니다.
 - 브리지: `KAKAO_APP_HOST`, `KAKAO_APP_PORT`, `KAKAO_BRIDGE_URL`
 
 LLM 키가 없으면 채팅만 사용할 수 없고, 카카오 설정이 없으면 카카오 공유만 제한됩니다. 메인 스크리닝 서버와 로컬 PDF 기능은 계속 시작할 수 있습니다. `database/app.py`의 설정 우선순위는 프로세스 환경, 프로젝트 루트 `.env`, 선택적 `config.local.json`, 코드 기본값입니다.

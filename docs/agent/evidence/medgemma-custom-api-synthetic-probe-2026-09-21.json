@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "status": "PASSED_CUSTOM_API_SYNTHETIC",
+  "http_status": 200,
+  "elapsed_seconds": 73.253,
+  "model": "google/medgemma-1.5-4b-it",
+  "input": {
+    "synthetic": true,
+    "medical_or_user_data": false,
+    "sha256": "89dbbdb88016000f5fc1ba75f0c5c039a4824fabc762f7b14f9158e1819b2b74"
+  },
+  "response": {
+    "analysis": {
+      "analysis_status": "abstain",
+      "brief_explanation": "short explanation",
+      "image_quality": {
+        "assessable": false,
+        "reasons": [
+          "short reason"
+        ]
+      },
+      "limitations": [
+        "short limitation"
+      ],
+      "schema_version": "1.0",
+      "suggested_label": null,
+      "visual_observations": []
+    },
+    "vision_ingested": true
+  },
+  "limitations": [
+    "synthetic image only",
+    "no medical quality evaluation",
+    "single request only"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "compatibility": {
+    "expected_cuda_family": "12.6",
+    "installation_performed": false,
+    "jetpack_family": "6.2.2",
+    "model_loaded": false,
+    "pytorch_matrix_note": "JetPack 6.2 rows list NVIDIA PyTorch 2.7/2.8 development builds",
+    "reasons": [],
+    "replacement_selected": false,
+    "state": "READY_CORE"
+  },
+  "host": {
+    "architecture": "aarch64",
+    "l4t_read_error": null,
+    "l4t_release": "36.5.2",
+    "python": "3.12.3"
+  },
+  "inspection": "read_only_no_network_no_model_load",
+  "packages": {
+    "cuda-toolkit-12-6": null,
+    "libcudnn9": "",
+    "nvidia-jetpack": null,
+    "nvidia-l4t-core": null,
+    "tensorrt": null
+  },
+  "python_packages": {
+    "accelerate": null,
+    "transformers": null
+  },
+  "schema_version": 1,
+  "torch": {
+    "built_cuda": "12.9",
+    "cuda_available": true,
+    "device_count": 1,
+    "device_name": "Orin",
+    "error": null,
+    "imported": true,
+    "version": "2.8.0a0+5228986c39.nv25.05"
+  }
+}

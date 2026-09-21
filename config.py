@@ -119,6 +119,9 @@ def resolve_torch_device(requested=None, cuda_index=None):
 TORCH_DEVICE_REQUESTED = _get_env_str('TORCH_DEVICE', 'auto').lower()
 CUDA_DEVICE_INDEX = _get_env_int('CUDA_DEVICE_INDEX', 0)
 CUDA_EMPTY_CACHE_AFTER_ANALYSIS = _get_env_bool('CUDA_EMPTY_CACHE_AFTER_ANALYSIS', False)
+GRADCAM_MODE = _get_env_str('GRADCAM_MODE', 'always').lower()
+if GRADCAM_MODE not in ('always', 'off', 'on_demand'):
+    raise ValueError('GRADCAM_MODE must be one of: always, off, on_demand')
 DEVICE = resolve_torch_device(TORCH_DEVICE_REQUESTED, CUDA_DEVICE_INDEX)
 
 print(

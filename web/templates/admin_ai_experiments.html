@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>MediFlow 연구 비교</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; color: #172033; background: #f4f7fb; }
+        .notice { padding: 1rem; background: #fff7d6; border: 1px solid #e7c760; border-radius: .5rem; }
+        table { margin-top: 1rem; width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: .65rem; border: 1px solid #d8dfeb; text-align: left; vertical-align: top; }
+        th { background: #eaf0f8; }
+        pre { white-space: pre-wrap; max-width: 42rem; }
+        .error { color: #b42318; }
+        .compare { margin-top: 1rem; padding: 1rem; background: white; border-radius: .5rem; }
+        input { min-width: 20rem; margin: .25rem; padding: .4rem; }
+        select, button { margin: .25rem; padding: .4rem; }
+    </style>
+</head>
+<body>
+    <h1>AI 연구 비교</h1>
+    <p class="notice">이 화면의 VLM 출력은 독립 연구 결과입니다. 기존 EfficientNet 결과, 사용자 결과, PDF 보고서를 변경하지 않습니다. 모델 간 일치는 정답이나 확진을 뜻하지 않습니다.</p>
+    <p id="capabilities">상태 확인 중…</p>
+    <p id="error" class="error"></p>
+    <section class="compare">
+        <h2>승인된 운영 이력 ROI 등록</h2>
+        <p>선택한 눈 ROI만 연구 저장소로 복사합니다. 기존 결과와 원본 DB는 수정하지 않습니다.</p>
+        <input id="history-id" inputmode="numeric" aria-label="운영 이력 ID" placeholder="history ID">
+        <select id="selected-eye" aria-label="선택 눈"><option value="L">L</option><option value="R">R</option></select>
+        <input id="permission-ref" aria-label="데이터 사용 승인 참조" placeholder="permission reference">
+        <input id="retention-ref" aria-label="보존 정책 참조" placeholder="retention policy reference">
+        <input id="retention-until" type="date" aria-label="보존 만료일">
+        <select id="research-split" aria-label="연구 분할">
+            <option value="holdout">holdout</option><option value="prospective">prospective</option>
+            <option value="train">train</option><option value="validation">validation</option><option value="test">test</option>
+        </select>
+        <button type="button" id="import-button">ROI 등록</button>
+        <pre id="import-result">명시적 승인 참조와 보존 정책 참조가 모두 필요합니다.</pre>
+    </section>
+    <section class="compare">
+        <h2>E0/E1 동일 샘플 run 비교</h2>
+        <input id="left-run" aria-label="왼쪽 run ID" placeholder="E0 run ID">
+        <input id="right-run" aria-label="오른쪽 run ID" placeholder="E1 run ID">
+        <button type="button" id="compare-button">비교</button>
+        <pre id="comparison">두 run의 공통 sample만 paired 집계합니다. 일치율은 정확도가 아닙니다.</pre>
+    </section>
+    <table>
+        <thead><tr><th>샘플 / arm</th><th>작업 상태</th><th>연구 분석</th><th>실행</th></tr></thead>
+        <tbody id="jobs"></tbody>
+    </table>
+    <script>
+        let adminCsrfToken = '';
+        function cell(text) {
+            const td = document.createElement('td');
+            td.textContent = text == null ? '' : String(text);
+            return td;
+        }
+        async function load() {
+            const error = document.getElementById('error');
+            try {
+                const [capsResponse, jobsResponse] = await Promise.all([
+                    fetch('/api/admin/ai-experiments/capabilities'),
+                    fetch('/api/admin/ai-experiments/jobs?limit=100')
+                ]);
+                const caps = await capsResponse.json();
+                const jobs = await jobsResponse.json();
+                if (!capsResponse.ok || !jobsResponse.ok) throw new Error('연구 저장소를 읽을 수 없습니다.');
+                const value = caps.capabilities;
+                adminCsrfToken = String(caps.csrf_token || '');
+                document.getElementById('capabilities').textContent =
+                    `enabled=${value.enabled}, baseline=${value.baseline_enabled}, vlm=${value.vlm_enabled}, survey=${value.survey_enabled}, explanation=${value.explanation_enabled}, hybrid=${value.hybrid_enabled}, import=${value.operational_import_ready}, mode=${value.mode}, profile=${value.deployment_profile}`;
+                const body = document.getElementById('jobs');
+                body.replaceChildren();
+                jobs.jobs.forEach((job) => {
+                    const row = document.createElement('tr');
+                    row.appendChild(cell(`${job.sample_id}\n${job.arm_id} repeat=${job.repeat_index}\nrun=${job.run_id}\n${job.selected_eye} ${job.modality}`));
+                    row.appendChild(cell(`${job.job_status}${job.error_code ? ` (${job.error_code})` : ''}`));
+                    row.appendChild(cell(job.analysis ? JSON.stringify(job.analysis, null, 2) : (job.explanation ? job.explanation.text : (job.hybrid_review ? JSON.stringify(job.hybrid_review.review, null, 2) : '결과 없음'))));
+                    row.appendChild(cell(job.duration_ms == null ? 'N/A' : `${job.duration_ms.toFixed(1)} ms`));
+                    body.appendChild(row);
+                });
+            } catch (failure) {
+                error.textContent = failure.message || '조회 실패';
+            }
+        }
+        async function compareRuns() {
+            const left = document.getElementById('left-run').value.trim();
+            const right = document.getElementById('right-run').value.trim();
+            const output = document.getElementById('comparison');
+            try {
+                const params = new URLSearchParams({ left_run_id: left, right_run_id: right });
+                const response = await fetch(`/api/admin/ai-experiments/compare?${params}`);
+                const payload = await response.json();
+                if (!response.ok) throw new Error(payload.error_code || '비교 실패');
+                output.textContent = JSON.stringify(payload.comparison, null, 2);
+            } catch (failure) {
+                output.textContent = failure.message || '비교 실패';
+            }
+        }
+        async function importHistoryRoi() {
+            const output = document.getElementById('import-result');
+            try {
+                const response = await fetch('/api/admin/ai-experiments/samples/from-history', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'X-Admin-CSRF': adminCsrfToken},
+                    body: JSON.stringify({
+                        history_id: Number(document.getElementById('history-id').value),
+                        selected_eye: document.getElementById('selected-eye').value,
+                        permission_ref: document.getElementById('permission-ref').value.trim(),
+                        retention_policy_ref: document.getElementById('retention-ref').value.trim(),
+                        retention_until: document.getElementById('retention-until').value,
+                        split: document.getElementById('research-split').value
+                    })
+                });
+                const payload = await response.json();
+                if (!response.ok) throw new Error(payload.error_code || '등록 실패');
+                output.textContent = `sample_id=${payload.sample_id}, created=${payload.created}`;
+                await load();
+            } catch (failure) {
+                output.textContent = failure.message || '등록 실패';
+            }
+        }
+        document.getElementById('import-button').addEventListener('click', importHistoryRoi);
+        document.getElementById('compare-button').addEventListener('click', compareRuns);
+        load();
+    </script>
+</body>
+</html>
