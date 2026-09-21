@@ -6,7 +6,7 @@ from pathlib import Path
 import socket
 from typing import Mapping
 
-from scripts import local_llm_service
+from scripts import local_llm_service, medgemma_service
 from services.ai_control.core import RuntimeObservation
 from services.ai_control.ingress import IngressJournal
 
@@ -32,8 +32,36 @@ def observe_runtime(env: Mapping[str, str] | None = None) -> RuntimeObservation:
             activity = IngressJournal(Path(ingress_dir) / "ingress.sqlite3").snapshot()
         except Exception:
             return RuntimeObservation("unknown", None, None, None)
-    profile = str(env.get("AI_DEPLOYMENT_PROFILE", "unknown")).strip()
-    if profile == "vlm_only":
+    vlm_pid = str(env.get("AI_CONTROL_MEDGEMMA_PID_FILE", "")).strip()
+    if vlm_pid:
+        try:
+            vlm_spec = medgemma_service.build_spec(env)
+            if Path(vlm_pid) != vlm_spec.pid_path:
+                raise medgemma_service.ManagerError("VLM PID path mismatch")
+            vlm_state, _record, _snapshot = medgemma_service.inspect_service(
+                vlm_spec, remove_stale=False
+            )
+        except (OSError, medgemma_service.ManagerError):
+            return RuntimeObservation("unknown", None, None, False)
+        if vlm_state == "running":
+            ready = medgemma_service.ready(vlm_spec, env)
+            return RuntimeObservation(
+                lifecycle_state="ready" if ready else "loading",
+                process_running=True,
+                model_loaded=ready,
+                inference_ready=ready,
+                activity_source="managed_ingress" if managed else "unmanaged_ingress",
+                inflight=activity["inflight"] if activity else None,
+                unknown_inflight=activity["unknown_inflight"] if activity else None,
+                admission=activity["admission"] if activity else None,
+                artifact_id=str(env.get("AI_CONTROL_VLM_ARTIFACT_ID", "")).strip() or None,
+                text_placement="cuda:0" if ready else None,
+                vision_placement="cpu" if ready else None,
+                observed_profile="vlm_only",
+            )
+        if vlm_state != "stopped":
+            return RuntimeObservation(vlm_state, None, None, False)
+    elif str(env.get("AI_DEPLOYMENT_PROFILE", "unknown")).strip() == "vlm_only":
         vlm_port = _optional_port(env.get("AI_CONTROL_VLM_RAW_PORT"), 8081)
         ready = _tcp_open(vlm_port)
         return RuntimeObservation(
@@ -48,7 +76,7 @@ def observe_runtime(env: Mapping[str, str] | None = None) -> RuntimeObservation:
             artifact_id=str(env.get("AI_CONTROL_VLM_ARTIFACT_ID", "")).strip() or None,
             text_placement="cuda:0" if ready else None,
             vision_placement="cpu" if ready else None,
-            observed_profile="vlm_only",
+            observed_profile="vlm_only" if ready else "stopped",
         )
     required = {
         "project_root": str(env.get("AI_CONTROL_PROJECT_ROOT", "")).strip(),

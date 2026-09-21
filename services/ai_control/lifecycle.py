@@ -37,9 +37,11 @@ class EngineAdapter:
 class LocalLlmEngine(EngineAdapter):
     """Reuse the existing local LLM manager rather than duplicating PID logic."""
 
-    def __init__(self, spec: local_llm_service.ServiceSpec, *, receipt: Callable[[], dict[str, Any]]):
+    def __init__(self, spec: local_llm_service.ServiceSpec, *, receipt: Callable[[], dict[str, Any]],
+                 prepare_start: Callable[[dict[str, Any]], None] | None = None):
         self.spec = spec
         self._receipt = receipt
+        self._prepare_start = prepare_start
 
     def snapshot(self) -> EngineState:
         state, record, _process = local_llm_service.inspect_service(
@@ -52,6 +54,8 @@ class LocalLlmEngine(EngineAdapter):
         return EngineState(state, False, dict(record or {}) if record else None)
 
     def start(self, desired: dict[str, Any]) -> None:
+        if self._prepare_start is not None:
+            self._prepare_start(desired)
         local_llm_service.start_service(self.spec)
 
     def stop(self) -> None:
@@ -256,9 +260,15 @@ class SequentialLifecycleAdapter(LifecycleAdapter):
         self._stop_running()
         profile = previous["profile"]
         if profile == "chat_only":
-            self.chat.start({"active_profile": profile, "restore": True})
+            self.chat.start({
+                "active_profile": profile, "restore": True,
+                "_runtime_receipt": previous["chat"].receipt,
+            })
         elif profile == "vlm_only":
-            self.vlm.start({"active_profile": profile, "restore": True})
+            self.vlm.start({
+                "active_profile": profile, "restore": True,
+                "_runtime_receipt": previous["vlm"].receipt,
+            })
         elif profile != "stopped":
             raise LifecycleFailure("restore_state_invalid")
 

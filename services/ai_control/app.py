@@ -34,6 +34,9 @@ def create_app(service: ControlService | None = None, *, env=None) -> Flask:
                 env.get("AI_CONTROL_MANAGED_INGRESS_VERIFIED", "0") == "1"
             ),
         )
+        if service.mutations_enabled:
+            from services.ai_control.bootstrap import build_operation_coordinator
+            service.operation_coordinator = build_operation_coordinator(service, env)
     token_file = env.get("AI_CONTROL_API_KEY_FILE", "").strip()
 
     @app.before_request

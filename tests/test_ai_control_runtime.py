@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+from scripts import medgemma_service
 from services.ai_control.ingress import IngressJournal
 from services.ai_control.runtime import observe_runtime
 
@@ -70,6 +71,23 @@ class RuntimeObservationTest(unittest.TestCase):
         self.assertTrue(state.inference_ready)
         self.assertFalse(state.model_loaded)
         self.assertEqual((state.text_placement, state.vision_placement), ("cuda:0", "cpu"))
+
+    def test_owned_medgemma_process_overrides_static_chat_profile(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            spec = mock.Mock(pid_path=root / "medgemma.pid.json")
+            env = {
+                "AI_DEPLOYMENT_PROFILE": "chat_only",
+                "AI_CONTROL_MEDGEMMA_PID_FILE": str(spec.pid_path),
+                "AI_CONTROL_VLM_ARTIFACT_ID": "fixture-vlm",
+            }
+            with mock.patch.object(medgemma_service, "build_spec", return_value=spec), \
+                    mock.patch.object(medgemma_service, "inspect_service", return_value=("running", {}, object())), \
+                    mock.patch.object(medgemma_service, "ready", return_value=True):
+                state = observe_runtime(env)
+            self.assertEqual(state.observed_profile, "vlm_only")
+            self.assertTrue(state.inference_ready)
+            self.assertEqual(state.artifact_id, "fixture-vlm")
 
 
 if __name__ == "__main__":

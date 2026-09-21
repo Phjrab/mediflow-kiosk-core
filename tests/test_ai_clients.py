@@ -302,6 +302,18 @@ class VLMClientTest(unittest.TestCase):
         self.assertEqual(result['provenance']['normalized_size'], [16, 12])
         self.assertEqual(result['provenance']['model'], self.env['VLM_MODEL'])
 
+    def test_vlm_credential_can_remain_in_owner_only_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            key = Path(directory) / 'vlm.key'
+            key.write_text('separate-vlm-token\n', encoding='utf-8')
+            key.chmod(0o600)
+            env = dict(self.env)
+            env.pop('VLM_API_KEY')
+            env['VLM_API_KEY_FILE'] = str(key)
+            result = analyze_eye(VLMConfig.from_env(env), self.image_bytes('red'))
+        self.assertEqual(result['analysis']['analysis_status'], 'abstain')
+        self.assertEqual(FakeChatHandler.requests[0]['authorization'], 'Bearer separate-vlm-token')
+
     def test_different_images_produce_different_payloads(self):
         config = VLMConfig.from_env(self.env)
         first = analyze_eye(config, self.image_bytes('red'))

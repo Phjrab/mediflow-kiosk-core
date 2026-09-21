@@ -15,7 +15,7 @@ from pathlib import Path
 
 from flask import Flask, jsonify, request
 from PIL import Image, ImageOps, UnidentifiedImageError
-from utils.ai_config import AIError
+from utils.ai_config import AIError, secret
 from utils.runtime_receipt import validate_runtime_expectation
 
 
@@ -85,10 +85,10 @@ runtime = {
 
 
 def _secret() -> str:
-    value = os.getenv('MEDGEMMA_API_KEY', '').strip()
-    if not value:
-        raise RuntimeError('MEDGEMMA_API_KEY is required')
-    return value
+    try:
+        return secret(os.environ, 'MEDGEMMA')
+    except AIError:
+        raise RuntimeError('MEDGEMMA API key is misconfigured') from None
 
 
 def _authorized() -> bool:
