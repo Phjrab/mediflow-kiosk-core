@@ -5,7 +5,7 @@
 - Path: `/Users/hajoonpark/자율설계/mediflow-kiosk-core`
 - Branch: `codex/local-ai-shadow-experiments`
 - Base: `2877e65f99bb1a3f9837b56c0736de57a4f66902`
-- Initial tree was clean; current changes are uncommitted task changes.
+- Feature commit `5c81b8d` is pushed as `origin/codex/local-ai-shadow-experiments`.
 - No `AGENTS.md` exists. Preserve `.env`, `HASH_PEPPER`, CUDA/PyTorch,
   operational DB, weights, user data, and current changes.
 
@@ -16,10 +16,10 @@
 | P0 | DONE | Code, baseline, branch, and two devices inspected read-only |
 | P1 | DEVICE_VERIFIED | Strict provider, bounded transport, A-to-B authenticated generation |
 | P2 | OPERATIONAL_DEVICE_VERIFIED | Minimal local-chat overlay promoted on A with recovery point; exact route, outage/no-fallback, and recovery checks passed |
-| P3 | DONE_CODE / MOCK_VERIFIED | Isolated samples, approved operational ROI import, E0, Grad-CAM |
-| P4 | DONE_CODE / MOCK_AND_SYNTHETIC_API_DEVICE_VERIFIED | Source-attested llama.cpp MedGemma service returned contract-valid HTTP 200 on one synthetic image |
-| P5 | DONE_CODE / MOCK_VERIFIED | Durable E0/E1 jobs and paired comparison |
-| P6 | DONE_CODE / MOCK_VERIFIED | E0/E1/E2/E3/E4 runner, storage, export, closed survey schema, and deterministic hybrid review implemented |
+| P3 | SYNTHETIC_DEVICE_VERIFIED | Isolated same-sample store plus Jetson A E0 and private Grad-CAM artifact |
+| P4 | SYNTHETIC_A_TO_B_DEVICE_VERIFIED | Source-attested MedGemma E1 and bounded-survey E2 workers succeeded on the same synthetic sample |
+| P5 | SYNTHETIC_DEVICE_VERIFIED | Durable E0/E1 jobs, one paired sample, comparison, and private exports verified |
+| P6 | SYNTHETIC_DEVICE_VERIFIED | E0/E1/E2/E3/E4 all succeeded; 15 private reports exported |
 | P7 | PARTIAL / SOURCE_ATTESTED_Q4_DEVICE_VERIFIED | Official source and derived Q4 artifacts verified; BF16 full-CUDA is blocked by memory and medical evaluation remains unrun |
 | P8 | DONE for current code scope | Runbooks, evidence, handoff updated |
 
@@ -72,17 +72,13 @@
 
 ## Device state
 
-- A's operational checkout started clean at `main` commit
-  `f5368550230e37238c7a7930e6b39c4e0ec11cde`. The minimal local-chat overlay is
-  committed locally on `codex/local-llm-operational`, rebased onto current
-  `origin/main` (`2877e65`), at `f4f0972`; its working tree is clean and no
-  push was performed. Pre-rebase commit `dd3afd7` is preserved on
-  `backup/local-llm-pre-rebase-20260920`. Only AI settings were atomically
-  added to the existing mode-0600 `.env`. Recovery branch
-  `backup/pre-local-llm-20260920-2335` and a private pre-change backup exist.
-  The dedicated key file remains mode 0600. Operational exact route,
-  unauthorized, outage/no-fallback, and recovery tests pass; DB, models, user
-  data, HASH_PEPPER and CUDA/PyTorch were not changed.
+- A's operational branch `codex/local-llm-operational` merged the feature
+  commit and is pushed at `ab6f840`. Recovery branch
+  `backup/pre-shadow-ai-20260921-1600` preserves the pre-deployment `f4f0972`
+  state, and a private mode-0600 `.env` backup exists. A's actual virtualenv ran
+  all 141 discovered tests successfully. Pre/post hashes confirmed `.env` and the
+  operational DB were unchanged; models, user data, HASH_PEPPER and CUDA/PyTorch
+  were also preserved.
 - B's root filesystem has 127 GiB available (42% used) after pulling the exact
   NVIDIA PyTorch 25.05 Linux/arm64 digest. Its 63 compressed layers total
   4,975,299,603 bytes; Docker inspection matched image ID and repo digest
@@ -112,6 +108,14 @@
   generated red/blue fixtures and was then removed. It remains
   `BLOCKED_PROVENANCE` for E1 because its manifest does not attest the exact
   Google source revision/conversion lineage.
+- On A, a mode-0700 research directory contains one generated 224x224 fixture,
+  a mode-0600 isolated research DB, the E0 Grad-CAM artifact, and 15 mode-0600
+  JSON/CSV/Markdown exports for E0-E4. All five jobs succeeded. E1/E2 abstained,
+  E3 is marked explanation-review-required, and E4 recorded `not_comparable` with
+  manual review and `agreement_is_accuracy=false`. No reference label was added.
+- The dedicated VLM key was transferred directly from B to A after explicit user
+  authorization and stored as an owned mode-0600 single-line file. It never
+  passed through the development Mac, command arguments, logs, or Git.
 - Credentials are not in repository files or command output. Dedicated API-key
   files on A and B are owned by their service users and mode 0600.
 - The approved temporary deployment clone/archive cleanup is complete. A's
@@ -120,19 +124,16 @@
 
 ## Resume from here
 
-1. Review A's rebased local deployment commit `f4f0972` before any push or merge.
-   Current `origin/main` is already its ancestor. Keep both recovery branches and
-   the mode-0600 pre-change `.env` backup; no remote branch has been pushed.
-2. Keep B manual. Its general LLM is the normal managed service on port 8080.
-   Run MedGemma only through a reviewed sequential stop/probe/restore procedure;
-   simultaneous residency on this 8 GB device is not verified or required.
-3. The next engineering step is a complete synthetic research-store E0/E1 run on
-   the same fixture through the A-side worker, followed by paired comparison and
-   export. The custom E1 endpoint itself is device verified, but this queue/store
-   integration has not yet run on hardware.
-4. E2, E3, and E4 remain mock verified. Run hardware workflows only with synthetic
-   fixtures first and keep E4 reports separate from classification metrics.
-5. Before any real-data use, enter actual governance references and expiry,
-   verify private research-directory controls, and review audit events. Run
-   `retention-status` before any explicitly authorized purge. No operational
-   record was imported or purged, and no medical-quality evaluation was run.
+1. Review the two pushed branches before merging to `main`: feature commit
+   `5c81b8d` and A deployment merge `ab6f840`. Keep A recovery branch
+   `backup/pre-shadow-ai-20260921-1600` and its private `.env` backup.
+2. B remains manual and sequential: the general LLM is the normal service on
+   port 8080; MedGemma is stopped and port 8081 is free. Simultaneous residency
+   on B is neither required nor verified.
+3. The implementation and synthetic device workflow are complete. Remaining
+   validation requires separately approved real research data, independent
+   reference labels, governance records, and a medical-quality protocol.
+4. Sustained load, thermal behavior, timeout/OOM recovery, and optional
+   co-residency remain unverified. Do not infer them from the single-fixture run.
+5. Review `retention-status` before any explicitly authorized purge. No
+   operational record was imported or purged during this deployment.

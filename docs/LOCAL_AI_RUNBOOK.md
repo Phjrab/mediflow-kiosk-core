@@ -8,23 +8,38 @@ remain resident on the same GPU.
 
 | Host | Intended role | Read-only observation | Status |
 | --- | --- | --- | --- |
-| A | Existing kiosk, `/api/chat` client, E0 baseline | Orin Nano 8 GB class, L4T R36.4.7, Python 3.10 | Minimal local-chat overlay operationally verified; no kiosk daemon was running during deployment |
+| A | Existing kiosk, `/api/chat` client, E0 baseline | Orin Nano 8 GB class, L4T R36.4.7, Python 3.10 | `ab6f840` deployed and pushed; 141 tests plus synthetic E0-E4 workflow passed |
 | B | General LLM or MedGemma service | Orin Nano 8 GB class, L4T R36.5.2, CUDA toolkit 12.6.11, Python 3.10 | General LLM managed on port 8080; official-source Q4 MedGemma custom API passed one synthetic request under sequential scheduling |
 | C | Optional VLM host | Not supplied | `NOT_RUN` |
 
 The pinned Qwen model was downloaded to B, verified by byte size and SHA-256,
-and run through the pinned native CUDA `llama.cpp` build. A dedicated mode-0600
-key was transferred to A without printing it. A's operational checkout now has
-the minimal local-chat overlay and only reviewed AI settings in its existing
-mode-0600 `.env`; its database, weights, user data, HASH_PEPPER and CUDA/PyTorch
-were not changed. A recovery branch and private pre-change `.env` backup exist.
-A's deployment branch is `codex/local-llm-operational` at local commit
-`f4f0972`, rebased onto `origin/main` `2877e65`; it has not been pushed. The
-current B general-LLM service is owned by the repository's manual lifecycle
-manager, not an installed boot service. Official pinned MedGemma source shards and
-source-derived Q4_K_M/F16 GGUF files are hash verified. With the general LLM
-stopped, the custom API completed one synthetic request; the service was then
-stopped and the general LLM restored.
+and run through the pinned native CUDA `llama.cpp` build. Dedicated mode-0600
+LLM and VLM keys are stored on A without printing their contents. A's operational
+branch `codex/local-llm-operational` is deployed and pushed at `ab6f840`; all 141
+device tests passed. Recovery branch `backup/pre-shadow-ai-20260921-1600` and a
+private pre-change `.env` backup exist. Hash checks confirmed that deployment and
+the synthetic workflow did not change A's `.env` or operational DB.
+
+B's general-LLM service remains owned by the repository's manual lifecycle
+manager, not an installed boot service. Official MedGemma source shards and the
+source-derived Q4_K_M/F16 GGUF files are hash verified. E1 and E2 completed under
+sequential scheduling; MedGemma was then stopped and the general LLM restored.
+
+## Same-sample synthetic device integration
+
+On 2026-09-21, A generated one 224x224 red/blue engineering fixture and stored
+it only in a private research directory. E0 used A's existing CUDA EfficientNet
+and saved a Grad-CAM artifact. B then stopped its managed general LLM and served
+the source-attested MedGemma Q4 endpoint for E1 and E2 sequentially. Both VLM
+arms returned valid abstentions. B stopped MedGemma and restored the general LLM;
+E3 then generated one local explanation from E0 JSON only, and E4 produced a
+deterministic `not_comparable` review with manual review required.
+
+All five jobs succeeded. The E0/E1 comparison recorded one paired attempt and
+zero paired assessed results, so agreement is `N/A` and explicitly not accuracy.
+Five JSON, CSV, and Markdown report sets were saved with mode 0600. Evidence is
+`docs/agent/evidence/jetson-a-synthetic-e0-e4-2026-09-21.json`. This is software
+integration evidence from a generated fixture, not medical-quality evidence.
 
 ## Pinned first-deployment candidates
 
