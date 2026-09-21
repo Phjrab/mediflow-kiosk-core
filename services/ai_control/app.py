@@ -30,6 +30,9 @@ def create_app(service: ControlService | None = None, *, env=None) -> Flask:
             observe_runtime=lambda: observe_runtime(env),
             drafts_enabled=env.get("AI_CONTROL_DRAFTS_ENABLED", "0") == "1",
             mutations_enabled=env.get("AI_CONTROL_MUTATIONS_ENABLED", "0") == "1",
+            managed_ingress_verified=(
+                env.get("AI_CONTROL_MANAGED_INGRESS_VERIFIED", "0") == "1"
+            ),
         )
     token_file = env.get("AI_CONTROL_API_KEY_FILE", "").strip()
 
