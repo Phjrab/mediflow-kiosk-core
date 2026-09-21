@@ -1,38 +1,60 @@
 # Admin Control Handoff
 
-Current phase: C0-C4 CODE/MOCK complete and C1/C2 DEVICE_READ_ONLY deployed; C5 remains PARTIAL/CODE/MOCK. The C4 implementation commit is `b870500`, based on the prior pushed source `6fa9e91`.
+Current phase: C0-C4 CODE/MOCK complete, C1/C2 read-only management deployed, and
+C4 managed ingress plus actual chat rollback verified. Final deployed runtime source is
+`c1e84bb`. C5 remains partial because the VLM device receipt and permanent
+MedGemma lifecycle binding are not complete.
 
-The existing LLM/VLM, F1, regression, and synthetic E0-E4 device evidence is preserved. A runs `codex/admin-control-a-deploy`; its runtime-code merge is `1dffc7a` and later branch commits only update this deployment record. B has release `/home/jetson2/mediflow-ai/control/releases/f0f0555`. A's `.env`, database and user data and B's inference keys, models and lifecycle records were not changed.
+The existing LLM/VLM, F1, regression, and synthetic E0-E4 device evidence is
+preserved. A runs `codex/admin-control-a-deploy`; its deployed SHA is `1ec6f31`.
+B's final controller and ingress source is the clean detached `c1e84bb` release;
+the earlier `f0f0555` release remains available for rollback. A's `.env` backup is
+owner-only, and its only live setting change is
+`VLM_BASE_URL=http://192.168.50.11:8080`; its non-VLM digest is unchanged. The A
+database and user data and B inference keys, models, and user data were not changed.
 
-Real B apply remains intentionally unavailable. Controller-authoritative ingress,
-shared lifecycle locking, sequential owned adapters, unknown-lease recovery, and
-E3 receipt persistence now exist in local code and mock tests. The currently
-deployed inference ports still bypass those components, so no real model change is
-safe until the separate maintenance migration is approved and completed.
+The deployed B inference path is now controller-authoritative: network port 8080
+is managed ingress, raw chat is loopback-only 18080, and raw VLM ports 8081/18081
+are closed. One real chat apply/rollback completed through the durable operation
+coordinator. The permanently running controller still has drafts and mutations
+disabled because a concrete MedGemma launcher/owner callback is not wired.
 
-Read-only device state:
+Current device state:
 
-- B controller PID 35999 listens only on `127.0.0.1:8090`; private PID record is under `/home/jetson2/.local/state/mediflow-ai/admin-control-runtime/`. It has no autostart entry.
+- B controller PID 37652 runs `c1e84bb` and listens only on `127.0.0.1:8090`.
+- B managed ingress PID 37550 runs `c1e84bb` on port 8080. Its durable journal is
+  open at generation 1 with zero active and zero unknown leases.
+- B general LLM PID 37864 is exact-owned and healthy on `127.0.0.1:18080`; its
+  runtime cwd is the compatible `6c2d9b1` release. MedGemma is stopped.
 - A tunnel PID 1947132 listens only on `127.0.0.1:18090` and forwards only to B loopback 8090; its private PID record is under `/home/jetson_orin_nano/.local/state/mediflow-ai/admin-control-tunnel/`. It has no autostart entry.
 - A reads `/home/jetson_orin_nano/.config/mediflow-ai/admin-control-readonly.env`; the file enables reads but keeps drafts and mutations off. The management credential is a separate owner-only mode-0600 file on each device.
-- Authenticated GET state/capabilities/models/current/events succeeded. Capabilities reports drafts false, mutations false and no operations. B's managed general LLM remained PID 9205 with its original start tick and healthy port 8080. MedGemma is stopped and port 8081 is free.
+- Authenticated GET state/capabilities/current succeeded through A. Capabilities
+  reports managed ingress authoritative, drafts false, mutations false and no
+  operations. A-to-B synthetic chat/receipt passed after rollback.
 - A's kiosk was already stopped and remains stopped; no web process was available to restart. The same-origin route was instead exercised with the actual A virtualenv and did not load the classifier.
 
-Validation: the A deployment merge passed 144 runnable tests with one skipped; B control suites passed 11; A focused device suites passed 9. The authenticated same-origin read, `.env`/DB hash preservation and exact process identity checks passed. The earlier A 141-test run predates this diff and is retained only as prior evidence.
+Validation: local runnable regression is 160 passed with one skipped; B preflight
+C4 suites passed 32 and the direct-CLI device subset passed 17. Real shared-lock,
+raw-bypass, receipt, inactive-VLM lease, controller isolation and rollback checks
+passed. Earlier regression evidence remains preserved.
 
 Still blocked/not run:
 
-- Managed chat/VLM ingress deployment, raw-port closure and device drain/switch/restore: BLOCKED_GATE. Review `C4_MAINTENANCE_MIGRATION.md` and its `.diff` first.
-- E3 general-LLM runtime receipt is CODE/MOCK complete; device receipt verification remains BLOCKED_GATE.
-- Draft/plan device writes and disabled-endpoint POST probes: NOT_RUN. A proposed POST probe was rejected because the approval covered GET verification only; no POST was sent.
-- Any actual B model change, device mutation test, medical quality evaluation, or real-user-data validation: NOT_RUN.
+- Permanent controller mutation and a device-tested MedGemma launcher/owner
+  binding: BLOCKED_GATE. Do not enable drafts/mutations before this is complete.
+- E3 general-LLM receipt is device-verified. E1/E2 VLM device receipt after a
+  sequential MedGemma profile selection remains BLOCKED_GATE.
+- Permanent controller POST endpoints remain disabled. One local synthetic
+  draft/plan was executed directly through the operation coordinator and finished
+  `rolled_back` after its injected verification failure.
+- A MedGemma start or model/profile switch, medical quality evaluation, and
+  real-user-data validation: NOT_RUN.
 
-Next action: review and execute the separate C4 maintenance migration only after
-explicit approval. Keep drafts and mutations off during raw-port migration; enable
-them only after ingress authority, exact process ownership, shared-lock contention,
-synthetic receipt, and rollback checks pass. Preserve the current read-only release
-and pre-migration general-LLM environment as the rollback path.
+Next action: implement and mock-test the fixed MedGemma service manager and bind
+both owned engines plus the managed ingress to controller bootstrap. Then use a
+separate approved window for one sequential chat→VLM→chat synthetic transition.
+Keep the current controller mutations off and preserve the C4 rollback environment.
 
 Exact approval phrase for the next device-writing step:
 
-> 승인합니다: `codex/admin-control`의 푸시된 C4 HEAD를 기준으로 `docs/agent/admin-control/C4_MAINTENANCE_MIGRATION.md`의 게이트 순서와 `C4_MAINTENANCE_MIGRATION.diff`를 Jetson A/B의 별도 유지보수 창에서 적용하는 것을 승인합니다. 기존 일반 LLM을 정확한 소유권 검증 후에만 일시 중지하고 raw chat/VLM을 B loopback 18080/18081로 이동한 다음 managed ingress를 B:8080에 설치하고, A의 비공개 VLM URL만 B:8080으로 변경하세요. 기존 추론 키는 owner-only mode 0600 파일로 유지하고 출력·로그·저장소·프로세스 인자에 노출하지 마세요. draft/mutation은 raw 우회 차단·공유 lock·unknown lease·합성 receipt·원복 검증이 모두 통과할 때까지 비활성화로 유지하고, 통과 후에만 1회의 합성 apply·restore를 수행하세요. 미관리 프로세스, PID/argv/boot-id 불일치, active/unknown inference, raw 우회, receipt drift, rollback 실패 중 하나라도 발견되면 즉시 admission을 닫고 기존 chat-only 상태로 원복한 뒤 mutation을 켜지 마세요. 모델·키·DB·사용자 데이터·의료 품질 평가는 변경하지 마세요.
+> 승인합니다: `codex/admin-control`의 최신 푸시 HEAD에 MedGemma 고정 launcher·exact owner process manager와 controller mutation bootstrap을 로컬 코드·mock으로 구현하고, 검증된 코드만 Jetson B의 새 detached release로 배포하는 것을 승인합니다. 현재 managed ingress·raw chat 18080·controller·A tunnel과 모든 owner-only 키·환경·rollback 파일을 보존하고, mock·identity·drain·unknown lease·receipt·원복 게이트가 모두 통과한 후에만 유지보수 창에서 draft/mutation을 일시 활성화하여 합성 chat→MedGemma→chat 순차 전환 1회를 실행하세요. 동시 GPU 상주는 하지 말고, 전환 후 drafts/mutations는 다시 비활성화하세요. 실패·drift·미관리 프로세스·unknown lease가 발생하면 admission을 닫고 현재 `1:1:chat_only`로 즉시 원복한 뒤 추가 재시작을 하지 마세요. 모델 파일·키·DB·사용자 데이터·CUDA/PyTorch·의료 품질 평가는 변경하지 마세요.

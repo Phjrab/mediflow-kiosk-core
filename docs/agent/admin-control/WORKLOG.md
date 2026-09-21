@@ -117,3 +117,63 @@ No LLM or VLM was started, stopped, restarted, or switched. No cloud fallback, m
 - Managed ingress activation, raw-port migration, process-manager bootstrap,
   synthetic device receipt verification, draft/mutation enablement, and a real
   apply/restore operation remain `BLOCKED_GATE` for a separate maintenance window.
+
+## 2026-09-21 — approved C4 device maintenance
+
+- Received explicit approval for the reviewed C4 maintenance sequence. Fixed two
+  pre-device defects before changing inference: managed controller observation
+  had to separate the ingress port from the raw runtime port (`29000e8`), and
+  direct lifecycle CLI execution needed the repository import root (`6c2d9b1`).
+  Local runnable regression reached 159 passed, one skipped before migration.
+- Verified the existing general LLM PID 9205 against its mode-0600 record: PID,
+  UID, executable, argv, cwd, boot-id and start-tick all matched. Port 8080 had
+  zero established inference connections. B private state/config directories
+  were owner-only, controller mutations were off, and there was no autostart.
+- Deployed detached B releases without replacing the prior rollback releases.
+  The final deployed runtime source is `c1e84bb`; B controller and ingress run from
+  that release. The raw LLM manager/runtime cwd is the compatible `6c2d9b1`
+  release because controller observation must match the exact process cwd.
+- Created owner-only C4 and rollback environment files, the shared lifecycle
+  lock, ingress journal, bootstrap applied state, and runtime receipt. Existing
+  inference/admin credentials remained in their original owner-only mode-0600
+  files and were never printed, logged, passed in argv, or copied to the Mac.
+- Proved real shared-lock contention before lifecycle mutation: a second CLI
+  action was rejected and PID/start-tick stayed unchanged.
+- Stopped only exact-owned PID 9205 and restarted the same pinned Qwen artifact as
+  PID 37141 on `127.0.0.1:18080`. A verified B:8080 reachable only through the
+  managed ingress while B:8081/18080/18081 were unreachable from the network.
+- Started ingress closed, verified sockets, then opened generation 1. A local B
+  synthetic chat returned 200 with a matching closed runtime receipt and journal
+  `open:0:0`. The bootstrap applied state is revision/generation `1/1`, profile
+  `chat_only`.
+- Restarted the B controller through exact PID validation. Final controller PID
+  is 37652 on loopback 8090; final ingress PID is 37550 on network port 8080. A's
+  existing tunnel PID 1947132 remained loopback-only on 18090.
+- Changed only A's private `VLM_BASE_URL` to B:8080 after saving an owner-only
+  backup. A's non-VLM `.env` digest stayed identical, `LLM_PROVIDER=local`, the
+  general LLM URL stayed B:8080/v1, and no A web process was started.
+- Found and fixed an inactive-upstream lease edge case (`c1e84bb`): connection
+  refusal before an upstream request is sent now returns 503 and completes the
+  lease instead of leaving it active. Actual A-to-B VLM-off verification returned
+  `503 backend_unavailable` with journal `open:0:0`. Local runnable regression is
+  now 160 passed, one skipped.
+- Ran one approved actual synthetic apply/restore through `OperationCoordinator`.
+  Operation `5adb27e4b8d74db0a3fa5768207f07c8` closed admission, drained, restarted
+  exact-owned chat, received the injected verification failure, restored chat
+  once, restored admission, and ended `rolled_back/synthetic_verify_failure`.
+  Applied state remained `1:1:chat_only`; final chat PID is 37864, health is ready,
+  and a post-restore A-to-B chat returned 200 with a matching receipt.
+
+### Final device state and limits
+
+- B sockets: ingress `0.0.0.0:8080`, raw chat `127.0.0.1:18080`, controller
+  `127.0.0.1:8090`; 8081 and 18081 are closed. Admission is open with zero active
+  and zero unknown leases.
+- All key, C4 environment, applied receipt/state, lock, ingress DB and PID record
+  files checked are owner-only mode 0600. No autostart entry was added.
+- Controller capabilities still report drafts false, mutations false and zero
+  operations. Permanent mutation was not enabled because the concrete MedGemma
+  launcher/owner callback is not yet bound to controller bootstrap. MedGemma was
+  not started, so no E1 device receipt or model-switch claim is made.
+- No model file, key, operational/application DB, user data, CUDA/PyTorch setup,
+  or medical-quality evaluation was changed or performed.

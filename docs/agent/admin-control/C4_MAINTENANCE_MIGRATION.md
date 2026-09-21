@@ -1,6 +1,6 @@
 # C4 Managed Ingress Maintenance Migration
 
-Status: `REVIEW_ONLY / NOT_APPLIED / BLOCKED_GATE`.
+Status: `INGRESS APPLIED / CHAT ROLLBACK VERIFIED / PERMANENT MUTATION BLOCKED_GATE`.
 
 This runbook separates the code/mock work from the device maintenance window. No
 Jetson port, process, model, key, environment file, database, or user data was
@@ -82,6 +82,8 @@ changed while preparing it. The proposed private configuration delta is in
 - Applied and restored generations, operation ID, rollback outcome, and proof
   that cloud fallback did not occur.
 
-Actual device migration, model switching, and medical-quality evaluation remain
-unexecuted until the user supplies the explicit maintenance approval recorded in
-the handoff.
+The approved ingress migration and one synthetic chat apply/rollback were
+completed on 2026-09-21. MedGemma stayed stopped, port 8081 stayed closed, and no
+model files, inference keys, application DB, user data, or medical-quality state
+were changed. Permanent draft/mutation enablement remains blocked until the
+controller has a concrete, device-tested MedGemma launcher/owner binding.
