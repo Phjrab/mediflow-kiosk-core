@@ -18,6 +18,13 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+# Direct `python3 scripts/local_llm_service.py ...` execution puts only the
+# scripts directory on sys.path. Add the fixed repository root before importing
+# the shared lifecycle-lock module used by both CLI and controller.
+_IMPORT_ROOT = Path(__file__).resolve().parent.parent
+if str(_IMPORT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_IMPORT_ROOT))
+
 from utils.lifecycle_lock import (
     LifecycleLockError,
     acquire_lifecycle_lock,
@@ -27,7 +34,7 @@ from utils.lifecycle_lock import (
 
 
 SCRIPT_PATH = Path(__file__).resolve()
-PROJECT_ROOT = SCRIPT_PATH.parent.parent
+PROJECT_ROOT = _IMPORT_ROOT
 COMMAND_NAME = "local_llm_service.py"
 ALLOWED_ACTIONS = frozenset({"start", "stop", "restart", "status", "logs"})
 DEFAULT_PORT = 8080

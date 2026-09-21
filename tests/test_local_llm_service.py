@@ -1,4 +1,6 @@
 import signal
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -55,6 +57,16 @@ class LocalLlmServiceTest(unittest.TestCase):
     def test_rejects_unknown_action(self):
         with self.assertRaises(service.UsageError):
             service.parse_action(["manager", "start;id"])
+
+    def test_direct_cli_imports_shared_lock_module(self):
+        result = subprocess.run(
+            [sys.executable, str(Path(service.__file__)), "invalid"],
+            cwd=Path(service.__file__).resolve().parents[1],
+            capture_output=True, text=True, timeout=10,
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("usage:", result.stderr)
+        self.assertNotIn("ModuleNotFoundError", result.stderr)
 
     def test_pid_reuse_is_not_treated_as_managed_process(self):
         with tempfile.TemporaryDirectory() as directory:
