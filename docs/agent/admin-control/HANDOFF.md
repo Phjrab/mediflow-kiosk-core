@@ -2,7 +2,7 @@
 
 Current phase: C0-C3 CODE/MOCK complete and C1/C2 DEVICE_READ_ONLY deployed; C4-C5 remain PARTIAL/CODE/MOCK. The source implementation is `c7807e1`/`f0f0555`, based on `2ccd9f1`.
 
-The existing LLM/VLM, F1, regression, and synthetic E0-E4 device evidence is preserved. A runs deployed checkout `1dffc7a` on `codex/admin-control-a-deploy`; B has release `/home/jetson2/mediflow-ai/control/releases/f0f0555`. A's `.env`, database and user data and B's inference keys, models and lifecycle records were not changed.
+The existing LLM/VLM, F1, regression, and synthetic E0-E4 device evidence is preserved. A runs `codex/admin-control-a-deploy`; its runtime-code merge is `1dffc7a` and later branch commits only update this deployment record. B has release `/home/jetson2/mediflow-ai/control/releases/f0f0555`. A's `.env`, database and user data and B's inference keys, models and lifecycle records were not changed.
 
 Real B apply is intentionally unavailable. The current inference ports do not yet provide controller-authoritative admission/in-flight leases, so a model change cannot safely prove drain completion. C4 must first complete mock concurrency/recovery work and an approved ingress/lifecycle migration plan.
 
