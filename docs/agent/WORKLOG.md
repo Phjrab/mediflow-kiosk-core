@@ -538,3 +538,43 @@
   parsed, relevant shell syntax and `git diff --check` passed, and `.env` has no
   diff. Final B state had managed general LLM PID 8244 healthy on port 8080,
   no MedGemma service process, and no listener on port 8081.
+
+## 2026-09-21 — commit, deployment, and synthetic E0-E4 device integration
+
+- Committed the complete feature set as `5c81b8d` and pushed
+  `codex/local-ai-shadow-experiments`. On A, created recovery branch
+  `backup/pre-shadow-ai-20260921-1600`, preserved a private `.env` backup, and
+  merged the feature commit into `codex/local-llm-operational` as `ab6f840`.
+  That deployment branch is also pushed.
+- The A merge had two overlapping local-chat conflicts. Resolved only the exact
+  conflict regions, preserving A's successful model-initialization guard and the
+  new research settings. A's actual virtualenv passed all 141 discovered tests.
+  SHA-256 comparisons before and after tests/integration confirmed that `.env`
+  and `database/database.db` were unchanged.
+- B cloned the pushed feature branch into versioned release
+  `/home/jetson2/mediflow-ai/control/releases/5c81b8d`; six MedGemma and five
+  artifact tests passed. An attempted control-path symlink promotion triggered
+  the lifecycle manager's cwd mismatch protection, so the original control
+  directory was immediately restored without stopping or replacing the model
+  process. The versioned release is used for MedGemma only.
+- After explicit authorization, transferred the dedicated VLM key directly from
+  B to A, never through the development Mac. A stores it in an owned mode-0600
+  single-line file. No key content was printed or committed.
+- Registered one generated 224x224 fixture in a mode-0700 research directory on
+  A. E0 ran the existing CUDA EfficientNet and saved a private Grad-CAM artifact.
+  With B's general LLM stopped by its manager, E1 and bounded-survey E2 ran
+  sequentially through the authenticated source-attested MedGemma endpoint.
+  Both returned valid abstentions. B then stopped MedGemma and restored the
+  managed general LLM on port 8080.
+- E3 used only the completed E0 JSON and the restored local LLM; E4 used the
+  stored E0/E1 result digests and no model call. E0-E4 all succeeded. E4 returned
+  `not_comparable` with manual review required because E1 abstained, and retained
+  `agreement_is_accuracy=false` and `user_result_action=none`.
+- Exported five private JSON/CSV/Markdown report sets (15 files, mode 0600).
+  The operational DB, `.env`, models, user data, HASH_PEPPER, and CUDA/PyTorch
+  remained unchanged. Final B state: managed general LLM healthy on port 8080,
+  no MedGemma process, and port 8081 free.
+- Evidence SHA-256 is
+  `0471a186621128da0595daca2eb94d3f9f27512ba6e892bcc29d740d4c85b07b`.
+  This was one synthetic engineering fixture with no reference label, operational
+  image, user data, clinical metric, or medical-quality evaluation.

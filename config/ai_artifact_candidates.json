@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_at_utc": "2026-09-21T06:35:00Z",
+  "recorded_at_utc": "2026-09-21T07:40:00Z",
   "target": {
     "host_role": "B_general_llm_or_research_vlm",
     "architecture": "aarch64",
@@ -214,7 +214,11 @@
     "medgemma_official_q4_synthetic_probe_verified": true,
     "medgemma_e1_api_device_verification_performed": true,
     "medgemma_bf16_full_cuda_load_verified": false,
-    "medgemma_mixed_cpu_gpu_placement_explicit": true
+    "medgemma_mixed_cpu_gpu_placement_explicit": true,
+    "synthetic_e0_e4_device_integration_performed": true,
+    "medgemma_e2_api_device_verification_performed": true,
+    "local_llm_e3_device_verification_performed": true,
+    "hybrid_e4_device_verification_performed": true
   },
   "sources": [
     "https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform-release-notes/pytorch-jetson-rel.html",
@@ -225,5 +229,13 @@
     "https://developers.google.com/health-ai-developer-foundations/faqs",
     "https://docs.ollama.com/docker",
     "https://ollama.com/library/medgemma1.5:4b"
-  ]
+  ],
+  "device_integration_evidence": {
+    "status": "PASSED_SYNTHETIC_E0_E1_E2_E3_E4_DEVICE_INTEGRATION",
+    "path": "docs/agent/evidence/jetson-a-synthetic-e0-e4-2026-09-21.json",
+    "sha256": "0471a186621128da0595daca2eb94d3f9f27512ba6e892bcc29d740d4c85b07b",
+    "sample_count": 1,
+    "synthetic": true,
+    "medical_or_user_data": false
+  }
 }

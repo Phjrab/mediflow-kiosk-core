@@ -1,10 +1,10 @@
 # Verified context — 2026-09-21
 
-Local development host: macOS, Python 3.13. The minimal general-LLM chat
-overlay is deployed in A's operational checkout on local branch
-`codex/local-llm-operational` at commit `f4f0972`, rebased onto current
-`origin/main` (`2877e65`), with a clean working tree, recovery branches, and
-private pre-change `.env` backup. It has not been pushed.
+Local development host: macOS, Python 3.13. Feature commit `5c81b8d` is
+pushed on `codex/local-ai-shadow-experiments`. Jetson A's operational branch
+`codex/local-llm-operational` is pushed at merge commit `ab6f840`; its 141-test
+device suite passed and its working tree is clean. Recovery branch
+`backup/pre-shadow-ai-20260921-1600` and a private pre-change `.env` backup remain.
 Repository path is `/Users/hajoonpark/자율설계/mediflow-kiosk-core`; branch
 `codex/local-ai-shadow-experiments`, initial HEAD
 `2877e65f99bb1a3f9837b56c0736de57a4f66902`. Initial worktree was clean. No
@@ -69,4 +69,4 @@ enumerated `eye-survey-1.0` record and keeps prior predictions, labels, confiden
 Grad-CAM, and free text out of VLM context. E4 is a deterministic same-sample
 E0-versus-E1/E2 review with no image/model call and no user-result action. Both
 features have independent default-off flags and their records are included in
-research retention purge. Their hardware workflow has not been run.
+research retention purge. Their synthetic hardware workflow has now run on the same isolated sample. E2 abstained; E4 returned `not_comparable` and required manual review without reporting accuracy.

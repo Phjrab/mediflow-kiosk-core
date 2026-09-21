@@ -10,11 +10,11 @@ local general LLM; it is not an image-analysis arm.
 
 | Arm | Input | Purpose | State |
 | --- | --- | --- | --- |
-| E0 | Canonical eye ROI | Existing EfficientNet baseline, optional Grad-CAM | Implemented for isolated samples |
-| E1 | Same canonical eye ROI | Independent MedGemma image analysis | Implemented; source-attested custom API verified on one synthetic fixture |
-| E2 | ROI plus frozen bounded survey | Survey-conditioned VLM analysis | Implemented; mock verified, hardware inference `NOT_RUN` |
-| E3 | Completed E0 result JSON, no image | Local-LLM result explanation | Implemented; mock verified, hardware inference `NOT_RUN` |
-| E4 | Completed same-sample E0 and E1/E2 results | Deterministic hybrid review rule | Implemented; mock verified, no model generation |
+| E0 | Canonical eye ROI | Existing EfficientNet baseline, optional Grad-CAM | Implemented; synthetic Jetson A run and Grad-CAM artifact verified |
+| E1 | Same canonical eye ROI | Independent MedGemma image analysis | Implemented; same-sample synthetic A-to-B worker run verified |
+| E2 | ROI plus frozen bounded survey | Survey-conditioned VLM analysis | Implemented; synthetic A-to-B worker run verified |
+| E3 | Completed E0 result JSON, no image | Local-LLM result explanation | Implemented; synthetic A-to-B local-LLM run verified |
+| E4 | Completed same-sample E0 and E1/E2 results | Deterministic hybrid review rule | Implemented; synthetic device workflow verified, no model generation |
 
 E0 does not run MediaPipe again. The sample manifest records source size, ROI
 coordinates, laterality basis, crop/preprocessing versions, and input digests.
