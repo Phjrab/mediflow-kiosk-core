@@ -5,7 +5,9 @@ from pathlib import Path
 
 from services.ai_control.core import ControlError
 from services.ai_control.ingress import IngressJournal
-from services.ai_control.ingress_app import UpstreamCompletionUnknown, create_app
+from services.ai_control.ingress_app import (
+    UpstreamCompletionUnknown, UpstreamUnavailable, create_app,
+)
 
 
 def expectation(generation=3):
@@ -115,6 +117,32 @@ class ManagedIngressTest(unittest.TestCase):
             self.assertEqual(lost.status_code, 503)
             self.assertEqual(journal.snapshot()['admission'], 'closed')
             self.assertEqual(journal.snapshot()['unknown_inflight'], 1)
+
+    def test_upstream_unavailable_before_send_completes_lease(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            key = root / 'key'
+            key.write_text('fixture-secret\n', encoding='ascii')
+            key.chmod(0o600)
+            journal = self.make_journal(root)
+            journal.open(deployment_generation=3, raw_bypass_closed=True)
+
+            def forward(_route, _payload):
+                raise UpstreamUnavailable()
+
+            app = create_app(
+                journal=journal, forward=forward, runtime_snapshot=expectation,
+                chat_key_file=str(key), vlm_key_file=str(key),
+            )
+            response = app.test_client().post(
+                '/v1/analyze-eye', json={},
+                headers={'Authorization': 'Bearer fixture-secret'},
+            )
+            self.assertEqual(response.status_code, 503)
+            self.assertEqual(response.get_json()['status'], 'backend_unavailable')
+            state = journal.snapshot()
+            self.assertEqual((state['admission'], state['inflight'], state['unknown_inflight']),
+                             ('open', 0, 0))
 
 
 if __name__ == '__main__':

@@ -23,6 +23,10 @@ class UpstreamCompletionUnknown(RuntimeError):
     """The upstream may still be computing after transport loss."""
 
 
+class UpstreamUnavailable(RuntimeError):
+    """The fixed upstream rejected connection before a request was sent."""
+
+
 def load_private_runtime_receipt(path: str | os.PathLike[str]) -> dict[str, Any]:
     receipt_path = Path(path)
     if not receipt_path.is_absolute():
@@ -76,10 +80,10 @@ class FixedLoopbackForwarder:
             if not isinstance(value, dict):
                 raise UpstreamCompletionUnknown()
             return int(response.status), value
-        except (OSError, TimeoutError, http.client.HTTPException, ValueError, UnicodeError):
+        except (ControlError, OSError, TimeoutError, http.client.HTTPException, ValueError, UnicodeError):
             if sent:
                 raise UpstreamCompletionUnknown() from None
-            raise
+            raise UpstreamUnavailable() from None
         finally:
             connection.close()
 
@@ -165,6 +169,9 @@ def create_app(
         except UpstreamCompletionUnknown:
             journal.mark_unknown(lease_id)
             return error("activity_unknown", 503)
+        except UpstreamUnavailable:
+            journal.complete(lease_id)
+            return error("backend_unavailable", 503)
         if status == 200 and actual is not None:
             response = dict(response)
             response["runtime_receipt"] = {**actual, "prompt_digest": prompt_digest}
