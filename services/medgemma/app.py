@@ -15,6 +15,8 @@ from pathlib import Path
 
 from flask import Flask, jsonify, request
 from PIL import Image, ImageOps, UnidentifiedImageError
+from utils.ai_config import AIError
+from utils.runtime_receipt import validate_runtime_expectation
 
 
 MAX_IMAGE_BYTES = 5 * 1024 * 1024
@@ -92,6 +94,22 @@ def _secret() -> str:
 def _authorized() -> bool:
     supplied = request.headers.get('Authorization', '')
     return hmac.compare_digest(supplied, 'Bearer ' + _secret())
+
+
+def _runtime_receipt(prompt_digest: str) -> dict:
+    try:
+        expectation = validate_runtime_expectation({
+            'node_id': os.environ['AI_CONTROL_NODE_ID'],
+            'artifact_id': os.environ['AI_CONTROL_ARTIFACT_ID'],
+            'artifact_manifest_digest': os.environ['AI_CONTROL_ARTIFACT_MANIFEST_DIGEST'],
+            'runtime_revision': os.environ['AI_CONTROL_RUNTIME_REVISION'],
+            'config_revision': int(os.environ['AI_CONTROL_CONFIG_REVISION']),
+            'deployment_generation': int(os.environ['AI_CONTROL_DEPLOYMENT_GENERATION']),
+            'effective_config_digest': os.environ['AI_CONTROL_EFFECTIVE_CONFIG_DIGEST'],
+        })
+    except (KeyError, ValueError, AIError):
+        raise AIError('configuration_drift') from None
+    return {**expectation, 'prompt_digest': prompt_digest}
 
 
 def _load_manifest() -> dict:
@@ -309,9 +327,8 @@ def analyze_eye():
         return jsonify({'status': 'busy'}), 429
     try:
         payload = request.get_json(silent=True)
-        if not isinstance(payload, dict) or set(payload) != {
-            'model', 'max_new_tokens', 'prompt_digest', 'class_mapping', 'context', 'image'
-        }:
+        required = {'model', 'max_new_tokens', 'prompt_digest', 'class_mapping', 'context', 'image'}
+        if not isinstance(payload, dict) or set(payload) not in (required, required | {'expected_runtime'}):
             raise ValueError('invalid_request')
         if payload['model'] != EXPECTED_MODEL_ID:
             return jsonify({'status': 'model_not_found'}), 404
@@ -328,6 +345,16 @@ def analyze_eye():
         expected_prompt_digest = hashlib.sha256(role.encode('utf-8')).hexdigest()
         if not role or not hmac.compare_digest(str(payload['prompt_digest']), expected_prompt_digest):
             raise ValueError('prompt_mismatch')
+        runtime_receipt = None
+        if 'expected_runtime' in payload:
+            try:
+                expected_runtime = validate_runtime_expectation(payload['expected_runtime'])
+                runtime_receipt = _runtime_receipt(expected_prompt_digest)
+            except AIError as exc:
+                code = 'configuration_drift' if exc.code == 'configuration_drift' else 'invalid_request'
+                return jsonify({'status': code}), 409 if code == 'configuration_drift' else 400
+            if any(runtime_receipt[key] != value for key, value in expected_runtime.items()):
+                return jsonify({'status': 'configuration_drift'}), 409
         _reject_forbidden_context(payload['context'])
         context = json.dumps(payload['context'], ensure_ascii=False, sort_keys=True)
         mapping = json.dumps(payload['class_mapping'], ensure_ascii=False, sort_keys=True)
@@ -366,7 +393,10 @@ def analyze_eye():
                 )
             decoded = processor.decode(output[0][input_length:], skip_special_tokens=True)
             analysis = json.loads(decoded)
-        return jsonify({'vision_ingested': True, 'analysis': analysis})
+        response = {'vision_ingested': True, 'analysis': analysis}
+        if runtime_receipt is not None:
+            response['runtime_receipt'] = runtime_receipt
+        return jsonify(response)
     except (ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         app.logger.info('request rejected: %s', type(exc).__name__)
         return jsonify({'status': 'invalid_request'}), 400

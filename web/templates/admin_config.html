@@ -302,6 +302,34 @@
             align-self: center;
         }
 
+        .ai-control-panel {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-top: 12px;
+        }
+
+        .ai-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .ai-status-item {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 9px;
+            font-size: 0.82rem;
+        }
+
+        [data-theme="dark"] .ai-status-item { background: #0f172a; }
+
+        .ai-warning { color: #b45309; font-size: 0.82rem; line-height: 1.45; }
+        .ai-error { color: #dc2626; }
+        .ai-control-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+        .ai-control-actions .btn:disabled { opacity:0.55; cursor:not-allowed; }
+
         @media screen and (max-width: 768px) {
             body {
                 width: 100%;
@@ -373,6 +401,31 @@
         <div class="section-title" data-i18n="section_llm_settings">LLM/API 키 설정</div>
         <div class="llm-note">API 키는 마스킹되어 표시됩니다. 비워두면 기존 키 유지, 새 값을 입력하면 즉시 갱신됩니다.</div>
         <div id="llm-config-grid" class="config-grid"></div>
+
+        <div class="section-title">로컬 AI 서버 관리</div>
+        <div class="llm-note">A의 요청 설정과 Jetson B의 실제 실행 설정은 별도로 관리됩니다. 상태 조회와 초안 저장은 모델을 시작하거나 중지하지 않습니다.</div>
+        <div id="ai-control-panel" class="ai-control-panel">
+            <div id="ai-control-status" class="ai-warning">기능 상태를 확인하는 중입니다.</div>
+            <div id="ai-status-grid" class="ai-status-grid" hidden></div>
+            <div id="ai-generation-fields" class="config-grid" hidden>
+                <div class="field"><label for="ai-temperature">로컬 채팅 temperature</label><input id="ai-temperature" type="number" min="0" max="1" step="0.05"></div>
+                <div class="field"><label for="ai-top-p">로컬 채팅 top_p</label><input id="ai-top-p" type="number" min="0.01" max="1" step="0.05"></div>
+                <div class="field"><label for="ai-max-tokens">로컬 채팅 최대 출력 token</label><input id="ai-max-tokens" type="number" min="1" max="4096" step="1"></div>
+            </div>
+            <div id="ai-runtime-fields" class="config-grid" hidden>
+                <div class="field"><label for="ai-profile">B 실행 프로필</label><select id="ai-profile"><option value="stopped">stopped</option><option value="chat_only">chat_only</option><option value="vlm_only">vlm_only</option></select></div>
+                <div class="field"><label for="ai-chat-artifact">일반 LLM artifact</label><select id="ai-chat-artifact"></select></div>
+                <div class="field"><label for="ai-vlm-artifact">MedGemma artifact</label><select id="ai-vlm-artifact"></select></div>
+            </div>
+            <div class="ai-control-actions">
+                <button class="btn btn-secondary" type="button" onclick="loadAiControl(true)">B 상태 새로고침</button>
+                <button id="ai-save-generation" class="btn btn-primary" type="button" onclick="saveGeneration()" disabled>생성 설정 저장</button>
+                <button id="ai-save-draft" class="btn btn-secondary" type="button" onclick="saveRuntimeDraft()" disabled>실행 설정 초안 저장</button>
+                <button id="ai-plan" class="btn btn-secondary" type="button" onclick="validateRuntimeDraft()" disabled>변경 검증</button>
+                <button id="ai-apply" class="btn btn-warning" type="button" disabled title="C4 안전 게이트 전에는 실제 적용할 수 없습니다.">실제 적용 비활성</button>
+            </div>
+            <div id="ai-plan-result" class="ai-warning" aria-live="polite"></div>
+        </div>
     </div>
 
     <div class="actions">
@@ -393,7 +446,8 @@
 </div>
 
 <script>
-    const configState = { values: {}, keys: [], llmSettings: {} };
+    const configState = { values: {}, keys: [], llmSettings: {}, aiControl: {} };
+    const aiControlState = { overview: null, generation: null, draft: null, plan: null, poller: null };
     let adminCsrfToken = '';
     function escapeHtml(value) {
         return String(value == null ? '' : value).replace(/[&<>"']/g, (character) => ({
@@ -512,7 +566,7 @@
         LOCAL_LLM_BASE_URL: {
             title: '로컬 LLM Base URL',
             description: 'Jetson B의 OpenAI 호환 /v1 주소입니다.',
-            hint: '예: http://192.168.50.11:8080/v1. 허용 목록에도 동일 origin을 등록하세요.'
+            hint: '예: http://<Jetson-B-IP>:8080/v1. 허용 목록에도 동일 origin을 등록하세요.'
         },
         LOCAL_LLM_MODEL: {
             title: '로컬 LLM 모델 alias',
@@ -718,6 +772,191 @@
         `;
     }
 
+    function setAiText(id, value, isError = false) {
+        const element = document.getElementById(id);
+        if (!element) return;
+        element.textContent = String(value == null ? '—' : value);
+        element.classList.toggle('ai-error', !!isError);
+    }
+
+    function statusItem(label, value) {
+        const item = document.createElement('div');
+        item.className = 'ai-status-item';
+        const title = document.createElement('strong');
+        title.textContent = label + ': ';
+        const text = document.createElement('span');
+        text.textContent = value == null ? '— / 측정 불가' : String(value);
+        item.append(title, text);
+        return item;
+    }
+
+    function renderAiOverview(payload) {
+        const grid = document.getElementById('ai-status-grid');
+        grid.replaceChildren();
+        const overview = payload.overview || {};
+        const state = overview.state || {};
+        const engine = state.engine || {};
+        const placements = engine.placements || {};
+        const telemetry = state.telemetry || {};
+        const stateCache = state.cache || {};
+        const stale = !!stateCache.stale;
+        const unreachable = stateCache.connection_state === 'unreachable';
+        grid.append(
+            statusItem('관리 연결', unreachable ? 'unreachable' : (stale ? 'stale' : 'connected')),
+            statusItem('관찰 시각', state.observed_at),
+            statusItem('실제 프로필', state.observed_profile || state.applied_profile),
+            statusItem('lifecycle', state.lifecycle_state),
+            statusItem('artifact', engine.artifact_id),
+            statusItem('프로세스', engine.process_running),
+            statusItem('모델 상주', engine.model_loaded),
+            statusItem('추론 준비', engine.inference_ready),
+            statusItem('배치', placements.vision ? `텍스트 ${placements.text || '—'} / 비전 ${placements.vision}` : placements.text),
+            statusItem('메모리 MiB', telemetry.memory_used_mib),
+            statusItem('온도 °C', telemetry.temperature_celsius),
+            statusItem('GPU 활동률', telemetry.gpu_activity_percent)
+        );
+        grid.hidden = false;
+
+        const models = ((overview.models || {}).models || []);
+        for (const [kind, selectId] of [['chat', 'ai-chat-artifact'], ['vlm', 'ai-vlm-artifact']]) {
+            const select = document.getElementById(selectId);
+            if (!select.options.length) {
+                models.filter((item) => item.engine_kind === kind).forEach((item) => {
+                    const option = document.createElement('option');
+                    option.value = item.artifact_id;
+                    option.textContent = `${item.display_name} · ${item.quantization}${item.medical_validated ? '' : ' · 의료 품질 미평가'}`;
+                    option.disabled = !item.eligible_for_activation;
+                    select.append(option);
+                });
+            }
+        }
+        document.getElementById('ai-runtime-fields').hidden = false;
+        document.getElementById('ai-save-draft').disabled = !configState.aiControl.drafts_enabled;
+        const stateMessage = unreachable
+            ? '관리 서비스에 연결할 수 없어 마지막 snapshot을 표시합니다. 모델 서비스 상태는 별도 확인이 필요합니다.'
+            : (stale ? '오래된 상태입니다. 변경 검증을 진행하지 마세요.' : 'Jetson B 읽기 전용 상태를 확인했습니다.');
+        setAiText('ai-control-status', stateMessage, stale || unreachable);
+    }
+
+    async function loadGeneration() {
+        const response = await fetch('/api/admin/ai-control/generation');
+        const data = await response.json();
+        if (!response.ok || data.status !== 'ok') throw new Error(data.message || '생성 설정 조회 실패');
+        aiControlState.generation = data.generation;
+        document.getElementById('ai-temperature').value = data.generation.temperature == null ? '' : data.generation.temperature;
+        document.getElementById('ai-top-p').value = data.generation.top_p == null ? '' : data.generation.top_p;
+        document.getElementById('ai-max-tokens').value = data.generation.max_tokens;
+        document.getElementById('ai-temperature').placeholder = '저장 전 runtime 기본값';
+        document.getElementById('ai-top-p').placeholder = '저장 전 runtime 기본값';
+        document.getElementById('ai-generation-fields').hidden = false;
+        document.getElementById('ai-save-generation').disabled = false;
+    }
+
+    async function loadAiControl(force = false) {
+        try {
+            await loadGeneration();
+            if (!configState.aiControl.enabled) {
+                setAiText('ai-control-status', '원격 관리 기능이 꺼져 있습니다. 기존 채팅·검사 동작은 유지됩니다.');
+                return;
+            }
+            const node = encodeURIComponent(configState.aiControl.node_id);
+            const response = await fetch(`/api/admin/ai-control/nodes/${node}/overview${force ? '?refresh=1' : ''}`);
+            const data = await response.json();
+            if (!response.ok || data.status !== 'ok') throw new Error(data.message || 'B 상태 조회 실패');
+            aiControlState.overview = data.overview;
+            renderAiOverview(data);
+        } catch (error) {
+            setAiText('ai-control-status', `관리 상태 조회 실패: ${error.message || error}. 기존 검사와 채팅 설정은 별도로 유지됩니다.`, true);
+        }
+    }
+
+    async function saveGeneration() {
+        const temperatureRaw = document.getElementById('ai-temperature').value;
+        const topPRaw = document.getElementById('ai-top-p').value;
+        const maxTokensRaw = document.getElementById('ai-max-tokens').value;
+        const temperature = Number(temperatureRaw);
+        const topP = Number(topPRaw);
+        const maxTokens = Number(maxTokensRaw);
+        if (!temperatureRaw || !topPRaw || !maxTokensRaw || !Number.isFinite(temperature)
+                || !Number.isFinite(topP) || !Number.isInteger(maxTokens)) {
+            await showAlert('temperature, top_p, 최대 token을 모두 유효한 숫자로 입력해 주세요.');
+            return;
+        }
+        try {
+            const response = await fetch('/api/admin/ai-control/generation', {
+                method: 'POST', headers: buildAdminHeaders(), body: JSON.stringify({
+                    expected_revision: aiControlState.generation.generation_revision,
+                    settings: { temperature, top_p: topP, max_tokens: maxTokens }
+                })
+            });
+            const data = await response.json();
+            if (!response.ok || data.status !== 'ok') throw new Error(data.message || '저장 실패');
+            aiControlState.generation = data.generation;
+            await showAlert(data.message);
+        } catch (error) {
+            await showAlert(`생성 설정 저장 실패: ${error.message || error}`);
+        }
+    }
+
+    function selectedRuntimeConfig() {
+        const models = ((aiControlState.overview || {}).models || {}).models || [];
+        const selectConfig = (kind, id) => {
+            const artifactId = document.getElementById(id).value;
+            const artifact = models.find((item) => item.engine_kind === kind && item.artifact_id === artifactId);
+            if (!artifact || !artifact.presets || !artifact.presets.length) throw new Error(`${kind} preset이 없습니다.`);
+            return { artifact_id: artifactId, preset_id: artifact.presets[0].preset_id, runtime_overrides: {} };
+        };
+        return {
+            active_profile: document.getElementById('ai-profile').value,
+            engines: { chat: selectConfig('chat', 'ai-chat-artifact'), vlm: selectConfig('vlm', 'ai-vlm-artifact') }
+        };
+    }
+
+    async function saveRuntimeDraft() {
+        try {
+            const current = aiControlState.overview.current_config;
+            const node = encodeURIComponent(configState.aiControl.node_id);
+            const response = await fetch(`/api/admin/ai-control/nodes/${node}/drafts`, {
+                method: 'POST', headers: buildAdminHeaders(), body: JSON.stringify({
+                    schema_version: '1.0', expected_config_revision: current.config_revision,
+                    desired: selectedRuntimeConfig()
+                })
+            });
+            const data = await response.json();
+            if (!response.ok || data.status !== 'ok') throw new Error(data.message || '초안 저장 실패');
+            aiControlState.draft = data.draft;
+            document.getElementById('ai-plan').disabled = false;
+            setAiText('ai-plan-result', '초안이 저장되었습니다. 현재 모델에는 적용되지 않았습니다.');
+        } catch (error) {
+            setAiText('ai-plan-result', `초안 저장 실패: ${error.message || error}`, true);
+        }
+    }
+
+    async function validateRuntimeDraft() {
+        if (!aiControlState.draft) return;
+        try {
+            const current = aiControlState.overview.current_config;
+            const node = encodeURIComponent(configState.aiControl.node_id);
+            const response = await fetch(`/api/admin/ai-control/nodes/${node}/plans`, {
+                method: 'POST', headers: buildAdminHeaders(), body: JSON.stringify({
+                    action: 'apply_config', draft_id: aiControlState.draft.draft_id,
+                    expected_config_revision: current.config_revision,
+                    expected_deployment_generation: current.deployment_generation,
+                    drain_policy: 'wait_then_abort', drain_timeout_seconds: 120
+                })
+            });
+            const data = await response.json();
+            if (!response.ok || data.status !== 'ok') throw new Error(data.message || '검증 실패');
+            aiControlState.plan = data.plan;
+            const blockers = data.plan.blocking_reasons || [];
+            setAiText('ai-plan-result', blockers.length
+                ? `검증 완료. 실제 적용 차단 사유: ${blockers.join(', ')}`
+                : `검증 완료. 재시작 필요: ${data.plan.restart_required}`);
+        } catch (error) {
+            setAiText('ai-plan-result', `변경 검증 실패: ${error.message || error}`, true);
+        }
+    }
+
     async function loadConfig() {
         try {
             setStatus('설정을 불러오는 중...');
@@ -731,12 +970,18 @@
             configState.values = data.config || {};
             configState.keys = data.editable_keys || Object.keys(configState.values);
             configState.llmSettings = data.llm_settings || {};
+            configState.aiControl = data.ai_control || {};
             adminCsrfToken = String(data.csrf_token || '').trim();
             if (adminCsrfToken) {
                 try { sessionStorage.setItem('admin_csrf_token', adminCsrfToken); } catch (e) {}
             }
             renderConfigFields();
             renderLLMFields();
+            await loadAiControl(false);
+            if (aiControlState.poller) clearInterval(aiControlState.poller);
+            if (configState.aiControl.enabled) {
+                aiControlState.poller = setInterval(() => loadAiControl(false), 5000);
+            }
             setStatus('설정 로드 완료');
         } catch (error) {
             setStatus(`조회 실패: ${error.message || error}`, true);

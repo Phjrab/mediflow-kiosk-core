@@ -12,6 +12,7 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 
 from utils.ai_config import AIError, VLMConfig
 from utils.llm_client import post_json
+from utils.runtime_receipt import validate_runtime_expectation, validate_runtime_receipt
 
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
@@ -124,6 +125,7 @@ def analyze_eye(
     image_bytes: bytes,
     *,
     context: dict[str, Any] | None = None,
+    runtime_expectation: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     context = {} if context is None else context
     if not isinstance(context, dict):
@@ -141,10 +143,11 @@ def analyze_eye(
 
     image, mime_type, size = prepare_image(image_bytes)
     digest = hashlib.sha256(image).hexdigest()
-    response = post_json(config, '/v1/analyze-eye', {
+    prompt_digest = hashlib.sha256(role.encode('utf-8')).hexdigest()
+    payload = {
         'model': config.model,
         'max_new_tokens': config.max_new_tokens,
-        'prompt_digest': hashlib.sha256(role.encode('utf-8')).hexdigest(),
+        'prompt_digest': prompt_digest,
         'class_mapping': {
             '0': 'conjunctivitis', '1': 'eyelid', '2': 'cataract',
             '3': 'normal', '4': 'uveitis',
@@ -154,18 +157,26 @@ def analyze_eye(
             'mime_type': mime_type,
             'data_base64': base64.b64encode(image).decode('ascii'),
         },
-    })
+    }
+    if runtime_expectation is not None:
+        payload['expected_runtime'] = validate_runtime_expectation(runtime_expectation)
+    response = post_json(config, '/v1/analyze-eye', payload)
     if response.get('vision_ingested') is not True:
         raise AIError('vision_not_ready')
     analysis = validate_analysis(response.get('analysis'))
+    provenance = {
+        'model': config.model,
+        'backend': config.backend,
+        'input_digest': digest,
+        'normalized_mime_type': mime_type,
+        'normalized_size': list(size),
+        'prompt_digest': prompt_digest,
+    }
+    if runtime_expectation is not None:
+        provenance['runtime_receipt'] = validate_runtime_receipt(
+            response.get('runtime_receipt'), runtime_expectation, prompt_digest=prompt_digest
+        )
     return {
         'analysis': analysis,
-        'provenance': {
-            'model': config.model,
-            'backend': config.backend,
-            'input_digest': digest,
-            'normalized_mime_type': mime_type,
-            'normalized_size': list(size),
-            'prompt_digest': hashlib.sha256(role.encode('utf-8')).hexdigest(),
-        },
+        'provenance': provenance,
     }

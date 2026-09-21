@@ -565,7 +565,14 @@ class ExperimentStore:
     ) -> dict[str, Any]:
         if arm_id not in ARMS or repeat_index < 0:
             raise ValueError('invalid run configuration')
-        if arm_id == 'E2_vlm_survey':
+        if arm_id == 'E1_vlm_image' and 'runtime_expectation' in config_snapshot:
+            from utils.runtime_receipt import validate_runtime_expectation
+
+            config_snapshot = dict(config_snapshot)
+            config_snapshot['runtime_expectation'] = validate_runtime_expectation(
+                config_snapshot['runtime_expectation']
+            )
+        elif arm_id == 'E2_vlm_survey':
             from experiments.survey import validate_run_config
 
             config_snapshot = validate_run_config(config_snapshot)
@@ -1078,6 +1085,17 @@ class ExperimentStore:
             } if review_json is not None else None)
             results.append(item)
         return results
+
+    def active_job_summary(self) -> dict[str, Any]:
+        with self._connection() as connection:
+            rows = connection.execute(
+                "SELECT state, COUNT(*) AS count FROM jobs "
+                "WHERE state IN ('queued','running','cancel_requested') GROUP BY state"
+            ).fetchall()
+        counts = {state: 0 for state in ('queued', 'running', 'cancel_requested')}
+        for row in rows:
+            counts[row['state']] = int(row['count'])
+        return {**counts, 'total': sum(counts.values())}
 
     def add_reference_label(self, sample_id: str, label: str, source: str) -> None:
         normalized = str(label)

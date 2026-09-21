@@ -47,16 +47,22 @@ def process_one(store: ExperimentStore, env=None) -> bool:
     started = time.monotonic()
     try:
         run = store.get_run(job['run_id'])
+        run_config = json.loads(run['config_json'])
+        runtime_expectation = run_config.get('runtime_expectation')
         image = store.sample_image_path(job['sample_id']).read_bytes()
         context = {}
         survey = None
         if run['arm_id'] == 'E2_vlm_survey':
             from experiments.survey import validate_run_config
 
-            validate_run_config(json.loads(run['config_json']))
+            run_config = validate_run_config(run_config)
+            runtime_expectation = run_config.get('runtime_expectation')
             survey = store.get_survey(job['sample_id'])
             context = {'survey': survey['responses']}
-        result = analyze_eye(VLMConfig.from_env(env), image, context=context)
+        result = analyze_eye(
+            VLMConfig.from_env(env), image, context=context,
+            runtime_expectation=runtime_expectation,
+        )
         if survey is not None:
             result.setdefault('provenance', {})['survey_digest'] = survey['response_digest']
             result['provenance']['survey_schema_version'] = survey['schema_version']
