@@ -5,6 +5,7 @@ import socket
 import threading
 import time
 from utils.ai_config import AIError, LocalConfig, provider_from
+from utils.ai_generation import GenerationSettings, settings_from_env
 
 # Process-local admission, deliberately single-flight. Unknown remote completion
 # quarantines this client until an operator verifies remote idle and restarts A.
@@ -52,6 +53,7 @@ def post_json(config, suffix, payload):
         })
         response = connection.getresponse()
         errors = {401: 'unauthorized', 403: 'unauthorized', 404: 'model_not_found',
+                  409: 'configuration_drift',
                   413: 'context_too_long', 429: 'busy', 503: 'loading'}
         if response.status != 200:
             raise AIError(errors.get(response.status, 'backend_unavailable'))
@@ -87,14 +89,20 @@ def post_json(config, suffix, payload):
         _slot.release()
 
 
-def local_chat(config, system_prompt, user_message):
+def local_chat(config, system_prompt, user_message, generation=None):
     if len((system_prompt + user_message).encode('utf-8')) > 24000:
         raise AIError('context_too_long')
-    data = post_json(config, '/chat/completions', {
-        'model': config.model, 'stream': False, 'max_tokens': config.max_tokens,
+    if generation is None:
+        generation = GenerationSettings(0, None, None, config.max_tokens, 'legacy_effective')
+    if generation.max_tokens > config.max_tokens:
+        raise AIError('invalid_generation_config')
+    payload = {
+        'model': config.model, 'stream': False,
         'messages': [{'role': 'system', 'content': system_prompt},
                      {'role': 'user', 'content': user_message}],
-    })
+    }
+    payload.update(generation.request_values())
+    data = post_json(config, '/chat/completions', payload)
     try:
         choice = data['choices'][0]
         if choice.get('finish_reason') == 'length':
@@ -113,7 +121,10 @@ def generate_chat(env, system_prompt, user_message, openai_call, gemini_call):
     if provider == 'local':
         if env.get('AI_DEPLOYMENT_PROFILE', 'chat_only') == 'vlm_only':
             raise AIError('backend_unavailable')
-        reply = local_chat(LocalConfig.from_env(env), system_prompt, user_message)
+        # Snapshot once at request admission. A concurrent admin save affects only
+        # later requests and cannot alter this payload in flight.
+        generation = settings_from_env(env)
+        reply = local_chat(LocalConfig.from_env(env), system_prompt, user_message, generation)
     elif provider == 'gemini':
         reply = gemini_call(system_prompt, user_message, env)
     else:

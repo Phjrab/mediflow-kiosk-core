@@ -47,6 +47,15 @@ class WorkerTest(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
+    @staticmethod
+    def runtime_expectation():
+        return {
+            'node_id': 'jetson-b', 'artifact_id': 'fixture-vlm',
+            'artifact_manifest_digest': 'a' * 64, 'runtime_revision': 'fixture-runtime',
+            'config_revision': 2, 'deployment_generation': 3,
+            'effective_config_digest': 'b' * 64,
+        }
+
     def test_disabled_flags_do_not_claim_job(self):
         run = self.store.create_run('E1_vlm_image', {}, {})
         job, _ = self.store.enqueue(self.sample['sample_id'], run['run_id'])
@@ -80,6 +89,24 @@ class WorkerTest(unittest.TestCase):
         self.assertTrue(process_one(self.store, self.env))
         self.assertEqual(self.store.get_job(job['job_id'])['state'], 'succeeded')
         analyze_eye.assert_called_once()
+
+    @mock.patch('experiments.worker.analyze_eye')
+    def test_e1_worker_forwards_frozen_runtime_expectation(self, analyze_eye):
+        expectation = self.runtime_expectation()
+        analyze_eye.return_value = {
+            'analysis': {
+                'schema_version': '1.0', 'analysis_status': 'abstain',
+                'image_quality': {'assessable': False, 'reasons': ['fixture']},
+                'visual_observations': [], 'suggested_label': None,
+                'limitations': ['fixture'], 'brief_explanation': 'fixture',
+            },
+            'provenance': {'input_digest': self.sample['roi_digest'], 'runtime_receipt': expectation},
+        }
+        run = self.store.create_run('E1_vlm_image', {'runtime_expectation': expectation}, {})
+        job, _ = self.store.enqueue(self.sample['sample_id'], run['run_id'])
+        self.assertTrue(process_one(self.store, self.env))
+        self.assertEqual(self.store.get_job(job['job_id'])['state'], 'succeeded')
+        self.assertEqual(analyze_eye.call_args.kwargs['runtime_expectation'], expectation)
 
     def test_vlm_worker_does_not_claim_another_arm(self):
         from experiments.survey import SURVEY_SCHEMA_VERSION

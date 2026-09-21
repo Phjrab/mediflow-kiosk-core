@@ -136,6 +136,8 @@ from PIL import Image, ImageOps
 import config as config
 from model_loader import initialize_models, get_models
 from utils.ai_config import AIError, LocalConfig, provider_from, validate_llm_settings
+from utils.ai_control_client import client_from_env
+from utils.ai_generation import settings_from_env, store_from_env
 from utils.llm_client import generate_chat
 from utils.chat_context import summarize_result
 from utils.chat_prompt import build_chat_system_prompt
@@ -550,6 +552,42 @@ def get_admin_llm_settings_snapshot():
         'LOCAL_LLM_API_KEY_CONFIGURED': bool(str(local_key).strip() or local_key_file),
         'LOCAL_LLM_API_KEY_SOURCE': local_key_source,
     }
+
+
+def get_ai_control_bootstrap_status():
+    enabled = os.getenv('AI_CONTROL_ENABLED', '0') == '1'
+    drafts_enabled = os.getenv('AI_CONTROL_DRAFTS_ENABLED', '0') == '1'
+    mutations_enabled = os.getenv('AI_CONTROL_MUTATIONS_ENABLED', '0') == '1'
+    node_id = os.getenv('AI_CONTROL_NODE_ID', 'jetson-b').strip() or 'jetson-b'
+    key_file = os.getenv('AI_CONTROL_API_KEY_FILE', '').strip()
+    base_url = os.getenv('AI_CONTROL_BASE_URL', '').strip()
+    return {
+        'enabled': enabled,
+        'drafts_enabled': drafts_enabled,
+        'mutations_enabled': mutations_enabled,
+        'node_id': node_id,
+        'credential_configured': bool(key_file),
+        'transport': 'https' if base_url.startswith('https://') else (
+            'loopback_http' if base_url.startswith('http://127.0.0.1') else 'unverified'
+        ),
+    }
+
+
+def _ai_control_error(exc, status=503):
+    code = exc.code if isinstance(exc, AIError) else 'controller_unreachable'
+    messages = {
+        'disabled': '로컬 AI 관리 기능이 비활성화되어 있습니다.',
+        'controller_unreachable': '관리 서비스에 연결할 수 없습니다.',
+        'mutations_disabled': '실제 모델 변경은 현재 비활성화되어 있습니다.',
+        'drafts_disabled': '설정 초안 기능이 비활성화되어 있습니다.',
+        'stale_generation_revision': '생성 설정이 다른 관리자에 의해 변경되었습니다.',
+        'invalid_generation_config': '생성 설정 값이 유효하지 않습니다.',
+    }
+    return jsonify({
+        'status': 'error',
+        'error_code': code,
+        'message': messages.get(code, '로컬 AI 관리 요청을 처리하지 못했습니다.'),
+    }), status
 
 
 def normalize_admin_llm_updates(updates):
@@ -4048,8 +4086,115 @@ def api_admin_config_get():
         'editable_keys': list(ADMIN_EDITABLE_CONFIG_KEYS.keys()),
         'llm_settings': get_admin_llm_settings_snapshot(),
         'llm_editable_keys': list(ADMIN_LLM_EDITABLE_KEYS.keys()),
+        'ai_control': get_ai_control_bootstrap_status(),
         'csrf_token': csrf_token
     }), 200
+
+
+@app.route('/api/admin/ai-control/generation', methods=['GET'])
+def api_admin_ai_control_generation_get():
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+    try:
+        return jsonify({'status': 'ok', 'generation': settings_from_env(dict(os.environ)).public_dict()}), 200
+    except AIError as exc:
+        return _ai_control_error(exc)
+
+
+@app.route('/api/admin/ai-control/generation', methods=['POST'])
+def api_admin_ai_control_generation_update():
+    csrf_error = require_admin_csrf()
+    if csrf_error:
+        return csrf_error
+    try:
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict) or set(data) != {'expected_revision', 'settings'}:
+            raise AIError('invalid_generation_config')
+        env = dict(os.environ)
+        store = store_from_env(env)
+        legacy = int(env.get('LOCAL_LLM_MAX_TOKENS', '512'))
+        saved = store.save(data['expected_revision'], data['settings'], legacy_max_tokens=legacy)
+        return jsonify({
+            'status': 'ok',
+            'message': '생성 설정이 저장되었습니다. 다음 새 로컬 채팅 요청부터 적용됩니다.',
+            'generation': saved.public_dict(),
+        }), 200
+    except (AIError, ValueError, TypeError) as exc:
+        conflict = isinstance(exc, AIError) and exc.code == 'stale_generation_revision'
+        return _ai_control_error(exc, 409 if conflict else 400)
+
+
+@app.route('/api/admin/ai-control/nodes/<node_id>/overview', methods=['GET'])
+def api_admin_ai_control_overview(node_id):
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+    expected = get_ai_control_bootstrap_status()['node_id']
+    if node_id != expected:
+        return jsonify({'status': 'error', 'error_code': 'node_not_allowed'}), 404
+    try:
+        overview = client_from_env(dict(os.environ)).overview(
+            force=request.args.get('refresh') == '1'
+        )
+        return jsonify({'status': 'ok', 'node_id': expected, 'overview': overview}), 200
+    except AIError as exc:
+        return _ai_control_error(exc)
+
+
+@app.route('/api/admin/ai-control/nodes/<node_id>/drafts', methods=['POST'])
+def api_admin_ai_control_drafts(node_id):
+    csrf_error = require_admin_csrf()
+    if csrf_error:
+        return csrf_error
+    bootstrap = get_ai_control_bootstrap_status()
+    if node_id != bootstrap['node_id']:
+        return jsonify({'status': 'error', 'error_code': 'node_not_allowed'}), 404
+    if not bootstrap['drafts_enabled']:
+        return _ai_control_error(AIError('drafts_disabled'), 403)
+    try:
+        result = client_from_env(dict(os.environ)).request(
+            'POST', '/drafts', request.get_json(silent=True)
+        )
+        return jsonify({'status': 'ok', 'draft': result}), 201
+    except AIError as exc:
+        return _ai_control_error(exc, 400)
+
+
+@app.route('/api/admin/ai-control/nodes/<node_id>/plans', methods=['POST'])
+def api_admin_ai_control_plans(node_id):
+    csrf_error = require_admin_csrf()
+    if csrf_error:
+        return csrf_error
+    bootstrap = get_ai_control_bootstrap_status()
+    if node_id != bootstrap['node_id']:
+        return jsonify({'status': 'error', 'error_code': 'node_not_allowed'}), 404
+    if not bootstrap['drafts_enabled']:
+        return _ai_control_error(AIError('drafts_disabled'), 403)
+    try:
+        if os.getenv('AI_EXPERIMENTS_ENABLED', '0') == '1':
+            active = _experiment_store().active_job_summary()
+            if active['total']:
+                return jsonify({
+                    'status': 'error',
+                    'error_code': 'active_experiment',
+                    'message': '대기 또는 실행 중인 연구 작업이 있어 모델 변경 검증을 막았습니다.',
+                    'active_jobs': active,
+                }), 409
+        result = client_from_env(dict(os.environ)).request(
+            'POST', '/plans', request.get_json(silent=True)
+        )
+        return jsonify({'status': 'ok', 'plan': result}), 201
+    except AIError as exc:
+        return _ai_control_error(exc, 400)
+
+
+@app.route('/api/admin/ai-control/nodes/<node_id>/operations', methods=['POST'])
+def api_admin_ai_control_operations_disabled(node_id):
+    csrf_error = require_admin_csrf()
+    if csrf_error:
+        return csrf_error
+    if node_id != get_ai_control_bootstrap_status()['node_id']:
+        return jsonify({'status': 'error', 'error_code': 'node_not_allowed'}), 404
+    return _ai_control_error(AIError('mutations_disabled'), 403)
 
 
 @app.route('/api/admin/config', methods=['POST'])
@@ -4528,7 +4673,9 @@ def survey():
 def initialize_on_first_request():
     """서버 시작 시 모델만 로드 (Flask 2.3+ 호환)"""
     global model_manager, models_initialized
-    if request.path in ('/api/chat', '/api/chat/status'):
+    if (request.path in ('/api/chat', '/api/chat/status', '/admin/config')
+            or request.path.startswith('/api/admin/config')
+            or request.path.startswith('/api/admin/ai-control/')):
         return
     if models_initialized:
         return

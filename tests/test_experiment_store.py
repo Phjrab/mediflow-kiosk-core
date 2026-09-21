@@ -128,6 +128,16 @@ class ExperimentStoreTest(unittest.TestCase):
         with self.assertRaisesRegex(AIError, 'queue_full'):
             self.store.enqueue(another_sample['sample_id'], self.run['run_id'])
 
+    def test_active_job_summary_preserves_queued_and_running_jobs(self):
+        job, _ = self.store.enqueue(self.sample['sample_id'], self.run['run_id'])
+        self.assertEqual(self.store.active_job_summary(), {
+            'queued': 1, 'running': 0, 'cancel_requested': 0, 'total': 1,
+        })
+        self.store.claim_next()
+        summary = self.store.active_job_summary()
+        self.assertEqual((summary['queued'], summary['running'], summary['total']), (0, 1, 1))
+        self.assertEqual(self.store.get_job(job['job_id'])['state'], 'running')
+
     def test_claim_and_finish_preserve_job_and_analysis_status(self):
         queued, _ = self.store.enqueue(self.sample['sample_id'], self.run['run_id'])
         claimed = self.store.claim_next()

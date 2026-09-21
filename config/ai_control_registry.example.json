@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "models": [
+    {
+      "artifact_id": "qwen25-3b-q4km-device-verified",
+      "display_name": "Qwen2.5 3B Instruct Q4_K_M",
+      "engine_kind": "chat",
+      "origin_model": "Qwen/Qwen2.5-3B-Instruct-GGUF",
+      "origin_revision": "7dabda4d13d513e3e842b20f0d435c732f172cbe",
+      "runtime_adapter": "llama_cpp_server_v041",
+      "runtime_revision": "391fac16460f15233a7740550d858ac96df3419d",
+      "quantization": "Q4_K_M",
+      "installed": true,
+      "integrity_verified": true,
+      "provenance_verified": true,
+      "engineering_verified": true,
+      "medical_validated": false,
+      "eligible_for_activation": true,
+      "activation_blockers": [],
+      "artifact_manifest_digest": "dc11bd6153aafb7f1bd33127c9511765cb91530973c35aaf66bcbc4721b8e041",
+      "file_integrity": [
+        {
+          "role": "text_weight",
+          "size": 2104932768,
+          "sha256": "626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d",
+          "verified": true
+        }
+      ],
+      "presets": [
+        {
+          "preset_id": "qwen25-chat-safe-v1",
+          "context_tokens": 4096,
+          "parallel": 1
+        }
+      ],
+      "placements": {
+        "text": "cuda:0",
+        "vision": null
+      }
+    },
+    {
+      "artifact_id": "medgemma15-4b-q4km-source-attested",
+      "display_name": "MedGemma 1.5 4B Q4_K_M (research)",
+      "engine_kind": "vlm",
+      "origin_model": "google/medgemma-1.5-4b-it",
+      "origin_revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+      "runtime_adapter": "medgemma_llama_cpp_mtmd_v041",
+      "runtime_revision": "391fac16460f15233a7740550d858ac96df3419d",
+      "quantization": "Q4_K_M_text_F16_projector",
+      "installed": true,
+      "integrity_verified": true,
+      "provenance_verified": true,
+      "engineering_verified": true,
+      "medical_validated": false,
+      "eligible_for_activation": true,
+      "activation_blockers": [],
+      "artifact_manifest_digest": "dc11bd6153aafb7f1bd33127c9511765cb91530973c35aaf66bcbc4721b8e041",
+      "file_integrity": [
+        {
+          "role": "text_weight",
+          "size": 2489893632,
+          "sha256": "c39d76e3cb4678bec663cab92b39ac45ad86378c26c978c023b4f6d81ce0f45c",
+          "verified": true
+        },
+        {
+          "role": "vision_projector",
+          "size": 851251232,
+          "sha256": "77bcbe7f2847d5f6c098c02ca99aeb4defadd3482469928fbf5e5924acb78733",
+          "verified": true
+        }
+      ],
+      "presets": [
+        {
+          "preset_id": "medgemma-q4-text-gpu-vision-cpu-v1",
+          "context_tokens": 4096,
+          "parallel": 1
+        }
+      ],
+      "placements": {
+        "text": "cuda:0",
+        "vision": "cpu"
+      }
+    }
+  ]
+}

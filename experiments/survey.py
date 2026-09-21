@@ -49,9 +49,15 @@ def validate_survey(value: Any) -> dict[str, Any]:
     }
 
 
-def validate_run_config(value: Any) -> dict[str, str]:
-    if not isinstance(value, dict) or set(value) != {'survey_schema_version'}:
+def validate_run_config(value: Any) -> dict[str, Any]:
+    if (not isinstance(value, dict)
+            or set(value) not in ({'survey_schema_version'}, {'survey_schema_version', 'runtime_expectation'})):
         raise ValueError('invalid E2 configuration')
     if value.get('survey_schema_version') != SURVEY_SCHEMA_VERSION:
         raise ValueError('invalid E2 survey schema')
-    return {'survey_schema_version': SURVEY_SCHEMA_VERSION}
+    result: dict[str, Any] = {'survey_schema_version': SURVEY_SCHEMA_VERSION}
+    if 'runtime_expectation' in value:
+        from utils.runtime_receipt import validate_runtime_expectation
+
+        result['runtime_expectation'] = validate_runtime_expectation(value['runtime_expectation'])
+    return result
