@@ -1,6 +1,6 @@
 # Admin Control Handoff
 
-Current phase: C0-C3 CODE/MOCK complete; C4-C5 PARTIAL/CODE/MOCK on `codex/admin-control`, based on `2ccd9f1`.
+Current phase: C0-C3 CODE/MOCK complete; C4-C5 PARTIAL/CODE/MOCK on pushed branch `codex/admin-control`. The implementation commit is `c7807e1`, based on `2ccd9f1`.
 
 The existing LLM/VLM, F1, regression, and synthetic E0-E4 device evidence is preserved. Jetson A and B have not received Admin Control code. B remains in its prior general-LLM state; no model, service, `.env`, database, credential, or user data was changed by this task.
 
@@ -23,4 +23,4 @@ Still blocked/not run:
 - E3 general-LLM runtime receipt: blocked on managed ingress.
 - Any actual B model change, device mutation test, medical quality evaluation, or real-user-data validation: NOT_RUN.
 
-Next action: commit/push the reviewed code, then obtain explicit bootstrap approval for a dedicated management credential plus verified transport and deploy only the B read controller with both draft and mutation flags off. Do not enable mutations or switch the running model in that step.
+Next action: obtain explicit bootstrap approval for a dedicated management credential plus verified transport, then deploy only the B read controller and A read-only integration with both draft and mutation flags off. Do not enable mutations or switch the running model in that step.

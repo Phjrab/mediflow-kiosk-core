@@ -23,6 +23,8 @@
 - Targeted existing regressions passed: 21 AI client, 7 MedGemma service, 6 experiment worker, 12 experiment store/admin, 6 survey/hybrid, 6 local lifecycle, 5 chat prompt, and 5 F1/evaluation tests.
 - Available full local suite after C5: 144 passed, 1 skipped, 0 failed/error. Two pre-existing test modules could not import in the Mac system Python because `pytorch_grad_cam` and `qrcode` are absent; their five tests were not executed locally. No packages were installed to work around this.
 - Python AST/compile checks, strict example registry load (2 models), and `git diff --check` passed.
+- All six inline JavaScript blocks in `/admin/config` passed `node --check`.
+- Committed the implementation as `c7807e1` and pushed `codex/admin-control` to `origin`.
 
 ### Changed files
 
@@ -31,4 +33,4 @@
 - Research receipt: `utils/runtime_receipt.py`, `utils/vlm_client.py`, `services/medgemma/app.py`, `experiments/{store,survey,worker}.py`.
 - Configuration/docs/tests: `.env.example`, this admin-control documentation directory, and focused test modules.
 
-No Jetson deployment, service start/stop, model transition, `.env`, DB, key, model, or user-data change was performed in this phase.
+No Jetson deployment, service start/stop, model transition, `.env`, DB, key, model, or user-data change was performed in this phase. The next action requires explicit read-only bootstrap approval as described in `READ_ONLY_RUNBOOK.md`.
