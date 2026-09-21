@@ -357,10 +357,36 @@ def check_cameras(reporter: Reporter, env_file: dict[str, str], allow_no_camera:
 
 
 def check_optional_features(reporter: Reporter, env_file: dict[str, str]) -> None:
-    if effective_setting(env_file, 'OPENAI_API_KEY') or effective_setting(env_file, 'GEMINI_API_KEY'):
-        reporter.pass_('optional LLM credentials', 'at least one provider key is configured; API call not performed')
+    from utils.ai_config import AIError, LocalConfig, provider_from
+
+    effective_env = dict(env_file)
+    effective_env.update(os.environ)
+    try:
+        provider = provider_from(effective_env)
+        if provider == 'local':
+            config = LocalConfig.from_env(effective_env)
+            reporter.pass_(
+                'optional local LLM configuration',
+                f'provider=local host={config.host} port={config.port}; API call not performed',
+            )
+        elif effective_setting(env_file, provider.upper() + '_API_KEY'):
+            reporter.pass_(
+                'optional LLM credentials',
+                f'provider={provider}; credential configured; API call not performed',
+            )
+        else:
+            reporter.skip(
+                'optional LLM credentials',
+                f'provider={provider}; selected provider key is not configured',
+            )
+    except AIError as exc:
+        reporter.skip('optional LLM configuration', f'status={exc.code}')
+
+    experiments_enabled = effective_setting(env_file, 'AI_EXPERIMENTS_ENABLED', '0') == '1'
+    if experiments_enabled:
+        reporter.skip('optional AI experiments', 'enabled; VLM runtime readiness requires ai_preflight.py')
     else:
-        reporter.skip('optional LLM credentials', 'chat provider key is not configured')
+        reporter.skip('optional AI experiments', 'disabled (default)')
     if effective_setting(env_file, 'KAKAO_CLIENT_ID') and effective_setting(env_file, 'KAKAO_REFRESH_TOKEN'):
         reporter.pass_('optional Kakao credentials', 'configuration present; external API call not performed')
     else:

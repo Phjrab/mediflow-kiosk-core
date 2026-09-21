@@ -26,3 +26,11 @@ database/config.local.example.json
 commit_detail.txt
 database/database.db
 database/backups/
+experiments/private/
+experiments/data/
+experiments/*.db
+experiments/*.db-*
+experiments/results/
+services/medgemma/models/
+*.gguf
+*.safetensors

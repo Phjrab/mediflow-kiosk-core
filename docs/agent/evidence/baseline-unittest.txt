@@ -1,0 +1,75 @@
+test_built_prompt_delimits_untrusted_result_and_capabilities (test_chat_prompt.ChatPromptTest.test_built_prompt_delimits_untrusted_result_and_capabilities) ... ok
+test_capabilities_include_classes_only_for_ready_models (test_chat_prompt.ChatPromptTest.test_capabilities_include_classes_only_for_ready_models) ... ok
+test_empty_role_file_is_rejected (test_chat_prompt.ChatPromptTest.test_empty_role_file_is_rejected) ... ok
+test_project_role_prompt_contains_required_safety_boundaries (test_chat_prompt.ChatPromptTest.test_project_role_prompt_contains_required_safety_boundaries) ... ok
+test_result_cannot_close_prompt_delimiters (test_chat_prompt.ChatPromptTest.test_result_cannot_close_prompt_delimiters) ... ok
+test_classifier_offline_init (unittest.loader._FailedTest.test_classifier_offline_init) ... ERROR
+test_legacy_migration_is_idempotent_and_hashes_identifiers (test_database.DatabaseSchemaTests.test_legacy_migration_is_idempotent_and_hashes_identifiers) ... ok
+test_schema_is_sql_and_has_no_legacy_tables (test_database.DatabaseSchemaTests.test_schema_is_sql_and_has_no_legacy_tables) ... ok
+test_database_app_environment (unittest.loader._FailedTest.test_database_app_environment) ... ERROR
+test_auto_with_cuda_selects_cuda (test_device_selection.TorchDeviceSelectionTest.test_auto_with_cuda_selects_cuda) ... ok
+test_auto_without_cuda_selects_cpu (test_device_selection.TorchDeviceSelectionTest.test_auto_without_cuda_selects_cpu) ... ok
+test_cpu_request_selects_cpu (test_device_selection.TorchDeviceSelectionTest.test_cpu_request_selects_cpu) ... ok
+test_cuda_without_cuda_has_diagnostics (test_device_selection.TorchDeviceSelectionTest.test_cuda_without_cuda_has_diagnostics) ... ok
+test_invalid_cuda_index_is_rejected (test_device_selection.TorchDeviceSelectionTest.test_invalid_cuda_index_is_rejected) ... ok
+test_invalid_policy_is_rejected (test_device_selection.TorchDeviceSelectionTest.test_invalid_policy_is_rejected) ... ok
+test_installer_does_not_add_autostart_or_guessed_wheels (test_jetson_deployment_scripts.JetsonDeploymentScriptTest.test_installer_does_not_add_autostart_or_guessed_wheels) ... ok
+test_jetson_docs_use_the_supported_manual_commands (test_jetson_deployment_scripts.JetsonDeploymentScriptTest.test_jetson_docs_use_the_supported_manual_commands) ... ok
+test_legacy_wrappers_delegate_without_pattern_kills (test_jetson_deployment_scripts.JetsonDeploymentScriptTest.test_legacy_wrappers_delegate_without_pattern_kills) ... ok
+test_preflight_supports_camera_skip_and_service_smoke (test_jetson_deployment_scripts.JetsonDeploymentScriptTest.test_preflight_supports_camera_skip_and_service_smoke) ... ok
+test_dashboard_url_resolves_wildcard_host_to_lan (test_mediflow_kiosk_command.MediflowKioskCommandTest.test_dashboard_url_resolves_wildcard_host_to_lan) ... ok
+test_dashboard_url_uses_external_override (test_mediflow_kiosk_command.MediflowKioskCommandTest.test_dashboard_url_uses_external_override) ... ok
+test_manager_source_has_no_private_ip_literal (test_mediflow_kiosk_command.MediflowKioskCommandTest.test_manager_source_has_no_private_ip_literal) ... ok
+test_parse_action_accepts_only_one_known_action (test_mediflow_kiosk_command.MediflowKioskCommandTest.test_parse_action_accepts_only_one_known_action) ... ok
+test_process_record_detects_start_time_tampering (test_mediflow_kiosk_command.MediflowKioskCommandTest.test_process_record_detects_start_time_tampering) ... skipped 'requires Linux /proc'
+test_tail_lines_returns_only_requested_suffix (test_mediflow_kiosk_command.MediflowKioskCommandTest.test_tail_lines_returns_only_requested_suffix) ... ok
+test_camera_roles_match_capture_hardware (test_screening_config.ScreeningConfigTest.test_camera_roles_match_capture_hardware) ... ok
+test_eye_classes_follow_model_index_order (test_screening_config.ScreeningConfigTest.test_eye_classes_follow_model_index_order) ... ok
+test_modality_order_and_ids (test_screening_config.ScreeningConfigTest.test_modality_order_and_ids) ... ok
+test_only_eye_model_is_ready (test_screening_config.ScreeningConfigTest.test_only_eye_model_is_ready) ... ok
+test_placeholder_classes_are_configurable (test_screening_config.ScreeningConfigTest.test_placeholder_classes_are_configurable) ... ok
+test_builds_fixed_manager_argv_without_shell (test_service_control.ServiceControlTest.test_builds_fixed_manager_argv_without_shell) ... ok
+test_rejects_unapproved_action (test_service_control.ServiceControlTest.test_rejects_unapproved_action) ... ok
+test_server_has_no_missing_platform_manager_references (test_service_control.ServiceControlTest.test_server_has_no_missing_platform_manager_references) ... ok
+test_negative_index_is_rejected (test_uvc_camera.UvcCameraTest.test_negative_index_is_rejected) ... ok
+test_requires_a_real_frame_and_releases_failed_backend (test_uvc_camera.UvcCameraTest.test_requires_a_real_frame_and_releases_failed_backend) ... ok
+
+======================================================================
+ERROR: test_classifier_offline_init (unittest.loader._FailedTest.test_classifier_offline_init)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_classifier_offline_init
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+    ~~~~~~~~~~^^^^^^
+  File "/Users/hajoonpark/Documents/자율설계/mediflow-kiosk-core/tests/test_classifier_offline_init.py", line 14, in <module>
+    from modules import classifier
+  File "/Users/hajoonpark/Documents/자율설계/mediflow-kiosk-core/modules/classifier.py", line 17, in <module>
+    from pytorch_grad_cam import GradCAM
+ModuleNotFoundError: No module named 'pytorch_grad_cam'
+
+
+======================================================================
+ERROR: test_database_app_environment (unittest.loader._FailedTest.test_database_app_environment)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_database_app_environment
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+    ~~~~~~~~~~^^^^^^
+  File "/Users/hajoonpark/Documents/자율설계/mediflow-kiosk-core/tests/test_database_app_environment.py", line 8, in <module>
+    from database.app import load_project_environment
+  File "/Users/hajoonpark/Documents/자율설계/mediflow-kiosk-core/database/../database/app.py", line 11, in <module>
+    import qrcode
+ModuleNotFoundError: No module named 'qrcode'
+
+
+----------------------------------------------------------------------
+Ran 35 tests in 0.020s
+
+FAILED (errors=2, skipped=1)
+[Inference] requested_device=cpu resolved_device=cpu

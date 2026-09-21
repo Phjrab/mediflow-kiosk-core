@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "default_deployment_profile": "chat_only",
+  "profiles": {
+    "E0_baseline": {
+      "input": "canonical_eye_roi",
+      "output": "existing_efficientnet_result_envelope",
+      "implemented": true,
+      "note": "Manual worker for an isolated approved sample. Admin-authorized ROI import is available but never auto-enqueues."
+    },
+    "E1_vlm_image": {
+      "input": "canonical_eye_roi_only",
+      "output": "strict_vlm_analysis_1.0",
+      "implemented": true,
+      "include_existing_prediction": false,
+      "include_reference_label": false,
+      "include_gradcam": false
+    },
+    "E2_vlm_survey": {
+      "input": "canonical_eye_roi_plus_frozen_eye_survey_1.0",
+      "output": "strict_vlm_analysis_1.0",
+      "implemented": true,
+      "survey_schema_version": "eye-survey-1.0",
+      "include_existing_prediction": false,
+      "include_reference_label": false,
+      "include_gradcam": false,
+      "free_text_allowed": false
+    },
+    "E3_result_explanation": {
+      "input": "completed_E0_result_json_without_image_or_reference_label",
+      "output": "separate_local_llm_explanation_record",
+      "implemented": true,
+      "provider": "local_only",
+      "question_ids": [
+        "explain-result-ko-v1"
+      ],
+      "classification_metric": false
+    },
+    "E4_hybrid_review": {
+      "input": "completed_same_sample_E0_and_E1_or_E2_results",
+      "output": "hybrid_review_1.0",
+      "implemented": true,
+      "rule_id": "paired-review-v1",
+      "model_generation": false,
+      "classification_metric": false,
+      "user_result_action": "none"
+    }
+  }
+}

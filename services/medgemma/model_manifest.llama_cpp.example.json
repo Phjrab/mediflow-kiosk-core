@@ -1,0 +1,17 @@
+{
+  "origin_model": "google/medgemma-1.5-4b-it",
+  "revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+  "runtime": "llama.cpp-mtmd-cli",
+  "runtime_revision": "391fac16460f15233a7740550d858ac96df3419d",
+  "dtype": "mixed",
+  "quantization": "Q4_K_M",
+  "weights_sha256": {
+    "medgemma-1.5-4b-it-q4_k_m.gguf": "c39d76e3cb4678bec663cab92b39ac45ad86378c26c978c023b4f6d81ce0f45c",
+    "medgemma-1.5-4b-it-mmproj-f16.gguf": "77bcbe7f2847d5f6c098c02ca99aeb4defadd3482469928fbf5e5924acb78733"
+  },
+  "device_placement": {
+    "text_model": "cuda:0",
+    "vision_projector": "cpu"
+  },
+  "verification_status": "SOURCE_ATTESTED_SYNTHETIC_IMAGE_DEVICE_VERIFIED_JETSON_B_2026-09-21"
+}

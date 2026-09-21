@@ -127,12 +127,19 @@ import uuid
 import socket
 import subprocess
 import hmac
+import hashlib
+import shutil
+import tempfile
 from datetime import datetime
 from PIL import Image, ImageOps
 
 import config as config
 from model_loader import initialize_models, get_models
+from utils.ai_config import AIError, LocalConfig, provider_from, validate_llm_settings
+from utils.llm_client import generate_chat
+from utils.chat_context import summarize_result
 from utils.chat_prompt import build_chat_system_prompt
+from utils.gradcam_policy import gradcam_result_state, should_generate_gradcam
 from utils.image_proc import resize_image, enhance_contrast
 from utils.service_control import service_manager_argv
 from utils.uvc_camera import UvcCameraError, open_usb_uvc_camera
@@ -173,6 +180,7 @@ app.config['SESSION_COOKIE_SECURE'] = os.getenv('SESSION_COOKIE_SECURE', '0').st
 current_frame = None  # 실시간 카메라 프레임
 model_manager = None  # 싱글톤 모델 매니저
 models_initialized = False  # 모델 초기화 완료 여부
+model_init_lock = threading.Lock()
 camera_thread = None  # 카메라 스레드
 camera_running = False  # 카메라 스레드 실행 상태
 camera_session_count = 0  # capture 페이지 활성 세션 수
@@ -302,8 +310,22 @@ ADMIN_LLM_EDITABLE_KEYS = {
     'OPENAI_MODEL': str,
     'GEMINI_MODEL': str,
     'OPENAI_API_KEY': str,
-    'GEMINI_API_KEY': str
+    'GEMINI_API_KEY': str,
+    'LOCAL_LLM_BASE_URL': str,
+    'LOCAL_LLM_MODEL': str,
+    'LOCAL_LLM_API_KEY': str,
+    'LOCAL_LLM_CONNECT_TIMEOUT': float,
+    'LOCAL_LLM_READ_TIMEOUT': float,
+    'LOCAL_LLM_REQUEST_DEADLINE': float,
+    'LOCAL_LLM_MAX_TOKENS': int,
+    'LOCAL_LLM_MAX_INFLIGHT': int,
+    'AI_ALLOWED_ENDPOINTS': str,
+    'OPENAI_API_KEY_DELETE': bool,
+    'GEMINI_API_KEY_DELETE': bool,
+    'LOCAL_LLM_API_KEY_DELETE': bool,
 }
+
+LLM_SECRET_KEYS = ('OPENAI_API_KEY', 'GEMINI_API_KEY', 'LOCAL_LLM_API_KEY')
 
 
 def is_admin_session():
@@ -438,14 +460,31 @@ def _env_serialize_value(value):
     return str(value)
 
 
+def apply_env_updates_atomic(updates):
+    """Replace .env only after every update has been validated and staged."""
+    if not updates:
+        return
+    os.makedirs(config.BASE_DIR, exist_ok=True)
+    file_descriptor, temporary_path = tempfile.mkstemp(
+        prefix='.env.update-', dir=config.BASE_DIR, text=True
+    )
+    os.close(file_descriptor)
+    try:
+        if os.path.exists(ENV_FILE_PATH):
+            shutil.copyfile(ENV_FILE_PATH, temporary_path)
+        for key, value in updates.items():
+            set_key(temporary_path, key, str(value))
+        os.replace(temporary_path, ENV_FILE_PATH)
+    finally:
+        if os.path.exists(temporary_path):
+            os.unlink(temporary_path)
+    for key, value in updates.items():
+        os.environ[key] = str(value)
+
+
 def apply_admin_config_updates(updates):
     if not updates:
         return {}
-
-    os.makedirs(config.BASE_DIR, exist_ok=True)
-    if not os.path.exists(ENV_FILE_PATH):
-        with open(ENV_FILE_PATH, 'a', encoding='utf-8'):
-            pass
 
     normalized_updates = {}
     for key, value in updates.items():
@@ -453,15 +492,13 @@ def apply_admin_config_updates(updates):
             continue
 
         env_value = _env_serialize_value(value)
-        set_key(ENV_FILE_PATH, key, env_value)
-        os.environ[key] = env_value
         normalized_updates[key] = value
 
         # SERVER_HOST를 사용하는 기존 환경과의 호환 유지
         if key == 'SERVER_IP':
-            set_key(ENV_FILE_PATH, 'SERVER_HOST', env_value)
-            os.environ['SERVER_HOST'] = env_value
+            normalized_updates['SERVER_HOST'] = env_value
 
+    apply_env_updates_atomic({key: _env_serialize_value(value) for key, value in normalized_updates.items()})
     return normalized_updates
 
 
@@ -484,50 +521,92 @@ def mask_secret_value(value):
 def get_admin_llm_settings_snapshot():
     openai_key = os.getenv('OPENAI_API_KEY', '')
     gemini_key = os.getenv('GEMINI_API_KEY', '')
+    local_key = os.getenv('LOCAL_LLM_API_KEY', '')
+    local_key_file = os.getenv('LOCAL_LLM_API_KEY_FILE', '').strip()
+    local_key_source = 'file' if local_key_file else ('inline' if local_key.strip() else 'none')
 
     provider = os.getenv('LLM_PROVIDER', 'openai').strip().lower()
-    if provider not in ('openai', 'gemini'):
-        provider = 'openai'
+    if provider not in ('openai', 'gemini', 'local'):
+        provider = 'misconfigured'
 
     return {
         'LLM_PROVIDER': provider,
         'OPENAI_MODEL': os.getenv('OPENAI_MODEL', 'gpt-4o-mini'),
         'GEMINI_MODEL': os.getenv('GEMINI_MODEL', 'gemini-2.5-flash'),
+        'LOCAL_LLM_BASE_URL': os.getenv('LOCAL_LLM_BASE_URL', ''),
+        'LOCAL_LLM_MODEL': os.getenv('LOCAL_LLM_MODEL', ''),
+        'LOCAL_LLM_CONNECT_TIMEOUT': os.getenv('LOCAL_LLM_CONNECT_TIMEOUT', '3'),
+        'LOCAL_LLM_READ_TIMEOUT': os.getenv('LOCAL_LLM_READ_TIMEOUT', '90'),
+        'LOCAL_LLM_REQUEST_DEADLINE': os.getenv('LOCAL_LLM_REQUEST_DEADLINE', '120'),
+        'LOCAL_LLM_MAX_TOKENS': os.getenv('LOCAL_LLM_MAX_TOKENS', '512'),
+        'LOCAL_LLM_MAX_INFLIGHT': os.getenv('LOCAL_LLM_MAX_INFLIGHT', '1'),
+        'AI_ALLOWED_ENDPOINTS': os.getenv('AI_ALLOWED_ENDPOINTS', ''),
+        'AI_DEPLOYMENT_PROFILE': os.getenv('AI_DEPLOYMENT_PROFILE', 'chat_only'),
         'OPENAI_API_KEY_MASKED': mask_secret_value(openai_key),
         'GEMINI_API_KEY_MASKED': mask_secret_value(gemini_key),
+        'LOCAL_LLM_API_KEY_MASKED': mask_secret_value(local_key) if local_key else ('********' if local_key_file else ''),
         'OPENAI_API_KEY_CONFIGURED': bool(str(openai_key).strip()),
-        'GEMINI_API_KEY_CONFIGURED': bool(str(gemini_key).strip())
+        'GEMINI_API_KEY_CONFIGURED': bool(str(gemini_key).strip()),
+        'LOCAL_LLM_API_KEY_CONFIGURED': bool(str(local_key).strip() or local_key_file),
+        'LOCAL_LLM_API_KEY_SOURCE': local_key_source,
     }
 
 
-def apply_admin_llm_updates(updates):
+def normalize_admin_llm_updates(updates):
     if not updates:
         return {}
 
-    os.makedirs(config.BASE_DIR, exist_ok=True)
-    if not os.path.exists(ENV_FILE_PATH):
-        with open(ENV_FILE_PATH, 'a', encoding='utf-8'):
-            pass
+    unknown = set(updates) - set(ADMIN_LLM_EDITABLE_KEYS)
+    if unknown:
+        raise ValueError(f'수정 불가 LLM 항목: {sorted(unknown)[0]}')
 
+    candidate = dict(os.environ)
     normalized_updates = {}
     for key, raw_value in updates.items():
-        if key not in ADMIN_LLM_EDITABLE_KEYS:
+        if key.endswith('_DELETE'):
+            if normalize_bool(raw_value):
+                secret_key = key[:-7]
+                candidate[secret_key] = ''
+                normalized_updates[secret_key] = ''
             continue
 
-        value = str(raw_value or '').strip()
+        target_type = ADMIN_LLM_EDITABLE_KEYS[key]
+        value = str(raw_value if raw_value is not None else '').strip()
         if key == 'LLM_PROVIDER':
             value = value.lower()
-            if value not in ('openai', 'gemini'):
-                raise ValueError('LLM_PROVIDER는 openai 또는 gemini만 허용됩니다.')
+            if value not in ('openai', 'gemini', 'local'):
+                raise ValueError('LLM_PROVIDER는 openai, gemini, local만 허용됩니다.')
+
+        if target_type is int:
+            value = str(int(value))
+        elif target_type is float:
+            value = str(float(value))
 
         # API 키는 빈 값이면 "변경 안 함"으로 처리
-        if key in ('OPENAI_API_KEY', 'GEMINI_API_KEY') and value == '':
+        if key in LLM_SECRET_KEYS and value == '':
             continue
+        if key in LLM_SECRET_KEYS and (len(value) > 4096 or any(c in value for c in '\r\n')):
+            raise ValueError(f'{key} 값이 유효하지 않습니다.')
+        if key not in LLM_SECRET_KEYS and len(value) > 4096:
+            raise ValueError(f'{key} 값이 너무 깁니다.')
 
-        set_key(ENV_FILE_PATH, key, value)
-        os.environ[key] = value
+        candidate[key] = value
         normalized_updates[key] = value
 
+    provider = provider_from(candidate)
+    if provider == 'local':
+        LocalConfig.from_env(candidate)
+    else:
+        model_key = 'OPENAI_MODEL' if provider == 'openai' else 'GEMINI_MODEL'
+        if not candidate.get(model_key, '').strip():
+            raise ValueError(f'{model_key} 값이 필요합니다.')
+
+    return normalized_updates
+
+
+def apply_admin_llm_updates(updates):
+    normalized_updates = normalize_admin_llm_updates(updates)
+    apply_env_updates_atomic(normalized_updates)
     return normalized_updates
 
 
@@ -793,6 +872,104 @@ def save_cam_image(user_id, eye_side, cam_image_bgr):
         return None
 
     return f"/static/captures/users/{safe_user_id}/{filename}"
+
+
+def _file_sha256(path):
+    digest = hashlib.sha256()
+    with open(path, 'rb') as source:
+        for block in iter(lambda: source.read(1024 * 1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def generate_saved_gradcam(history_id, selected_eye):
+    """Generate a CAM from the immutable saved snapshot without updating its result."""
+    if config.GRADCAM_MODE != 'on_demand':
+        raise AIError('gradcam_mode_unavailable')
+    side = normalize_selected_eye(selected_eye)
+    if side is None:
+        raise ValueError('selected_eye must be L or R')
+    side_key = 'left_eye' if side == 'L' else 'right_eye'
+    conn = get_conn(DATABASE_PATH)
+    try:
+        row = conn.execute(
+            '''SELECT sessions.ai_reading_json, assets.file_path
+               FROM diagnosis_sessions AS sessions
+               JOIN session_assets AS assets ON assets.id = (
+                 SELECT candidate.id FROM session_assets AS candidate
+                 WHERE candidate.session_id = sessions.id
+                   AND candidate.asset_type = 'image_raw'
+                 ORDER BY candidate.id LIMIT 1
+               )
+               WHERE sessions.id = ?''',
+            (int(history_id),),
+        ).fetchone()
+    finally:
+        conn.close()
+    if row is None:
+        raise KeyError('history_not_found')
+
+    source_path = os.path.realpath(row['file_path'])
+    image_root = os.path.realpath(config.IMAGE_SAVE_DIR)
+    if os.path.commonpath([source_path, image_root]) != image_root or not os.path.isfile(source_path):
+        raise AIError('asset_unavailable')
+    try:
+        stored_analysis = json.loads(row['ai_reading_json'])
+    except (TypeError, json.JSONDecodeError):
+        raise AIError('baseline_unverified') from None
+    stored_eye = stored_analysis.get(side_key)
+    if not isinstance(stored_eye, dict):
+        raise AIError('unsupported_input')
+    bbox = stored_eye.get('bbox')
+    if not isinstance(bbox, (list, tuple)) or len(bbox) != 4:
+        raise AIError('baseline_unverified')
+
+    source = cv2.imread(source_path, cv2.IMREAD_COLOR)
+    if source is None:
+        raise AIError('asset_unavailable')
+    height, width = source.shape[:2]
+    try:
+        x1, y1, x2, y2 = [int(value) for value in bbox]
+    except (TypeError, ValueError):
+        raise AIError('baseline_unverified') from None
+    x1, y1 = max(0, x1), max(0, y1)
+    x2, y2 = min(width, x2), min(height, y2)
+    if x1 >= x2 or y1 >= y2:
+        raise AIError('baseline_unverified')
+    prepared = upscale_eye_crop_for_classifier(source[y1:y2, x1:x2])
+    if prepared is None:
+        raise AIError('unsupported_input')
+
+    classifier = get_models().get_classifier()
+    classification = classifier.classify_with_details(prepared, generate_cam=True)
+    stored_class = stored_eye.get('class', stored_eye.get('disease_class'))
+    if type(stored_class) is not int or stored_class != classification['class']:
+        raise AIError('baseline_changed')
+    heatmap = classification.get('heatmap_image')
+    if heatmap is None:
+        raise AIError('gradcam_failed')
+
+    cache_material = ':'.join((
+        _file_sha256(source_path),
+        _file_sha256(config.CLASSIFIER_MODEL_PATH),
+        str(classification['class']),
+        'efficientnet-preprocess-v1',
+    ))
+    cache_key = hashlib.sha256(cache_material.encode()).hexdigest()
+    cache_path = os.path.join(os.path.dirname(source_path), f'ondemand_cam_{side}_{cache_key}.jpg')
+    if not os.path.isfile(cache_path) and not cv2.imwrite(cache_path, heatmap):
+        raise AIError('gradcam_failed')
+    static_root = os.path.realpath(app.static_folder)
+    if os.path.commonpath([os.path.realpath(cache_path), static_root]) != static_root:
+        raise AIError('asset_unavailable')
+    relative = os.path.relpath(cache_path, static_root).replace(os.sep, '/')
+    return {
+        'history_id': int(history_id),
+        'selected_eye': side,
+        'cam_image_url': '/static/' + relative,
+        'cache_key': cache_key,
+        'classification_unchanged': True,
+    }
 
 
 def build_mediapipe_mesh_overlay(source_bgr):
@@ -1902,7 +2079,10 @@ def analyze_uploaded_single_eye_from_image(img_bgr, user_id='anonymous', selecte
             }
 
         cls_start = time.time()
-        classification = classifier.classify_with_details(prepared_eye, generate_cam=True)
+        classification = classifier.classify_with_details(
+            prepared_eye,
+            generate_cam=should_generate_gradcam(config.GRADCAM_MODE),
+        )
         eye_analysis = analyzer.analyze(prepared_eye)
         cls_elapsed_ms = (time.time() - cls_start) * 1000.0
 
@@ -1917,6 +2097,7 @@ def analyze_uploaded_single_eye_from_image(img_bgr, user_id='anonymous', selecte
             'redness': round(float(eye_analysis.get('redness', 0.0)), 4),
             'bbox': (0, 0, source_w, source_h),
             'cam_image_url': cam_image_url,
+            'gradcam_status': gradcam_result_state(config.GRADCAM_MODE, bool(cam_image_url)),
             'detection_confidence': None,
             'process_time_ms': round(cls_elapsed_ms, 1),
             'detection_method': 'upload_single_image'
@@ -2224,7 +2405,10 @@ def analyze_bilateral_from_image(img_bgr, user_id='anonymous', selected_eye=None
                     }
                 }
 
-            classification = classifier.classify_with_details(prepared_eye, generate_cam=True)
+            classification = classifier.classify_with_details(
+                prepared_eye,
+                generate_cam=should_generate_gradcam(config.GRADCAM_MODE),
+            )
             eye_analysis = analyzer.analyze(prepared_eye)
             cls_elapsed_ms = (time.time() - cls_start) * 1000.0
 
@@ -2237,6 +2421,7 @@ def analyze_bilateral_from_image(img_bgr, user_id='anonymous', selected_eye=None
                 'redness': round(float(eye_analysis.get('redness', 0.0)), 4),
                 'bbox': eye_item['bbox'],
                 'cam_image_url': cam_image_url,
+                'gradcam_status': gradcam_result_state(config.GRADCAM_MODE, bool(cam_image_url)),
                 'detection_confidence': 100.0,  # MediaPipe는 신뢰도를 직접 제공하지 않음
                 'process_time_ms': round(cls_elapsed_ms, 1)
             }
@@ -2690,7 +2875,10 @@ def run_diagnosis_pipeline(snapshot, language='ko'):
             # Stage 2: 질환 분류
             print(f"  Stage 2: 질환 분류 중...")
             start_time = time.time()
-            classification = classifier.classify_with_details(crop_image, generate_cam=True)
+            classification = classifier.classify_with_details(
+                crop_image,
+                generate_cam=should_generate_gradcam(config.GRADCAM_MODE),
+            )
             elapsed_classify = time.time() - start_time
             print(f"    ✓ {classification['disease']} (신뢰도: {classification['confidence']*100:.1f}%)")
             
@@ -2713,6 +2901,7 @@ def run_diagnosis_pipeline(snapshot, language='ko'):
                 'redness': float(analysis['redness']),
                 'bbox': eye_crop['bbox'],
                 'cam_image_url': cam_image_url,
+                'gradcam_status': gradcam_result_state(config.GRADCAM_MODE, bool(cam_image_url)),
                 'detection_confidence': float(eye_crop['confidence']),
                 'processing_time_ms': f"{elapsed_classify + elapsed_analyze:.1f}"
             }
@@ -3228,12 +3417,13 @@ def _normalize_diagnosis_result_for_chat(diagnosis_result):
     return {'raw_result': str(diagnosis_result)}
 
 
-def _call_openai_chat(system_prompt, user_message):
-    api_key = os.getenv('OPENAI_API_KEY', '').strip()
+def _call_openai_chat(system_prompt, user_message, env=None):
+    env = dict(os.environ) if env is None else env
+    api_key = env.get('OPENAI_API_KEY', '').strip()
     if not api_key:
         raise RuntimeError('OPENAI_API_KEY is not configured')
 
-    model_name = os.getenv('OPENAI_MODEL', 'gpt-4o-mini').strip() or 'gpt-4o-mini'
+    model_name = env.get('OPENAI_MODEL', 'gpt-4o-mini').strip() or 'gpt-4o-mini'
     url = 'https://api.openai.com/v1/chat/completions'
     payload = {
         'model': model_name,
@@ -3271,8 +3461,9 @@ def _call_openai_chat(system_prompt, user_message):
     return content
 
 
-def _call_gemini_chat(system_prompt, user_message):
-    api_key = os.getenv('GEMINI_API_KEY', '').strip()
+def _call_gemini_chat(system_prompt, user_message, env=None):
+    env = dict(os.environ) if env is None else env
+    api_key = env.get('GEMINI_API_KEY', '').strip()
     if not api_key:
         raise RuntimeError('GEMINI_API_KEY is not configured')
 
@@ -3292,7 +3483,7 @@ def _call_gemini_chat(system_prompt, user_message):
         }
     }
 
-    configured_model = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash').strip() or 'gemini-2.5-flash'
+    configured_model = env.get('GEMINI_MODEL', 'gemini-2.5-flash').strip() or 'gemini-2.5-flash'
     candidate_models = []
     for model_name in [
         configured_model,
@@ -3347,16 +3538,34 @@ def _call_gemini_chat(system_prompt, user_message):
 
 
 def generate_llm_chat_reply(user_message, diagnosis_result):
-    """LLM 공급자(OpenAI/Gemini)를 선택해 채팅 응답을 생성한다."""
-    provider = os.getenv('LLM_PROVIDER', 'openai').strip().lower()
-    normalized_result = _normalize_diagnosis_result_for_chat(diagnosis_result)
-    system_prompt = build_chat_system_prompt(normalized_result)
+    env = dict(os.environ)
+    system_prompt = build_chat_system_prompt(summarize_result(diagnosis_result))
+    return generate_chat(
+        env,
+        system_prompt,
+        user_message,
+        _call_openai_chat,
+        _call_gemini_chat,
+    )
 
-    if provider == 'gemini':
-        return _call_gemini_chat(system_prompt, user_message), 'gemini'
 
-    # 기본값은 openai
-    return _call_openai_chat(system_prompt, user_message), 'openai'
+def get_chat_configuration_status():
+    """Return public-safe configuration state without probing or generating."""
+    try:
+        env = dict(os.environ)
+        provider = validate_llm_settings(env)
+        state = 'configured'
+        if provider == 'local' and env.get('AI_DEPLOYMENT_PROFILE', 'chat_only') == 'vlm_only':
+            state = 'unavailable'
+        return {'status': state, 'provider': provider}
+    except AIError:
+        return {'status': 'misconfigured'}
+
+
+@app.route('/api/chat/status', methods=['GET'])
+def api_chat_status():
+    # Configuration only: no model generation, no internal URL/token disclosure.
+    return jsonify(get_chat_configuration_status())
 
 
 @app.route('/api/chat', methods=['POST'])
@@ -3370,6 +3579,8 @@ def api_chat():
     """
     try:
         data = request.get_json(silent=True) or {}
+        if not isinstance(data, dict):
+            return jsonify({'status': 'error', 'message': 'JSON object required'}), 400
         user_message = str(data.get('user_message', '')).strip()
         diagnosis_result = data.get('diagnosis_result', {})
 
@@ -3395,13 +3606,15 @@ def api_chat():
     except RuntimeError as e:
         return jsonify({
             'status': 'error',
-            'message': str(e)
+            'message': '채팅 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.',
+            'error_code': e.code if isinstance(e, AIError) else 'backend_unavailable'
         }), 503
     except Exception as e:
-        print(f"[ERROR] /api/chat failed: {e}")
+        app.logger.warning("chat request failed")
         return jsonify({
             'status': 'error',
-            'message': str(e)
+            'message': '채팅 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.',
+            'error_code': e.code if isinstance(e, AIError) else 'backend_unavailable'
         }), 500
 
 
@@ -3747,7 +3960,12 @@ def status():
             'kakao_send_ready': report_dep['kakao_send_ready'],
             'kakao_token_configured': report_dep['kakao_token_configured'],
             'missing_packages': report_dep['missing_packages']
-        }
+        },
+        'chat_feature': get_chat_configuration_status(),
+        'ai_experiments': {
+            'status': 'disabled' if os.getenv('AI_EXPERIMENTS_ENABLED', '0') != '1' else 'configured',
+            'mode': os.getenv('AI_EXPERIMENT_MODE', 'shadow'),
+        },
     })
 
 
@@ -3763,6 +3981,13 @@ def admin_config_page():
     if not is_admin_session():
         return redirect(url_for('login'))
     return render_template('admin_config.html')
+
+
+@app.route('/admin/ai-experiments')
+def admin_ai_experiments_page():
+    if not is_admin_session():
+        return redirect(url_for('login'))
+    return render_template('admin_ai_experiments.html')
 
 
 @app.route('/api/admin/login', methods=['POST'])
@@ -3853,19 +4078,27 @@ def api_admin_config_update():
                 continue
             casted_updates[key] = cast_config_value(key, raw_value)
 
-        applied_llm_updates = apply_admin_llm_updates(llm_updates_raw)
+        applied_llm_updates = normalize_admin_llm_updates(llm_updates_raw)
 
         if not casted_updates and not applied_llm_updates:
             return jsonify({'status': 'error', 'message': '유효한 설정 항목이 없습니다.'}), 400
 
-        persisted_updates = apply_admin_config_updates(casted_updates)
+        persisted_updates = dict(casted_updates)
+        env_updates = {
+            key: _env_serialize_value(value)
+            for key, value in persisted_updates.items()
+        }
+        if 'SERVER_IP' in persisted_updates:
+            env_updates['SERVER_HOST'] = _env_serialize_value(persisted_updates['SERVER_IP'])
+        env_updates.update(applied_llm_updates)
+        apply_env_updates_atomic(env_updates)
         for key, value in persisted_updates.items():
             setattr(config, key, value)
 
         safe_llm_updates = {}
         for key, value in applied_llm_updates.items():
-            if key in ('OPENAI_API_KEY', 'GEMINI_API_KEY'):
-                safe_llm_updates[key] = 'updated'
+            if key in LLM_SECRET_KEYS:
+                safe_llm_updates[key] = 'deleted' if value == '' else 'updated'
             else:
                 safe_llm_updates[key] = value
 
@@ -3875,8 +4108,241 @@ def api_admin_config_update():
             'updated': persisted_updates,
             'llm_updated': safe_llm_updates
         }), 200
+    except (ValueError, AIError) as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 400
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+def _experiment_store():
+    from experiments.worker import store_from_env
+    return store_from_env()
+
+
+@app.route('/api/admin/gradcam/on-demand', methods=['POST'])
+def api_admin_gradcam_on_demand():
+    csrf_error = require_admin_csrf()
+    if csrf_error:
+        return csrf_error
+    try:
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict) or set(data) - {'history_id', 'selected_eye', 'csrf_token'}:
+            raise ValueError('invalid request')
+        history_id = int(data.get('history_id'))
+        if history_id < 1:
+            raise ValueError('invalid history id')
+        return jsonify({'status': 'ok', **generate_saved_gradcam(history_id, data.get('selected_eye'))})
+    except KeyError as exc:
+        return jsonify({'status': 'error', 'error_code': str(exc).strip("'")}), 404
+    except (ValueError, AIError) as exc:
+        code = exc.code if isinstance(exc, AIError) else 'invalid_request'
+        return jsonify({'status': 'error', 'error_code': code}), 409 if isinstance(exc, AIError) else 400
+
+
+def _experiment_capabilities():
+    enabled = os.getenv('AI_EXPERIMENTS_ENABLED', '0') == '1'
+    vlm_enabled = os.getenv('VLM_ENABLED', '0') == '1'
+    baseline_enabled = os.getenv('BASELINE_EXPERIMENTS_ENABLED', '0') == '1'
+    explanation_enabled = os.getenv('EXPLANATION_EXPERIMENTS_ENABLED', '0') == '1'
+    survey_enabled = os.getenv('SURVEY_VLM_EXPERIMENTS_ENABLED', '0') == '1'
+    hybrid_enabled = os.getenv('HYBRID_REVIEW_EXPERIMENTS_ENABLED', '0') == '1'
+    real_data_enabled = os.getenv('EXPERIMENT_ALLOW_REAL_DATA', '0') == '1'
+    supported_arms = []
+    if enabled and baseline_enabled:
+        supported_arms.append('E0_baseline')
+    if enabled and vlm_enabled:
+        supported_arms.append('E1_vlm_image')
+        if survey_enabled:
+            supported_arms.append('E2_vlm_survey')
+    if enabled and explanation_enabled and os.getenv('LLM_PROVIDER', 'openai').strip().lower() == 'local':
+        supported_arms.append('E3_result_explanation')
+    if enabled and hybrid_enabled:
+        supported_arms.append('E4_hybrid_review')
+    return {
+        'enabled': enabled,
+        'vlm_enabled': vlm_enabled,
+        'baseline_enabled': baseline_enabled,
+        'explanation_enabled': explanation_enabled,
+        'survey_enabled': survey_enabled,
+        'hybrid_enabled': hybrid_enabled,
+        'operational_import_ready': (
+            enabled and real_data_enabled
+            and os.getenv('AI_EXPERIMENT_MODE', 'shadow') == 'shadow'
+        ),
+        'mode': os.getenv('AI_EXPERIMENT_MODE', 'shadow'),
+        'deployment_profile': os.getenv('AI_DEPLOYMENT_PROFILE', 'chat_only'),
+        'enqueue_ready': bool(supported_arms),
+        'supported_arms': supported_arms,
+        'user_results_affected': False,
+    }
+
+
+def _experiment_error(exc):
+    if isinstance(exc, KeyError):
+        return jsonify({'status': 'error', 'error_code': str(exc).strip("'")}), 404
+    if isinstance(exc, ValueError):
+        return jsonify({'status': 'error', 'error_code': 'invalid_request'}), 400
+    code = exc.code if isinstance(exc, AIError) else 'invalid_request'
+    status = 503 if code in ('misconfigured', 'disabled') else 409
+    return jsonify({'status': 'error', 'error_code': code}), status
+
+
+@app.route('/api/admin/ai-experiments/capabilities', methods=['GET'])
+def api_admin_experiment_capabilities():
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+    csrf_token = str(session.get('admin_csrf_token', '')).strip() or create_admin_csrf_token()
+    return jsonify({
+        'status': 'ok',
+        'capabilities': _experiment_capabilities(),
+        'csrf_token': csrf_token,
+    })
+
+
+@app.route('/api/admin/ai-experiments/samples/from-history', methods=['POST'])
+def api_admin_experiment_sample_from_history():
+    csrf_error = require_admin_csrf()
+    if csrf_error:
+        return csrf_error
+    try:
+        capabilities = _experiment_capabilities()
+        if not capabilities['operational_import_ready']:
+            raise AIError('real_data_not_allowed')
+        data = request.get_json(silent=True)
+        allowed = {
+            'history_id', 'selected_eye', 'permission_ref',
+            'retention_policy_ref', 'retention_until', 'split', 'csrf_token',
+        }
+        if not isinstance(data, dict) or set(data) - allowed:
+            raise ValueError('invalid request')
+        try:
+            history_id = int(data.get('history_id'))
+        except (TypeError, ValueError):
+            raise ValueError('invalid history id') from None
+        from experiments.import_operational import import_history_eye
+        sample, created = import_history_eye(
+            _experiment_store(),
+            database_path=DATABASE_PATH,
+            image_root=config.IMAGE_SAVE_DIR,
+            history_id=history_id,
+            selected_eye=data.get('selected_eye'),
+            permission_ref=data.get('permission_ref'),
+            retention_policy_ref=data.get('retention_policy_ref'),
+            retention_until=data.get('retention_until'),
+            split=str(data.get('split') or ''),
+        )
+        return jsonify({
+            'status': 'ok',
+            'sample_id': sample['sample_id'],
+            'selected_eye': sample['selected_eye'],
+            'created': created,
+        }), 201 if created else 200
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
+
+
+@app.route('/api/admin/ai-experiments/jobs', methods=['GET'])
+def api_admin_experiment_jobs_list():
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+    try:
+        limit = max(1, min(int(request.args.get('limit', 100)), 500))
+        return jsonify({'status': 'ok', 'jobs': _experiment_store().list_job_summaries(limit)})
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
+
+
+@app.route('/api/admin/ai-experiments/jobs', methods=['POST'])
+def api_admin_experiment_jobs_create():
+    csrf_error = require_admin_csrf()
+    if csrf_error:
+        return csrf_error
+    try:
+        capabilities = _experiment_capabilities()
+        if not capabilities['enqueue_ready']:
+            raise AIError('disabled')
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict) or set(data) - {'sample_id', 'run_id', 'csrf_token'}:
+            raise ValueError('invalid request')
+        sample_id = str(data.get('sample_id') or '')
+        run_id = str(data.get('run_id') or '')
+        if not re.fullmatch(r'[0-9a-f]{32}', sample_id) or not re.fullmatch(r'[0-9a-f]{32}', run_id):
+            raise ValueError('invalid identifiers')
+        store = _experiment_store()
+        run = store.get_run(run_id)
+        if run['arm_id'] not in capabilities['supported_arms']:
+            raise AIError('unsupported_arm')
+        job, created = store.enqueue(sample_id, run_id)
+        return jsonify({
+            'status': 'ok', 'job_id': job['job_id'],
+            'job_status': job['state'], 'created': created,
+        }), 202 if created else 200
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
+
+
+@app.route('/api/admin/ai-experiments/jobs/<job_id>', methods=['GET'])
+def api_admin_experiment_job_get(job_id):
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+    try:
+        if not re.fullmatch(r'[0-9a-f]{32}', job_id):
+            raise ValueError('invalid job id')
+        jobs = _experiment_store().list_job_summaries(500)
+        job = next((item for item in jobs if item['job_id'] == job_id), None)
+        if job is None:
+            raise KeyError('job_not_found')
+        return jsonify({'status': 'ok', 'job': job})
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
+
+
+@app.route('/api/admin/ai-experiments/runs/<run_id>', methods=['GET'])
+def api_admin_experiment_run_get(run_id):
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+    try:
+        if not re.fullmatch(r'[0-9a-f]{32}', run_id):
+            raise ValueError('invalid run id')
+        from experiments.evaluate import evaluate_run
+        store = _experiment_store()
+        return jsonify({
+            'status': 'ok',
+            'run': store.get_run(run_id),
+            'evaluation': evaluate_run(store, run_id),
+        })
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
+
+
+@app.route('/api/admin/ai-experiments/compare', methods=['GET'])
+def api_admin_experiment_compare():
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+    try:
+        left = str(request.args.get('left_run_id') or '')
+        right = str(request.args.get('right_run_id') or '')
+        if not re.fullmatch(r'[0-9a-f]{32}', left) or not re.fullmatch(r'[0-9a-f]{32}', right):
+            raise ValueError('invalid run ids')
+        from experiments.evaluate import compare_runs
+        comparison = compare_runs(_experiment_store(), left, right)
+        return jsonify({'status': 'ok', 'comparison': comparison})
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
+
+
+@app.route('/api/admin/ai-experiments/jobs/<job_id>/cancel', methods=['POST'])
+def api_admin_experiment_job_cancel(job_id):
+    csrf_error = require_admin_csrf()
+    if csrf_error:
+        return csrf_error
+    try:
+        if not re.fullmatch(r'[0-9a-f]{32}', job_id):
+            raise ValueError('invalid job id')
+        job = _experiment_store().request_cancel(job_id)
+        return jsonify({'status': 'ok', 'job_id': job_id, 'job_status': job['state']})
+    except (AIError, ValueError, KeyError) as exc:
+        return _experiment_error(exc)
 
 
 @app.route('/api/admin/logout', methods=['POST'])
@@ -4062,13 +4528,20 @@ def survey():
 def initialize_on_first_request():
     """서버 시작 시 모델만 로드 (Flask 2.3+ 호환)"""
     global model_manager, models_initialized
-    if not models_initialized:
-        models_initialized = True
+    if request.path in ('/api/chat', '/api/chat/status'):
+        return
+    if models_initialized:
+        return
+    with model_init_lock:
+        if models_initialized:
+            return
         init_history_db()
         print("\n" + "="*50)
         print("[Eye Disease Detection Server]")
         print("="*50)
-        model_manager = initialize_models()
+        loaded_model_manager = initialize_models()
+        model_manager = loaded_model_manager
+        models_initialized = True
 
         print("\n✓ 서버 준비 완료! http://0.0.0.0:5000 에서 접속하세요\n")
 
