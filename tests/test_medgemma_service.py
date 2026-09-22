@@ -183,7 +183,17 @@ class MedGemmaServiceContractTest(unittest.TestCase):
         self.assertIn('--offline', observed['command'])
         self.assertIn('--no-mmproj-offload', observed['command'])
         self.assertIn('--json-schema', observed['command'])
-        self.assertIn('--log-disable', observed['command'])
+        self.assertNotIn('--log-disable', observed['command'])
+        self.assertEqual(
+            observed['command'][observed['command'].index('--verbosity') + 1],
+            '0',
+        )
+        self.assertEqual(
+            observed['command'][observed['command'].index('--log-colors') + 1],
+            'off',
+        )
+        self.assertIn('--no-log-prefix', observed['command'])
+        self.assertIn('--no-log-timestamps', observed['command'])
         self.assertEqual(observed['kwargs']['timeout'], 180)
         self.assertIs(observed['kwargs']['stdin'], subprocess.DEVNULL)
 

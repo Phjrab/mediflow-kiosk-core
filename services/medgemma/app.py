@@ -256,7 +256,12 @@ def _llama_cpp_generate(image: Image.Image, prompt: str, max_new_tokens: int) ->
             image.save(handle, format='PNG')
         os.chmod(temporary_path, 0o600)
         command = [
-            runtime['cli'], '--offline', '--log-disable',
+            # mtmd-cli emits generated tokens through its LOG(...) output level.
+            # --log-disable pauses that logger and therefore suppresses the model
+            # response too. Level 0 keeps only generic output while excluding
+            # error/warning/info/debug diagnostics from the captured JSON channel.
+            runtime['cli'], '--offline', '--verbosity', '0',
+            '--log-colors', 'off', '--no-log-prefix', '--no-log-timestamps',
             '-m', runtime['model'], '--mmproj', runtime['processor'],
             '--image', str(temporary_path), '-p', prompt,
             '--temp', '0', '-n', str(max_new_tokens),
