@@ -139,7 +139,10 @@ class VLMConfig:
             '',
         )
         model = env.get('VLM_MODEL', '').strip()
-        token = env.get('VLM_API_KEY', '').strip()
+        try:
+            token = secret(env, 'VLM')
+        except AIError:
+            raise AIError('misconfigured') from None
         if not model or len(model) > 200 or not token or len(token) > 4096:
             raise AIError('misconfigured')
         if any(c in token for c in '\r\n'):
