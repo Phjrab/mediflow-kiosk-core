@@ -316,6 +316,8 @@ changed or performed.
 - This HTTP-output postmortem code is not deployed to either Jetson, and no
   further model start, controller mutation window, or synthetic inference was
   attempted after fail-closed recovery.
+- Committed and pushed the HTTP-output postmortem baseline as `f6e428d` on
+  `codex/admin-control`.
 
 Existing model files, key contents, `.env`, application/user databases, user
 data, CUDA/PyTorch, A tunnel, managed ingress, and cloud provider behavior were

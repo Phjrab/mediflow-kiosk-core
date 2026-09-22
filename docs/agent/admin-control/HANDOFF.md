@@ -46,8 +46,8 @@ original `1:1:chat_only` state, and controller mutations are disabled.
 
 ## Local source after the window
 
-The branch has an additional undeployed HTTP-output postmortem change after
-`27c5da9`:
+Pushed commit `f6e428d` contains an undeployed HTTP-output postmortem change
+after device release `27c5da9`:
 
 - the pinned, device-confirmed `llama-mtmd-cli --log-disable` option prevents CLI
   diagnostics from contaminating the captured JSON channel;
@@ -62,8 +62,7 @@ This latest local change is not deployed to A or B.
 
 ## Remaining gates
 
-- Commit and push the HTTP-output postmortem change, then review it before any
-  new detached B release.
+- Review pushed postmortem commit `f6e428d` before any new detached B release.
 - A further synthetic VLM attempt requires a new explicit maintenance approval.
   Preserve `27c5da9`, the current `1:1:chat_only` state, the reconciled historical
   row, the successful forward-operation row, and all rollback material.
