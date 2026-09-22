@@ -21,7 +21,10 @@ from utils.lifecycle_lock import (
 )
 
 
-TERMINAL_STATES = frozenset({"succeeded", "failed", "rolled_back", "manual_intervention_required", "cancelled"})
+TERMINAL_STATES = frozenset({
+    "succeeded", "failed", "rolled_back", "manual_intervention_required",
+    "reconciled", "cancelled",
+})
 ACTIVE_STATES = frozenset({"accepted", "validating", "draining", "stopping", "starting", "verifying", "restoring"})
 
 
@@ -200,6 +203,33 @@ class OperationJournal:
             ).rowcount
         return changed
 
+    def reconcile_manual(self, operation_id: str, *, result: dict[str, Any]) -> dict[str, Any]:
+        """Preserve a manual-intervention row while recording verified recovery."""
+        operation_id = operation_id if isinstance(operation_id, str) else ""
+        if len(operation_id) != 32:
+            raise ControlError("operation_not_found", 404)
+        self.initialize()
+        result_json = canonical_json(result)
+        with self._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT state FROM operations WHERE operation_id=?", (operation_id,)
+            ).fetchone()
+            if row is None:
+                raise ControlError("operation_not_found", 404)
+            if row["state"] != "manual_intervention_required":
+                raise ControlError("operation_not_reconcilable", 409)
+            connection.execute(
+                "UPDATE operations SET state='reconciled', stage='reconciled', "
+                "result_json=?, updated_at=? WHERE operation_id=?",
+                (result_json, utc_now(), operation_id),
+            )
+            updated = connection.execute(
+                "SELECT * FROM operations WHERE operation_id=?", (operation_id,)
+            ).fetchone()
+        assert updated is not None
+        return self._row(updated)
+
 
 class OperationCoordinator:
     def __init__(self, *, journal: OperationJournal, lifecycle: LifecycleAdapter,
@@ -333,10 +363,19 @@ class OperationCoordinator:
                     if applied_written and previous_applied is not None:
                         self.save_applied(previous_applied)
                     self.journal.update(operation_id, "rolled_back", error_code=code)
-                except Exception:
+                except Exception as rollback_exc:
+                    rollback_code = (
+                        rollback_exc.code
+                        if isinstance(rollback_exc, (LifecycleFailure, ControlError))
+                        else "rollback_operation_failed"
+                    )
                     self.journal.update(
                         operation_id, "manual_intervention_required",
                         error_code="rollback_failed",
+                        result={
+                            "primary_error_code": code,
+                            "rollback_error_code": rollback_code,
+                        },
                     )
         finally:
             if lock_handle is not None:
@@ -355,3 +394,77 @@ class OperationCoordinator:
         if updated["state"] != "cancelled":
             raise ControlError("operation_not_cancellable", 409)
         return updated
+
+    def reconcile(self, operation_id: str, body: Any) -> dict[str, Any]:
+        required = {
+            "expected_config_revision", "expected_deployment_generation",
+            "expected_profile", "acknowledgement",
+        }
+        if not isinstance(body, dict) or set(body) != required:
+            raise ControlError("invalid_reconciliation")
+        for field in ("expected_config_revision", "expected_deployment_generation"):
+            if isinstance(body[field], bool) or not isinstance(body[field], int) or body[field] < 1:
+                raise ControlError("invalid_reconciliation")
+        if body["expected_profile"] not in {"chat_only", "vlm_only"}:
+            raise ControlError("invalid_reconciliation")
+        if body["acknowledgement"] != "exact_recovery_state_verified":
+            raise ControlError("acknowledgement_required")
+        operation = self.journal.get(operation_id)
+        if operation["state"] != "manual_intervention_required":
+            raise ControlError("operation_not_reconcilable", 409)
+        lock_handle = None
+        try:
+            try:
+                lock_handle = open_lifecycle_lock(self.lifecycle_lock_path)
+                acquire_lifecycle_lock(lock_handle)
+            except LifecycleLockError as exc:
+                raise ControlError(exc.code, 409) from None
+            applied = self.load_applied()
+            expected_state = (
+                body["expected_config_revision"],
+                body["expected_deployment_generation"],
+                body["expected_profile"],
+            )
+            actual_state = (
+                applied.get("config_revision"),
+                applied.get("deployment_generation"),
+                applied.get("applied_profile"),
+            )
+            if actual_state != expected_state:
+                raise ControlError("state_changed", 412)
+            desired = applied.get("effective_config")
+            if (
+                not isinstance(desired, dict)
+                or applied.get("effective_config_digest") != digest(desired)
+            ):
+                raise ControlError("recovery_unverified", 409)
+            try:
+                snapshot = self.lifecycle.snapshot()
+            except (LifecycleFailure, ControlError):
+                raise ControlError("recovery_unverified", 409) from None
+            if (
+                snapshot.get("profile") != body["expected_profile"]
+                or snapshot.get("admission") != "open"
+                or not snapshot.get("raw_bypass_closed")
+                or snapshot.get("inflight") != 0
+                or snapshot.get("unknown_inflight") != 0
+                or snapshot.get("deployment_generation") != body["expected_deployment_generation"]
+            ):
+                raise ControlError("recovery_unverified", 409)
+            try:
+                receipt = self.lifecycle.verify(desired)
+            except (LifecycleFailure, ControlError):
+                raise ControlError("recovery_unverified", 409) from None
+            if receipt != applied.get("receipt"):
+                raise ControlError("recovery_unverified", 409)
+            return self.journal.reconcile_manual(operation_id, result={
+                "resolution": "exact_recovery_state_verified",
+                "config_revision": body["expected_config_revision"],
+                "deployment_generation": body["expected_deployment_generation"],
+                "applied_profile": body["expected_profile"],
+                "effective_config_digest": applied.get("effective_config_digest"),
+                "receipt": receipt,
+            })
+        finally:
+            if lock_handle is not None:
+                release_lifecycle_lock(lock_handle)

@@ -11,6 +11,8 @@ from typing import Any, Callable
 from scripts import local_llm_service
 from services.ai_control.core import digest
 from services.ai_control.operations import LifecycleAdapter, LifecycleFailure
+from utils.ai_config import AIError
+from utils.runtime_receipt import validate_runtime_expectation
 
 
 @dataclass(frozen=True)
@@ -250,11 +252,11 @@ class SequentialLifecycleAdapter(LifecycleAdapter):
                 or engine.receipt.get("artifact_id") != expected_artifact
                 or engine.receipt.get("effective_config_digest") != expected_digest):
             raise LifecycleFailure("verification_failed")
-        return {
-            **engine.receipt,
-            "observed_profile": profile,
-            "effective_config_digest": expected_digest,
-        }
+        try:
+            receipt = validate_runtime_expectation(dict(engine.receipt))
+        except AIError:
+            raise LifecycleFailure("verification_failed") from None
+        return {**receipt, "effective_config_digest": expected_digest}
 
     def restore(self, previous: dict[str, Any]) -> None:
         self._stop_running()

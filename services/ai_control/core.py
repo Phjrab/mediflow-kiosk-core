@@ -290,7 +290,10 @@ class ControlService:
             "co_resident_verified": False,
             "runtime_override_fields": ["context_tokens"],
             "plan_actions": ["apply_config"],
-            "operations": ["apply_config"] if self.mutations_enabled and self.operation_coordinator else [],
+            "operations": (
+                ["apply_config", "reconcile_manual_intervention"]
+                if self.mutations_enabled and self.operation_coordinator else []
+            ),
             "managed_ingress_verified": self.managed_ingress_verified,
             "activity_authoritative": self.managed_ingress_verified,
             "medical_quality_evaluated": False,
@@ -506,3 +509,8 @@ class ControlService:
         if not self.mutations_enabled or self.operation_coordinator is None:
             self.reject_operation()
         return self.operation_coordinator.cancel(operation_id)
+
+    def reconcile_operation(self, operation_id: str, body: Any) -> dict[str, Any]:
+        if not self.mutations_enabled or self.operation_coordinator is None:
+            self.reject_operation()
+        return self.operation_coordinator.reconcile(operation_id, body)

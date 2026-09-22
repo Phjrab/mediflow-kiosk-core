@@ -121,6 +121,10 @@ def create_app(service: ControlService | None = None, *, env=None) -> Flask:
     def cancel_operation(operation_id):
         return jsonify(service.cancel_operation(operation_id))
 
+    @app.route("/control/v1/operations/<operation_id>/reconcile", methods=["POST"])
+    def reconcile_operation(operation_id):
+        return jsonify(service.reconcile_operation(operation_id, request.get_json(silent=True)))
+
     return app
 
 

@@ -177,3 +177,78 @@ No LLM or VLM was started, stopped, restarted, or switched. No cloud fallback, m
   not started, so no E1 device receipt or model-switch claim is made.
 - No model file, key, operational/application DB, user data, CUDA/PyTorch setup,
   or medical-quality evaluation was changed or performed.
+
+## 2026-09-22 — approved C5 MedGemma lifecycle window and fail-closed recovery
+
+- Implemented and pushed `8a9efa3` with the fixed MedGemma launcher, exact
+  UID/executable/argv/cwd/boot-id/start-tick owner manager, controller mutation
+  bootstrap, shared lifecycle lock, managed ingress binding, and private runtime
+  receipt handling. Local runnable regression before deployment was 172 passed
+  and one skipped; the focused clean detached B release suites passed 29 Admin
+  Control, 13 MedGemma, and 10 local-LLM tests.
+- Deployed the clean detached release at
+  `/home/jetson2/mediflow-ai/control/releases/8a9efa3`. Added only the owner-only
+  C5 path configuration needed by the manager. Existing keys, models, `.env`,
+  CUDA/PyTorch, application DB, user data, rollback files, ingress, A tunnel, and
+  raw chat configuration were preserved.
+- Passed the identity, private-file mode, model-manifest, real shared-lock,
+  zero-active/zero-unknown lease, raw-bypass, exact applied-receipt, and
+  no-co-residency gates. Restarted only the exact-owned controller into the new
+  release, then temporarily enabled drafts/mutations for the approved single
+  sequence.
+- Operation `3f0dd84d4d5b4e4d89c74e16449cedd9` completed the exact-owned
+  chat→MedGemma switch. Applied state reached `2:2:vlm_only`; chat was stopped,
+  MedGemma was ready on loopback `127.0.0.1:18081`, and the two heavy engines
+  were never resident together.
+- The synthetic VLM request was rejected with HTTP 409 before ingress created a
+  lease or MedGemma began generation. This is not E1/E2 inference evidence and
+  no medical-quality claim is made. The A and B role-prompt SHA-256 values were
+  identical. The successful operation had stored an extra `observed_profile`
+  field in its applied receipt while the E3 expectation schema requires exactly
+  seven fields; this receipt-boundary defect explains the pre-admission 409.
+- The requested MedGemma→chat operation
+  `e287c3094eb740ae8332a92d822de76f` entered
+  `manual_intervention_required/rollback_failed`. Device evidence showed no
+  chat start log and no second MedGemma start log, making the VLM stop/port-release
+  boundary the strongest failure location. The deployed code recorded only the
+  generic rollback code, so the exact primary exception cannot be claimed.
+- Followed the approved fail-safe immediately: admission remained closed while
+  both engines and both raw ports were confirmed stopped; an exact, locked
+  recovery restored the original receipt and applied state to `1:1:chat_only`,
+  started only the pinned general LLM (PID 42774), and reopened admission with
+  zero active and zero unknown leases. The controller was then restarted in the
+  same `8a9efa3` release with drafts/mutations disabled (PID 42828).
+- Final A-side verification passed: capabilities report drafts false, mutations
+  false, managed ingress true and no operations; current state is
+  `1:1:chat_only`; synthetic chat returned 200 with an exact receipt; only B:8080
+  is network-reachable while 8081/18080/18081 are not.
+
+### Postmortem code and tests
+
+- Locally removed `observed_profile` from the runtime receipt and now validates
+  the exact closed expectation schema before persistence.
+- Locally made the MedGemma owner manager wait for actual loopback port release
+  after exact process termination, preventing an immediate stopped-process/open-
+  socket race from being interpreted as an unmanaged runtime.
+- Locally added non-sensitive primary and rollback error codes to future
+  `manual_intervention_required` audit results. Raw exception text, prompts, and
+  credentials are not persisted.
+- Added a local, explicit reconciliation endpoint that never changes a process or
+  applied configuration. It acquires the shared lifecycle lock and will preserve
+  the failed row as `reconciled` only after exact applied revision/generation/
+  profile, engine receipt, open admission, closed raw bypass, and zero active/
+  unknown lease evidence all match. Unsafe evidence leaves the row unchanged.
+- Focused postmortem suite: 29 passed before the reconciliation addition; its
+  focused Admin Control suite passed 28. Full runnable local suite: 176 passed,
+  one skipped, zero failures/errors. The two pre-existing unavailable optional
+  modules (`pytorch_grad_cam`, `qrcode`) remain excluded; no dependency was
+  installed. `git diff --check` passed.
+- These postmortem changes have not been deployed to either Jetson and the
+  synthetic transition was not retried. The historical manual-intervention row
+  remains in B's owner-only operation journal for audit and blocks a future
+  operation until the new evidence-backed reconciliation code is separately
+  approved, deployed, and explicitly invoked.
+
+No model file, key, operational/application DB, user data, CUDA/PyTorch setup,
+cloud fallback, real-user-data inference, or medical-quality evaluation was
+changed or performed.

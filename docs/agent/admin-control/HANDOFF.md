@@ -1,60 +1,84 @@
 # Admin Control Handoff
 
-Current phase: C0-C4 CODE/MOCK complete, C1/C2 read-only management deployed, and
-C4 managed ingress plus actual chat rollback verified. Final deployed runtime source is
-`c1e84bb`. C5 remains partial because the VLM device receipt and permanent
-MedGemma lifecycle binding are not complete.
+Current phase: C0-C4 implementation and the controller-authoritative ingress are
+complete. The C5 fixed MedGemma owner manager was deployed from pushed commit
+`8a9efa3`, but the approved synthetic chat→MedGemma→chat window exposed a receipt
+contract defect and then a rollback failure. The device was safely returned to
+the original `1:1:chat_only` state and mutations were disabled. C5 VLM receipt
+verification remains incomplete.
 
-The existing LLM/VLM, F1, regression, and synthetic E0-E4 device evidence is
-preserved. A runs `codex/admin-control-a-deploy`; its deployed SHA is `1ec6f31`.
-B's final controller and ingress source is the clean detached `c1e84bb` release;
-the earlier `f0f0555` release remains available for rollback. A's `.env` backup is
-owner-only, and its only live setting change is
-`VLM_BASE_URL=http://192.168.50.11:8080`; its non-VLM digest is unchanged. The A
-database and user data and B inference keys, models, and user data were not changed.
+## Final verified device state
 
-The deployed B inference path is now controller-authoritative: network port 8080
-is managed ingress, raw chat is loopback-only 18080, and raw VLM ports 8081/18081
-are closed. One real chat apply/rollback completed through the durable operation
-coordinator. The permanently running controller still has drafts and mutations
-disabled because a concrete MedGemma launcher/owner callback is not wired.
+- B controller runs the clean detached `8a9efa3` release as exact-owned PID
+  42828 on `127.0.0.1:8090`. Capabilities report drafts false, mutations false,
+  managed ingress true, and an empty operations list.
+- B managed ingress remains on network port 8080. Its journal is open at
+  generation 1 with zero active and zero unknown leases. Network checks from A
+  show only B:8080 reachable; 8081, 18080, and 18081 are not exposed.
+- The pinned general LLM is exact-owned PID 42774, healthy on B loopback
+  `127.0.0.1:18080`. MedGemma is stopped and loopback 18081 is closed. No heavy
+  model co-residency occurred.
+- Durable applied state and the private ingress receipt are restored to
+  `1:1:chat_only`. A-to-B synthetic chat returned 200 with an exact E3 receipt.
+- A's existing loopback Admin Control tunnel and private VLM URL remain in their
+  prior C4 state. Existing keys and environment/rollback files remain
+  owner-only. No autostart was added.
+- Operation `e287c3094eb740ae8332a92d822de76f` remains
+  `manual_intervention_required/rollback_failed` in B's owner-only journal. Do
+  not delete or rewrite it. It deliberately blocks another apply until the local
+  evidence-backed reconciliation path is reviewed, deployed, and invoked.
 
-Current device state:
+## What the device window proved
 
-- B controller PID 37652 runs `c1e84bb` and listens only on `127.0.0.1:8090`.
-- B managed ingress PID 37550 runs `c1e84bb` on port 8080. Its durable journal is
-  open at generation 1 with zero active and zero unknown leases.
-- B general LLM PID 37864 is exact-owned and healthy on `127.0.0.1:18080`; its
-  runtime cwd is the compatible `6c2d9b1` release. MedGemma is stopped.
-- A tunnel PID 1947132 listens only on `127.0.0.1:18090` and forwards only to B loopback 8090; its private PID record is under `/home/jetson_orin_nano/.local/state/mediflow-ai/admin-control-tunnel/`. It has no autostart entry.
-- A reads `/home/jetson_orin_nano/.config/mediflow-ai/admin-control-readonly.env`; the file enables reads but keeps drafts and mutations off. The management credential is a separate owner-only mode-0600 file on each device.
-- Authenticated GET state/capabilities/current succeeded through A. Capabilities
-  reports managed ingress authoritative, drafts false, mutations false and no
-  operations. A-to-B synthetic chat/receipt passed after rollback.
-- A's kiosk was already stopped and remains stopped; no web process was available to restart. The same-origin route was instead exercised with the actual A virtualenv and did not load the classifier.
+- Exact-owned sequential chat→MedGemma switching worked once. Operation
+  `3f0dd84d4d5b4e4d89c74e16449cedd9` reached `2:2:vlm_only`; MedGemma was ready
+  on loopback and chat was stopped.
+- The synthetic VLM request returned HTTP 409 before ingress created a lease and
+  before generation. A/B role-prompt hashes match. The operation receipt stored
+  eight fields because `observed_profile` leaked into the closed seven-field E3
+  expectation, so this window does not provide an E1/E2 VLM receipt or inference
+  result.
+- The reverse operation failed before a chat start was logged, then its single
+  rollback attempt also failed. Both engines were stopped, admission was closed,
+  and no active/unknown inference remained when manual recovery began. The old
+  code did not preserve the two underlying exception codes, so the precise
+  rollback exception is not asserted.
+- The approved exact recovery restored only the original chat runtime and then
+  locked the controller read-only. No further transition or model restart was
+  attempted.
 
-Validation: local runnable regression is 160 passed with one skipped; B preflight
-C4 suites passed 32 and the direct-CLI device subset passed 17. Real shared-lock,
-raw-bypass, receipt, inactive-VLM lease, controller isolation and rollback checks
-passed. Earlier regression evidence remains preserved.
+## Local source after the window
 
-Still blocked/not run:
+The branch contains an undeployed postmortem fix after `8a9efa3`:
 
-- Permanent controller mutation and a device-tested MedGemma launcher/owner
-  binding: BLOCKED_GATE. Do not enable drafts/mutations before this is complete.
-- E3 general-LLM receipt is device-verified. E1/E2 VLM device receipt after a
-  sequential MedGemma profile selection remains BLOCKED_GATE.
-- Permanent controller POST endpoints remain disabled. One local synthetic
-  draft/plan was executed directly through the operation coordinator and finished
-  `rolled_back` after its injected verification failure.
-- A MedGemma start or model/profile switch, medical quality evaluation, and
-  real-user-data validation: NOT_RUN.
+- lifecycle verification returns and persists only the exact seven-field runtime
+  expectation;
+- the MedGemma owner manager waits until loopback port 18081 is actually released
+  after exact process termination;
+- future manual-intervention records contain safe primary and rollback error
+  codes in addition to the stable `rollback_failed` status;
+- an explicit reconciliation endpoint preserves the historical row and changes
+  no process/configuration; it succeeds only when exact applied state, runtime
+  receipt, ownership, admission, raw-bypass, and zero-lease evidence all match;
+- focused tests pass and the runnable suite passes 176 with one skipped.
 
-Next action: implement and mock-test the fixed MedGemma service manager and bind
-both owned engines plus the managed ingress to controller bootstrap. Then use a
-separate approved window for one sequential chat→VLM→chat synthetic transition.
-Keep the current controller mutations off and preserve the C4 rollback environment.
+The two pre-existing optional local dependencies `pytorch_grad_cam` and `qrcode`
+are unavailable, so their modules were not run. No package was installed. The
+pushed postmortem source must be reviewed before any future device window; it is
+not present on A or B yet.
 
-Exact approval phrase for the next device-writing step:
+## Remaining gates
 
-> 승인합니다: `codex/admin-control`의 최신 푸시 HEAD에 MedGemma 고정 launcher·exact owner process manager와 controller mutation bootstrap을 로컬 코드·mock으로 구현하고, 검증된 코드만 Jetson B의 새 detached release로 배포하는 것을 승인합니다. 현재 managed ingress·raw chat 18080·controller·A tunnel과 모든 owner-only 키·환경·rollback 파일을 보존하고, mock·identity·drain·unknown lease·receipt·원복 게이트가 모두 통과한 후에만 유지보수 창에서 draft/mutation을 일시 활성화하여 합성 chat→MedGemma→chat 순차 전환 1회를 실행하세요. 동시 GPU 상주는 하지 말고, 전환 후 drafts/mutations는 다시 비활성화하세요. 실패·drift·미관리 프로세스·unknown lease가 발생하면 admission을 닫고 현재 `1:1:chat_only`로 즉시 원복한 뒤 추가 재시작을 하지 마세요. 모델 파일·키·DB·사용자 데이터·CUDA/PyTorch·의료 품질 평가는 변경하지 마세요.
+- Review the postmortem and reconciliation diff and deploy it to a new detached B
+  release only in a new approved maintenance window. Preserve the current
+  `8a9efa3` release and all rollback material. Invoke reconciliation only after
+  it re-verifies exact `1:1:chat_only`, open admission, zero active/unknown
+  leases, exact-owned healthy chat, stopped VLM, and closed raw bypass.
+- A second synthetic chat→MedGemma→chat attempt requires new explicit approval.
+  It must stop after the first drift, ownership, lease, port-release, receipt, or
+  rollback failure. Do not claim E1/E2 until the managed-ingress VLM response is
+  200, `vision_ingested` is true, and its closed receipt matches.
+- Real-user-data validation and medical-quality evaluation remain `NOT_RUN`.
+
+Models, key contents, application/operational DBs, user data, CUDA/PyTorch, and
+cloud provider behavior remain unchanged.

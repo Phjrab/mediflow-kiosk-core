@@ -147,7 +147,9 @@ class RuntimeReceiptManagerTest(unittest.TestCase):
                 headers={"Authorization": "Bearer fixture-admin-token"},
             )
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.get_json()["operations"], ["apply_config"])
+            self.assertEqual(response.get_json()["operations"], [
+                "apply_config", "reconcile_manual_intervention",
+            ])
 
 
 if __name__ == "__main__":

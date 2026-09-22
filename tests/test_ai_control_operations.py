@@ -3,7 +3,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from services.ai_control.core import Catalog, ControlService, PrivateJsonStore, RuntimeObservation, TelemetrySampler
+from services.ai_control.core import (
+    Catalog, ControlService, PrivateJsonStore, RuntimeObservation,
+    TelemetrySampler, digest,
+)
 from services.ai_control.operations import LifecycleAdapter, OperationCoordinator, OperationJournal
 from test_ai_control_service import catalog_payload
 
@@ -46,7 +49,8 @@ class FakeLifecycle(LifecycleAdapter):
 
     def verify(self, desired):
         self.events.append(("verify", desired["active_profile"]))
-        return {"artifact_id": desired["engines"]["vlm"]["artifact_id"], "observed_profile": desired["active_profile"]}
+        kind = "chat" if desired["active_profile"] == "chat_only" else "vlm"
+        return {"artifact_id": desired["engines"][kind]["artifact_id"]}
 
     def restore(self, previous):
         self.events.append(("restore", previous["profile"]))
@@ -153,6 +157,10 @@ class OperationTest(unittest.TestCase):
             accepted = service.accept_operation(request, idempotency_key="fixture-rollback-fail")
             finished = journal.get(accepted["operation_id"])
             self.assertEqual((finished["state"], finished["error_code"]), ("manual_intervention_required", "rollback_failed"))
+            self.assertEqual(finished["result"], {
+                "primary_error_code": "operation_failed",
+                "rollback_error_code": "rollback_operation_failed",
+            })
             self.assertEqual(lifecycle.events.count(("restore", "stopped")), 1)
 
     def test_restart_reconciliation_never_replays_nonterminal_operation(self):
@@ -185,6 +193,81 @@ class OperationTest(unittest.TestCase):
             function(*args)
             self.assertEqual(journal.get(first["operation_id"])["state"], "cancelled")
             self.assertNotIn(("apply", "vlm_only"), lifecycle.events)
+
+    def test_manual_intervention_reconciliation_preserves_row_after_exact_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            lifecycle = FakeLifecycle()
+            service, journal = self.make_service(Path(directory), lifecycle)
+            desired = {**self.desired(), "active_profile": "chat_only"}
+            receipt = {"artifact_id": "fixture-chat"}
+            service.save_applied({
+                "config_revision": 1,
+                "deployment_generation": 1,
+                "applied_profile": "chat_only",
+                "effective_config": desired,
+                "last_good_config": desired,
+                "effective_config_digest": digest(desired),
+                "receipt": receipt,
+            })
+            lifecycle.previous = {
+                "profile": "chat_only", "admission": "open",
+                "raw_bypass_closed": True, "inflight": 0, "unknown_inflight": 0,
+                "deployment_generation": 1,
+            }
+            operation, _created = journal.accept(
+                principal="management", idempotency_key="manual-fixture",
+                request_body={"plan_id": "a" * 32},
+            )
+            journal.update(
+                operation["operation_id"], "manual_intervention_required",
+                error_code="rollback_failed",
+            )
+            reconciled = service.reconcile_operation(operation["operation_id"], {
+                "expected_config_revision": 1,
+                "expected_deployment_generation": 1,
+                "expected_profile": "chat_only",
+                "acknowledgement": "exact_recovery_state_verified",
+            })
+            self.assertEqual(reconciled["state"], "reconciled")
+            self.assertEqual(reconciled["error_code"], "rollback_failed")
+            self.assertEqual(reconciled["result"]["receipt"], receipt)
+            self.assertEqual(journal.get(operation["operation_id"])["state"], "reconciled")
+
+    def test_manual_intervention_reconciliation_rejects_unknown_activity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            lifecycle = FakeLifecycle()
+            service, journal = self.make_service(Path(directory), lifecycle)
+            desired = {**self.desired(), "active_profile": "chat_only"}
+            service.save_applied({
+                "config_revision": 1, "deployment_generation": 1,
+                "applied_profile": "chat_only", "effective_config": desired,
+                "last_good_config": desired, "effective_config_digest": digest(desired),
+                "receipt": {"artifact_id": "fixture-chat"},
+            })
+            lifecycle.previous = {
+                "profile": "chat_only", "admission": "open",
+                "raw_bypass_closed": True, "inflight": 0, "unknown_inflight": 1,
+                "deployment_generation": 1,
+            }
+            operation, _created = journal.accept(
+                principal="management", idempotency_key="manual-unsafe-fixture",
+                request_body={"plan_id": "b" * 32},
+            )
+            journal.update(
+                operation["operation_id"], "manual_intervention_required",
+                error_code="rollback_failed",
+            )
+            with self.assertRaisesRegex(Exception, "recovery_unverified"):
+                service.reconcile_operation(operation["operation_id"], {
+                    "expected_config_revision": 1,
+                    "expected_deployment_generation": 1,
+                    "expected_profile": "chat_only",
+                    "acknowledgement": "exact_recovery_state_verified",
+                })
+            self.assertEqual(
+                journal.get(operation["operation_id"])["state"],
+                "manual_intervention_required",
+            )
 
 
 if __name__ == "__main__":

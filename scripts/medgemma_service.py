@@ -38,6 +38,7 @@ FIXED_PORT = 18081
 START_TIMEOUT_SECONDS = 45.0
 STOP_TIMEOUT_SECONDS = 15.0
 KILL_TIMEOUT_SECONDS = 3.0
+PORT_RELEASE_TIMEOUT_SECONDS = 5.0
 LOG_LINE_LIMIT = 100
 
 
@@ -303,6 +304,11 @@ def stop_owned(spec: ServiceSpec, pid: int) -> None:
     if record is None or record.get("pid") != pid:
         raise ManagerError("refusing to stop: PID record changed")
     terminate_record(spec, record)
+    deadline = time.monotonic() + PORT_RELEASE_TIMEOUT_SECONDS
+    while local_llm_service.port_is_open(spec.port) and time.monotonic() < deadline:
+        time.sleep(0.05)
+    if local_llm_service.port_is_open(spec.port):
+        raise ManagerError(f"MedGemma stopped but port {spec.port} is still in use")
 
 
 def stop_service(spec: ServiceSpec) -> None:
@@ -312,6 +318,11 @@ def stop_service(spec: ServiceSpec) -> None:
     if state != "running" or record is None:
         raise ManagerError(f"refusing to stop: {state}")
     terminate_record(spec, record)
+    deadline = time.monotonic() + PORT_RELEASE_TIMEOUT_SECONDS
+    while local_llm_service.port_is_open(spec.port) and time.monotonic() < deadline:
+        time.sleep(0.05)
+    if local_llm_service.port_is_open(spec.port):
+        raise ManagerError(f"MedGemma stopped but port {spec.port} is still in use")
 
 
 def run_locked(action: str, spec: ServiceSpec, *, env: Mapping[str, str] | None = None) -> None:

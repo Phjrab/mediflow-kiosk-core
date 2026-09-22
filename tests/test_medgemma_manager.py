@@ -78,6 +78,31 @@ class MedGemmaManagerTest(unittest.TestCase):
                 service.terminate_record(spec, self.record(live))
             kill.assert_called_once_with(4242, signal.SIGTERM)
 
+    def test_owned_stop_waits_for_loopback_port_release(self):
+        with tempfile.TemporaryDirectory() as directory:
+            spec = self.make_spec(Path(directory))
+            record = {'pid': 4242}
+            with mock.patch.object(local_llm_service, 'load_record', return_value=record), \
+                    mock.patch.object(service, 'terminate_record') as terminate, \
+                    mock.patch.object(local_llm_service, 'port_is_open', side_effect=[True, False, False]), \
+                    mock.patch.object(service.time, 'sleep') as sleep:
+                service.stop_owned(spec, 4242)
+            terminate.assert_called_once_with(spec, record)
+            sleep.assert_called_once_with(0.05)
+
+    def test_owned_stop_rejects_port_that_remains_open(self):
+        with tempfile.TemporaryDirectory() as directory:
+            spec = self.make_spec(Path(directory))
+            record = {'pid': 4242}
+            ticks = iter((0.0, 0.0, 6.0))
+            with mock.patch.object(local_llm_service, 'load_record', return_value=record), \
+                    mock.patch.object(service, 'terminate_record'), \
+                    mock.patch.object(local_llm_service, 'port_is_open', return_value=True), \
+                    mock.patch.object(service.time, 'monotonic', side_effect=lambda: next(ticks)), \
+                    mock.patch.object(service.time, 'sleep'):
+                with self.assertRaisesRegex(service.ManagerError, 'still in use'):
+                    service.stop_owned(spec, 4242)
+
     def test_start_refuses_unmanaged_loopback_port(self):
         with tempfile.TemporaryDirectory() as directory:
             spec = self.make_spec(Path(directory))

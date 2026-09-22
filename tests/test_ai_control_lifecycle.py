@@ -25,9 +25,12 @@ class FakeEngine(EngineAdapter):
         receipt = None
         if self.state == 'running':
             receipt = {
+                'node_id': 'jetson-b',
                 'artifact_id': 'fixture-' + self.name,
                 'artifact_manifest_digest': 'a' * 64,
                 'runtime_revision': 'fixture-runtime',
+                'config_revision': 3,
+                'deployment_generation': 3,
                 'effective_config_digest': digest(self.desired) if self.desired else 'b' * 64,
             }
         return EngineState(self.state, self.managed, {'pid': 42}, receipt)
@@ -85,7 +88,10 @@ class LifecycleAdapterTest(unittest.TestCase):
         lifecycle.apply(self.desired('vlm_only'))
         receipt = lifecycle.verify(self.desired('vlm_only'))
         self.assertEqual(events, [('stop', 'chat'), ('start', 'vlm')])
-        self.assertEqual(receipt['observed_profile'], 'vlm_only')
+        self.assertEqual(set(receipt), {
+            'node_id', 'artifact_id', 'artifact_manifest_digest', 'runtime_revision',
+            'config_revision', 'deployment_generation', 'effective_config_digest',
+        })
         lifecycle.restore(previous)
         self.assertEqual(events[-2:], [('stop', 'vlm'), ('start', 'chat')])
 
