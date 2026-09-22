@@ -248,6 +248,8 @@ No LLM or VLM was started, stopped, restarted, or switched. No cloud fallback, m
   remains in B's owner-only operation journal for audit and blocks a future
   operation until the new evidence-backed reconciliation code is separately
   approved, deployed, and explicitly invoked.
+- Committed and pushed the postmortem code/mock baseline as `30f3ee4` on
+  `codex/admin-control`.
 
 No model file, key, operational/application DB, user data, CUDA/PyTorch setup,
 cloud fallback, real-user-data inference, or medical-quality evaluation was

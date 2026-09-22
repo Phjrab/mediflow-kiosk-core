@@ -49,7 +49,7 @@ verification remains incomplete.
 
 ## Local source after the window
 
-The branch contains an undeployed postmortem fix after `8a9efa3`:
+Pushed commit `30f3ee4` contains the undeployed postmortem fix after `8a9efa3`:
 
 - lifecycle verification returns and persists only the exact seven-field runtime
   expectation;
