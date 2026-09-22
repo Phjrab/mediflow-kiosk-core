@@ -122,7 +122,8 @@ inline `VLM_API_KEY`. Current `codex/admin-control` has used
 `secret(env, 'VLM')` since `8a9efa3` and includes a regression proving
 `VLM_API_KEY_FILE` works. Deploy that existing safe client change to A before a
 future run; preserve the failed job, use new identifiers, and obtain a separate
-approval before any new E2 attempt.
+approval before any new E2 attempt. The exact review artifacts are
+`A_VLM_KEYFILE_CLIENT.diff` and `A_VLM_KEYFILE_CLIENT_MIGRATION.md`.
 
 ## Remaining gates
 

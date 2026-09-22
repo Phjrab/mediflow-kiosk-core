@@ -32,4 +32,5 @@ deployed head `1ec6f31` reads only inline `VLM_API_KEY`; the safe owner-only
 `1:1:chat_only`, zero active/unknown leases, with drafts/mutations disabled.
 Next, deploy only the existing A client key-file support under a separately
 approved scope. A later E2 attempt must use another isolated set of identifiers
-and its own approval.
+and its own approval. The review-only deployment scope is frozen in
+`A_VLM_KEYFILE_CLIENT.diff` and `A_VLM_KEYFILE_CLIENT_MIGRATION.md`.

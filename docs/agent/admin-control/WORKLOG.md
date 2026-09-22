@@ -593,6 +593,9 @@ unchanged.
   AI-client, 6 experiment-worker, and 6 survey/hybrid tests.
 - This diagnosis did not change A or B. Deploying the existing safe client code
   to A and attempting a new isolated E2 run both require new explicit scope.
+- Prepared the review-only two-file delta in `A_VLM_KEYFILE_CLIENT.diff` and its
+  gated device procedure in `A_VLM_KEYFILE_CLIENT_MIGRATION.md`. Neither was
+  applied to a Jetson.
 
 The managed-ingress E2 survey-worker gate remains incomplete because the job did
 not succeed and no analysis or matching runtime receipt was persisted. This was
