@@ -8,23 +8,28 @@ bounded error `misconfigured` because A's deployed client cannot read the
 owner-only VLM key file. A's exact two-file key-file client fix is deployed as
 `f53a1c6`. A second approved window stopped before job creation because an
 unauthenticated audit probe could not verify the protected MedGemma readiness
-route. B is recovered to exact
-`1:1:chat_only`; controller drafts and mutations are disabled.
+route. Before C13, B had been recovered to exact
+`1:1:chat_only` with controller drafts and mutations disabled. A new C13 E2
+worker run subsequently succeeded. Its controller-authoritative restore advanced
+the device to internally consistent `3:3:chat_only`; an unsafe direct generation
+rewind was blocked before execution, so admission is now closed and the
+controller remains read-only.
 
 ## Final verified device state
 
-- B controller is exact-owned PID 47037 from release `86bebb6`, loopback-only on
+- B controller is exact-owned PID 69967 from release `86bebb6`, loopback-only on
   8090. Capabilities report drafts false, mutations false, managed ingress true,
   and no operations.
 - B managed ingress remains on network port 8080. Its journal is open at
-  generation 1 with zero active and zero unknown leases. From A, only B:8080 is
+  generation 3 with zero active and zero unknown leases, but admission is
+  closed. From A, only B:8080 is
   reachable; 8081, 18080, and 18081 are not network-exposed.
-- The pinned general LLM is exact-owned PID 46810 and healthy on B loopback
+- The pinned general LLM is exact-owned PID 69924 and healthy on B loopback
   18080. MedGemma is stopped, has no PID record, and loopback 18081 is closed.
   No heavy model co-residency occurred.
-- Applied state and the private ingress receipt are exact `1:1:chat_only` with
-  the closed seven-field schema. A-to-B synthetic chat returned HTTP 200 with a
-  matching receipt.
+- Applied state and the private ingress receipt match at `3:3:chat_only` with
+  the closed seven-field schema. Inference admission remains closed pending an
+  explicit safe-baseline decision.
 - A's Admin Control tunnel and private VLM URL are unchanged. Keys, environment
   files, rollback releases, model files, CUDA/PyTorch, application/user DBs, and
   user data are unchanged. No autostart was added.
@@ -132,7 +137,7 @@ Post-apply protected-file hashes and key mode 0600 were unchanged.
 ## Remaining gates
 
 - Preserve current controller release `86bebb6`, rollback release `ee7e03e`,
-  exact `1:1:chat_only`, every existing audit row, owner-only
+  current internally consistent `3:3:chat_only`, every existing audit row, owner-only
   files, and all rollback material. Stop at the first drift, ownership, lease,
   port, receipt, output-contract, or rollback failure.
 - The direct managed VLM contract gate needs no additional synthetic retry. The
@@ -164,6 +169,26 @@ Post-apply protected-file hashes and key mode 0600 were unchanged.
   read-only bootstrap, and shared-lock gates passed on B before the controller
   alone moved to `86bebb6`.
 
-The readiness deployment gate is complete. A later E2 window still requires
-separate approval, another isolated store and identifiers, and all runtime
-gates. Do not reuse the C11 failed job or the C12 sample.
+The readiness deployment and C13 E2 worker gate are complete. Do not run another
+E2 request. The next action is limited to recovery policy: either explicitly
+accept monotonic `3:3:chat_only` and reopen admission after read-only gates, or
+implement and review a controller-authoritative reconciliation feature. Do not
+directly rewrite applied metadata, ingress generation, or the receipt.
+
+## C13 successful E2 evidence and current fail-closed state
+
+- C13 sample/run/job:
+  `6c68ba3fc1f441c0a93d4b7ccf3a455e` /
+  `e2276b4707c54b72b30459a8aa19e3fd` /
+  `dd95e9c0413e49719188076289f67f69`.
+- Forward and reverse operations:
+  `91ac1878b65c45fdb0217bee5c3b005c` and
+  `0f0a7732fd4b4307b0008c101d39e755`, both preserved as `succeeded`.
+- The single VLM lease completed. The job succeeded with HTTP-success and
+  `vision_ingested=true` enforced by the worker, strict schema 1.0
+  `analysis_status=abstain`, matching frozen survey digest, and matching
+  generation-2 runtime receipt.
+- Automatic approval review rejected a direct shared-state rewind from
+  generation 3 to generation 1 before it executed, citing possible controller
+  authority and security drift. Final admission is therefore closed at
+  consistent `3:3:chat_only`; controller drafts/mutations are disabled.

@@ -7,8 +7,8 @@
 | C2 | Separate A management client, same-origin admin proxy, existing `/admin/config` read UI | DEVICE_READ_ONLY; kiosk process remains stopped |
 | C3 | Versioned local-chat sampling, runtime draft and validation plan, apply disabled | CODE + MOCK |
 | C4 | Managed ingress, shared device lock, durable operation, drain/switch/rollback | DEVICE_INGRESS VERIFIED; exact chat recovery verified |
-| C5 | Research queue/run lock and effective B receipt | Direct managed contract DONE; A key-file client deployed; E2 stopped by unauthenticated readiness audit |
-| C6 | Read-only deployment then approved device mutation verification | `86bebb6` controller DEPLOYED read-only; inference lifecycle unchanged; exact chat-only |
+| C5 | Research queue/run lock and effective B receipt | DONE; C13 E2 worker succeeded with frozen survey and matching receipt |
+| C6 | Read-only deployment then approved device mutation verification | `86bebb6` controller read-only; safe `3:3:chat_only`; admission closed pending baseline decision |
 
 The approved C1/C2 bootstrap, C4 managed inference ingress, `ee7e03e`
 MedGemma output/lifecycle release, and `86bebb6` read-only controller are
@@ -48,5 +48,17 @@ check during start and withholds the receipt while not ready, allowing operation
 rollback to stop the exact-owned process before restoring chat. This change
 passes 32 Admin Control and 19 MedGemma tests and is deployed read-only in
 `86bebb6` after authenticated mock, exact-owner, rollback, chat-health, receipt,
-lease, and shared-lock gates passed. Any new isolated E2 attempt remains a
-separately approved operation.
+lease, and shared-lock gates passed. Those gates enabled the separately approved
+C13 attempt described below.
+
+The later C13 window completed the synthetic E2 survey-worker contract with one
+new isolated sample, run, job, and prediction. Both sequential transition
+operations succeeded without co-residency, and the device returned to healthy
+chat with VLM stopped. Because the controller correctly advanced its monotonic
+revision and generation to 3, a proposed direct rewind to the old `1:1`
+metadata was rejected by automatic approval review before execution. The device
+is therefore fail-closed at internally consistent `3:3:chat_only`, zero
+active/unknown leases, read-only controller, and closed admission. No further
+E2 request is needed. Recovery must either accept generation 3 as the new safe
+baseline or add a reviewed controller-authoritative reconciliation mechanism;
+direct state-file or ingress-generation rewrites are out of scope.

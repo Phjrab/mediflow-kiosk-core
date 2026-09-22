@@ -735,3 +735,65 @@ persisted, and no medical-quality evaluation was performed.
 No E2 worker, inference request, sample, run, job, or model-profile mutation was
 performed. Model files, keys, environment files, ports, databases, user data,
 CUDA/PyTorch, cloud fallback, and medical-quality status were unchanged.
+
+## 2026-09-22 — C13 managed-ingress E2 succeeded; final admission fail-closed
+
+- Began from source `3f5d863`, A deployment `f53a1c6`, and B release `86bebb6`.
+  B passed exact-owner chat health, exact `1:1:chat_only`, open admission,
+  raw-bypass closure, zero active/unknown leases, the seven-field receipt,
+  stopped VLM, and read-only controller gates. A loaded the owner-only mode-0600
+  VLM key file without an inline key. A-to-B port checks exposed only managed
+  ingress 8080; controller 8090 and raw 18080/18081 remained network-blocked.
+- The operation database contained 11 pre-existing rows, rather than the nine
+  stated in the previous summary. All 11 identifiers and states were captured
+  as the immutable baseline and remained present at final audit.
+- Created private C13 store
+  `/home/jetson_orin_nano/mediflow-ai/research/admin-e2-managed-20260922-c13`
+  using the existing 224x224 red/blue fixture digest
+  `e85c72bc93d05149bac9be4d0d03f5ffcb2240b294d9305c818a8cad92f2f911`.
+  New sample `6c68ba3fc1f441c0a93d4b7ccf3a455e` froze the existing
+  `eye-survey-1.0` digest
+  `6ec89117c833a9d5e2cfc6397f6c23971b3e55e25f148371db39f133ef08f150`.
+- Restarted only the exact-owned controller as mutable PID 69830. Forward
+  operation `91ac1878b65c45fdb0217bee5c3b005c` succeeded at exact
+  `2:2:vlm_only`. Chat was stopped, MedGemma was exact-owned PID 69851, its
+  authenticated readiness check passed, the receipt matched, and no heavy-model
+  co-residency or active/unknown lease existed.
+- Created new run `e2276b4707c54b72b30459a8aa19e3fd` and job
+  `dd95e9c0413e49719188076289f67f69` with the verified generation-2 receipt.
+  The normal CLI exited at import before claiming the job because A's system
+  Python lacks `python-dotenv`; the job remained queued and B recorded no lease.
+  No package was installed. The same existing `process_one` worker was then
+  invoked directly exactly once, so no inference retry occurred.
+- The single generation-2 VLM lease ran from `2026-09-22T06:39:29Z` to
+  `06:40:44Z` and completed. The C13 job succeeded in 75138.51 ms with one
+  prediction. The worker's enforced HTTP-success and `vision_ingested=true`
+  checks passed, analysis was strict schema 1.0 with status `abstain`, and the
+  frozen survey digest, seven-field runtime expectation, and receipt prompt
+  digest all matched. Model output, prompt, image, response bytes, and keys were
+  not printed or added to these logs.
+- Reverse operation `0f0a7732fd4b4307b0008c101d39e755` succeeded, stopped
+  MedGemma, released 18081, and restored healthy exact-owned chat PID 69924.
+  Controller-authoritative revisions therefore advanced normally to
+  `3:3:chat_only`.
+- A proposed shared-lock rewrite of applied metadata, ingress generation, and
+  receipt back to `1:1` was rejected by automatic approval review before
+  execution because directly decreasing the controller-authoritative generation
+  could create state and security drift. No such rewrite occurred and it was
+  not retried through another path. Per the approved fail-closed rule, managed
+  ingress admission was closed with zero active/unknown leases, then only the
+  controller was restarted read-only as PID 69967 from `86bebb6`.
+- Final B state is internally consistent `3:3:chat_only`, healthy chat, stopped
+  VLM, closed admission, raw bypass closed, zero active/unknown leases, matching
+  seven-field receipt, and drafts/mutations false. All 11 original operations
+  plus the two successful C13 transition operations are preserved. From A,
+  only port 8080 is network-reachable; its closed admission prevents inference.
+- Final A audit found exactly one sample, survey, run, succeeded job, and
+  prediction in the owner-only C13 store. A HEAD, `.env`, both operational DBs,
+  the key file and mode, and the C11/C12 database hashes were unchanged.
+
+This is synthetic integration evidence only. No model, key, environment file,
+operational DB, user data, CUDA/PyTorch, or cloud fallback was changed, and no
+medical-quality evaluation was performed. Reopening admission requires a new
+explicit decision to accept monotonic `3:3:chat_only` as the safe baseline or a
+separately implemented controller-authoritative reconciliation mechanism.
