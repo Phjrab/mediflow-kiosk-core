@@ -4,8 +4,9 @@ Current phase: C0-C6 and the direct managed VLM contract gate are complete.
 Clean detached release `ee7e03e` remains deployed on Jetson B. The subsequent
 one-time managed-ingress E2 survey-worker attempt failed before ingress with
 bounded error `misconfigured` because A's deployed client cannot read the
-owner-only VLM key file. The approved fail-closed path restored exact
-`1:1:chat_only`; controller drafts and mutations are disabled.
+owner-only VLM key file. A's exact two-file key-file client fix is now deployed
+as `f53a1c6`; no E2 retry followed. B remains exact `1:1:chat_only` with
+controller drafts and mutations disabled.
 
 ## Final verified device state
 
@@ -117,13 +118,13 @@ path under managed ingress.
 - Worker result: one terminal `failed/misconfigured` job, zero predictions, and
   no ingress VLM lease. No retry occurred.
 
-A's deployed `codex/admin-control-a-deploy` head `1ec6f31` still reads only
-inline `VLM_API_KEY`. Current `codex/admin-control` has used
-`secret(env, 'VLM')` since `8a9efa3` and includes a regression proving
-`VLM_API_KEY_FILE` works. Deploy that existing safe client change to A before a
-future run; preserve the failed job, use new identifiers, and obtain a separate
-approval before any new E2 attempt. The exact review artifacts are
-`A_VLM_KEYFILE_CLIENT.diff` and `A_VLM_KEYFILE_CLIENT_MIGRATION.md`.
+At the failed attempt, A's deployed `codex/admin-control-a-deploy` head
+`1ec6f31` read only inline `VLM_API_KEY`. The exact review artifacts were
+`A_VLM_KEYFILE_CLIENT.diff` and `A_VLM_KEYFILE_CLIENT_MIGRATION.md`. They were
+applied as only two source/test files and committed on A as `f53a1c6`. Focused
+tests passed 22+6+6, and a no-network check loaded the existing owner-only file
+without an inline key. A had no running web process, so none was restarted.
+Post-apply protected-file hashes and key mode 0600 were unchanged.
 
 ## Remaining gates
 
@@ -131,9 +132,9 @@ approval before any new E2 attempt. The exact review artifacts are
   files, and all rollback material. Stop at the first drift, ownership, lease,
   port, receipt, output-contract, or rollback failure.
 - The direct managed VLM contract gate needs no additional synthetic retry. The
-  E2 survey-worker gate is incomplete. A minimal A client deployment and any
-  later E2 rerun require separately reviewed scope; the failed job must remain
-  immutable.
+  E2 survey-worker gate is incomplete. The minimal A client deployment is now
+  complete at `f53a1c6`; any later E2 rerun requires separately reviewed scope,
+  a new isolated store and identifiers, and the failed job must remain immutable.
 - A future device mutation, sustained load/thermal evaluation, or real-data
   protocol requires its own reviewed scope.
 - Real-user-data validation and medical-quality evaluation remain `NOT_RUN`.

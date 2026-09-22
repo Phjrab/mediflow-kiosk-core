@@ -1,6 +1,6 @@
 # Jetson A VLM key-file client migration
 
-Status: review-only. Not applied to either Jetson.
+Status: applied to Jetson A only as `f53a1c6`; no E2 retry was run.
 
 ## Purpose and exact scope
 

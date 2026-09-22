@@ -601,3 +601,41 @@ The managed-ingress E2 survey-worker gate remains incomplete because the job did
 not succeed and no analysis or matching runtime receipt was persisted. This was
 an engineering integration attempt only; no real-user-data inference, accuracy
 measurement, or medical-quality evaluation was performed.
+
+## 2026-09-22 — approved Jetson A owner-only VLM key-file client deployment
+
+- Started from clean A branch `codex/admin-control-a-deploy` at exact head
+  `1ec6f31`. Recorded content-free hashes for `.env`, the operational database,
+  both research databases, and the owner-only VLM key file. The key file was
+  owned by the device user with mode 0600. No A web process was running.
+- Revalidated B before applying source: release `ee7e03e`, exact
+  `1:1:chat_only`, healthy exact-owned chat PID 46419, controller PID 46468,
+  VLM stopped, open admission, raw bypass closed, zero active/unknown leases,
+  exact seven-field receipt, and drafts/mutations disabled.
+- Transferred the review-only patch to an A temporary path and verified its
+  digest matched the repository artifact. `git apply --check` passed. Applied
+  exactly `utils/ai_config.py` and `tests/test_ai_clients.py`; no other tracked
+  file changed.
+- A focused tests passed: 22 AI-client, 6 experiment-worker, and 6
+  survey/hybrid tests. The first configuration-only check sourced the unchanged
+  operational `.env`, which intentionally has no VLM block, and stopped at the
+  backend precondition before reading the key. A corrected no-network check used
+  the existing managed-ingress endpoint/model values plus the owner-only key
+  file and passed with no inline key and no request.
+- Committed the exact two-file change on A as `f53a1c6` (`fix: load VLM
+  credential from owner-only file`) and pushed
+  `codex/admin-control-a-deploy`. The A working tree and remote tracking branch
+  were clean and equal afterward.
+- No web process existed before or after deployment, so no process was started
+  or restarted. Post-apply hashes for `.env`, the operational database, both
+  research databases, and the key file matched their preflight values. Key mode
+  remained 0600 and the temporary transferred patch was removed.
+- Final B verification again passed unchanged at `ee7e03e`, exact
+  `1:1:chat_only`, with chat PID 46419, controller PID 46468, VLM stopped, open
+  admission, zero active/unknown leases, and drafts/mutations disabled.
+
+No E2 job or inference request ran in this deployment. No model process,
+controller mutation, port, key, environment file, database, user data, model
+file, CUDA/PyTorch, cloud fallback, or medical-quality status changed. A future
+E2 attempt still requires a new isolated store and identifiers plus separate
+approval; the prior failed job remains immutable.
