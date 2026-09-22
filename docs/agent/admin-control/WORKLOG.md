@@ -658,10 +658,12 @@ approval; the prior failed job remains immutable.
   46742. Forward operation `dd35e4c05ae74279bb38a0e710ae9492` stopped chat
   and started exact-owned MedGemma without co-residency, then recorded
   `succeeded` at `2:2:vlm_only`.
-- The independent pre-worker gate found `vlm_ready=false`. Process ownership,
-  applied state, receipt, admission, raw-bypass closure, and zero leases all
-  matched, but readiness is mandatory. No C12 run or job was created, no worker
-  or inference request ran, and no retry followed.
+- The independent pre-worker audit used the generic unauthenticated health probe
+  against MedGemma's protected `/readyz` route and returned
+  `vlm_ready=false`. Process ownership, applied state, receipt, admission,
+  raw-bypass closure, and zero leases all matched. Because the bounded check was
+  treated as a mandatory gate, no C12 run or job was created, no worker or
+  inference request ran, and no retry followed.
 - Closed admission immediately. Recovery operation
   `88a4afb4ce81463fa1ffcabe27cd1431` stopped exact-owned MedGemma and restored
   healthy chat. It advanced the controller metadata to `3:3:chat_only`, so the
@@ -677,16 +679,20 @@ approval; the prior failed job remains immutable.
   `109efdbfb7a34ef0a3756db9828d9d9b` remained unchanged. A's `.env`, operational
   DB, source research DB, A source HEAD, and all private modes remained unchanged.
 
-### Local fail-closed readiness fix
+### Local authenticated readiness hardening
 
-- The device result exposed a controller gap: exact PID ownership alone allowed
-  the forward operation to succeed even though MedGemma `/readyz` was false.
+- Post-recovery source inspection established that MedGemma `/readyz` requires
+  its owner-only bearer credential. The unauthenticated audit result cannot
+  establish that the service was unready. The existing MedGemma manager had
+  already passed its authenticated readiness loop before the forward operation
+  completed.
 - Added an optional readiness probe to the exact-owned process adapter. The
-  MedGemma bootstrap now supplies its fixed loopback `/readyz` probe. A start
-  with a false probe raises `start_not_ready`; the exact-owned process remains
-  represented as running so operation rollback can stop it before restoring chat.
-  A running-but-not-ready snapshot withholds its receipt, so later verification
-  also fails closed.
+  MedGemma bootstrap now supplies `medgemma_service.ready`, which reads the
+  owner-only credential and checks the fixed loopback `/readyz` route without
+  exposing the key. A start with a false authenticated probe raises
+  `start_not_ready`; the exact-owned process remains represented as running so
+  operation rollback can stop it before restoring chat. A running-but-not-ready
+  snapshot withholds its receipt, so later verification also fails closed.
 - Added a regression proving a not-ready MedGemma start fails and remains safely
   stoppable by exact PID ownership. Local Admin Control tests passed 32 and
   MedGemma tests passed 19; source compilation and `git diff --check` passed.

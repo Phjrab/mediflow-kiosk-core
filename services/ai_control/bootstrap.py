@@ -230,7 +230,7 @@ def build_operation_coordinator(
         stop=stop_vlm,
         receipt=receipt_manager.read,
         unmanaged_present=lambda: local_llm_service.port_is_open(medgemma_spec.port),
-        ready=lambda: local_llm_service.health_is_ready(medgemma_spec.ready_url),
+        ready=lambda: medgemma_service.ready(medgemma_spec, env),
     )
     ingress_journal = IngressJournal(ingress_dir / "ingress.sqlite3")
     ingress_journal.initialize()
