@@ -640,7 +640,7 @@ file, CUDA/PyTorch, cloud fallback, or medical-quality status changed. A future
 E2 attempt still requires a new isolated store and identifiers plus separate
 approval; the prior failed job remains immutable.
 
-## 2026-09-22 — second approved E2 window stopped by VLM readiness gate
+## 2026-09-22 — second approved E2 window stopped by conservative readiness audit
 
 - Began from clean source HEAD `4a68a6c`, A deployment `f53a1c6`, and B release
   `ee7e03e`. A's owner-only VLM key file loaded without an inline key. B passed
