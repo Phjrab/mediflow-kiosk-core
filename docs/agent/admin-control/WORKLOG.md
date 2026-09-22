@@ -376,6 +376,8 @@ reconciliation was written.
 - The minimum-budget change is not deployed to either Jetson. No additional
   model start, controller mutation window, or synthetic inference was attempted
   after fail-closed recovery.
+- Committed and pushed the generation-budget guard as `8f2b62b` on
+  `codex/admin-control`.
 
 Model files, key contents, `.env`, application/user databases, user data,
 CUDA/PyTorch, managed ingress, A tunnel, and cloud provider behavior were

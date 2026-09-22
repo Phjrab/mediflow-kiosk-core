@@ -46,7 +46,8 @@ with a matching runtime receipt.
 
 ## Local source after the window
 
-The branch contains an undeployed generation-budget guard after `14d7dc3`:
+Pushed commit `8f2b62b` contains an undeployed generation-budget guard after
+device release `14d7dc3`:
 
 - `MIN_ANALYSIS_NEW_TOKENS=256` rejects budgets below the complete seven-field
   response contract before starting generation;
@@ -63,8 +64,8 @@ The minimum-budget change is not deployed to A or B.
 
 ## Remaining gates
 
-- Commit and push the minimum-generation-budget guard, then review it before any
-  future detached B release.
+- Review pushed generation-budget guard `8f2b62b` before any future detached B
+  release.
 - A further synthetic VLM attempt requires a new explicit maintenance approval
   and must use at least 256 tokens; 512 matches the production default and prior
   successful direct-probe configuration class.
