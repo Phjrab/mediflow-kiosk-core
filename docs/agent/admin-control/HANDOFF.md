@@ -12,24 +12,25 @@ route. Before C13, B had been recovered to exact
 `1:1:chat_only` with controller drafts and mutations disabled. A new C13 E2
 worker run subsequently succeeded. Its controller-authoritative restore advanced
 the device to internally consistent `3:3:chat_only`; an unsafe direct generation
-rewind was blocked before execution, so admission is now closed and the
-controller remains read-only.
+rewind was blocked before execution. A later explicit approval accepted monotonic
+`3:3:chat_only` as the safe baseline and reopened admission without changing the
+controller, model processes, receipt, generation, or operation history.
 
 ## Final verified device state
 
 - B controller is exact-owned PID 69967 from release `86bebb6`, loopback-only on
   8090. Capabilities report drafts false, mutations false, managed ingress true,
   and no operations.
-- B managed ingress remains on network port 8080. Its journal is open at
-  generation 3 with zero active and zero unknown leases, but admission is
-  closed. From A, only B:8080 is
+- B managed ingress remains on network port 8080. Its journal is at generation
+  3 with zero active and zero unknown leases, and admission is open. From A,
+  only B:8080 is
   reachable; 8081, 18080, and 18081 are not network-exposed.
 - The pinned general LLM is exact-owned PID 69924 and healthy on B loopback
   18080. MedGemma is stopped, has no PID record, and loopback 18081 is closed.
   No heavy model co-residency occurred.
 - Applied state and the private ingress receipt match at `3:3:chat_only` with
-  the closed seven-field schema. Inference admission remains closed pending an
-  explicit safe-baseline decision.
+  the closed seven-field schema. Inference admission is open at unchanged
+  generation 3.
 - A's Admin Control tunnel and private VLM URL are unchanged. Keys, environment
   files, rollback releases, model files, CUDA/PyTorch, application/user DBs, and
   user data are unchanged. No autostart was added.
@@ -169,11 +170,9 @@ Post-apply protected-file hashes and key mode 0600 were unchanged.
   read-only bootstrap, and shared-lock gates passed on B before the controller
   alone moved to `86bebb6`.
 
-The readiness deployment and C13 E2 worker gate are complete. Do not run another
-E2 request. The next action is limited to recovery policy: either explicitly
-accept monotonic `3:3:chat_only` and reopen admission after read-only gates, or
-implement and review a controller-authoritative reconciliation feature. Do not
-directly rewrite applied metadata, ingress generation, or the receipt.
+The readiness deployment, C13 E2 worker gate, and safe admission recovery are
+complete. Do not run another E2 request or directly rewrite applied metadata,
+ingress generation, or the receipt.
 
 ## C13 successful E2 evidence and current fail-closed state
 
@@ -190,5 +189,10 @@ directly rewrite applied metadata, ingress generation, or the receipt.
   generation-2 runtime receipt.
 - Automatic approval review rejected a direct shared-state rewind from
   generation 3 to generation 1 before it executed, citing possible controller
-  authority and security drift. Final admission is therefore closed at
+  authority and security drift. Admission at that window's end was closed at
   consistent `3:3:chat_only`; controller drafts/mutations are disabled.
+- A later explicit approval accepted monotonic `3:3:chat_only`. After all
+  read-only gates passed, admission alone reopened under the shared lifecycle
+  lock at unchanged generation 3. Controller PID 69967, chat PID 69924, stopped
+  VLM, zero leases, seven-field receipt, disabled drafts/mutations, and all 13
+  operation rows remained unchanged. No inference request ran.

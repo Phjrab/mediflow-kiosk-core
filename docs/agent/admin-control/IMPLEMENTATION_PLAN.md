@@ -8,7 +8,7 @@
 | C3 | Versioned local-chat sampling, runtime draft and validation plan, apply disabled | CODE + MOCK |
 | C4 | Managed ingress, shared device lock, durable operation, drain/switch/rollback | DEVICE_INGRESS VERIFIED; exact chat recovery verified |
 | C5 | Research queue/run lock and effective B receipt | DONE; C13 E2 worker succeeded with frozen survey and matching receipt |
-| C6 | Read-only deployment then approved device mutation verification | `86bebb6` controller read-only; safe `3:3:chat_only`; admission closed pending baseline decision |
+| C6 | Read-only deployment then approved device mutation verification | `86bebb6` controller read-only; safe `3:3:chat_only`; admission open at generation 3 |
 
 The approved C1/C2 bootstrap, C4 managed inference ingress, `ee7e03e`
 MedGemma output/lifecycle release, and `86bebb6` read-only controller are
@@ -62,3 +62,12 @@ active/unknown leases, read-only controller, and closed admission. No further
 E2 request is needed. Recovery must either accept generation 3 as the new safe
 baseline or add a reviewed controller-authoritative reconciliation mechanism;
 direct state-file or ingress-generation rewrites are out of scope.
+
+A separate approval accepted the monotonic controller-authoritative
+`3:3:chat_only` state as the safe baseline. All exact-owner, receipt, lease,
+operation-history, raw-bypass, and read-only gates passed; managed ingress
+admission then reopened under the shared lifecycle lock without changing
+generation, applied state, receipt, model processes, controller capabilities, or
+ports. The device is now healthy chat-only with open admission, zero
+active/unknown leases, stopped VLM, and drafts/mutations disabled. No inference
+request was used to validate this recovery.

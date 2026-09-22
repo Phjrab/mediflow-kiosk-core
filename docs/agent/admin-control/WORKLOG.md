@@ -797,3 +797,30 @@ operational DB, user data, CUDA/PyTorch, or cloud fallback was changed, and no
 medical-quality evaluation was performed. Reopening admission requires a new
 explicit decision to accept monotonic `3:3:chat_only` as the safe baseline or a
 separately implemented controller-authoritative reconciliation mechanism.
+
+## 2026-09-22 — monotonic 3:3 baseline accepted and admission reopened
+
+- Under a separate explicit approval, accepted controller-authoritative
+  `3:3:chat_only` as the new safe baseline. Before mutation, exact-owned
+  read-only controller PID 69967, healthy chat PID 69924, stopped MedGemma,
+  closed admission, raw-bypass closure, zero active/unknown leases, matching
+  seven-field receipt, disabled drafts/mutations, and all 13 operation rows
+  matched the recorded state.
+- Acquired the existing shared lifecycle lock, repeated every gate, and opened
+  managed ingress admission at unchanged deployment generation 3. No applied
+  state, receipt, generation, operation row, controller capability, model
+  process, port, environment, or key was rewritten.
+- Post-open verification passed at `3:3:chat_only`: admission open, zero
+  active/unknown leases, raw bypass closed, exact same controller and chat PIDs,
+  VLM stopped with no 18081 listener, drafts/mutations false, and all 13
+  operation rows preserved. Controller 8090 and raw chat 18080 remain loopback;
+  managed ingress remains on 8080.
+- Applied-state and receipt file hashes after verification were
+  `c127b3de434504924e97c86e1c3bb93511be7673d808d8f2c037589b827bf156`
+  and `cff246d0bf0b8b43f9e8cb8d1fbb12ce3ab26981e86d278e360547e90101b709`.
+  The admin, VLM, and chat key files remained owner-only mode 0600.
+
+No chat or VLM inference request, E2 worker, model start/stop/restart, profile
+transition, controller restart, or mutation enablement occurred in this action.
+No model, key, environment file, port, database, user data, CUDA/PyTorch, cloud
+fallback, or medical-quality status changed.
