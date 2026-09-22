@@ -18,6 +18,8 @@ managed ingress. Applied state is restored to exact `1:1:chat_only` after the
 single 224×224, 512-token retry reached VLM but returned
 `502 invalid_model_output` after a completed 74-second backend lease. This rules
 out the prior 64-token budget as the sole cause. The deployed guard still rejects
-budgets below 256 before generation; production remains 512. Safe structural
-diagnosis of the managed llama.cpp output boundary is the next code gate. Any
-further synthetic inference requires separate approval; E1/E2 is not complete.
+budgets below 256 before generation; production remains 512. Undeployed local
+commit `6d522da` now provides safe structural diagnostics for the managed
+llama.cpp output boundary without recording model text. Its mock and runnable
+local regressions pass. Any deployment or further synthetic inference requires
+separate approval; E1/E2 is not complete.

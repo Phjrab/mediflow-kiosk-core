@@ -430,3 +430,20 @@ receipt. Existing model files, keys, owner-only environment and rollback files,
 application/user databases, user data, CUDA/PyTorch, A tunnel, cloud fallback,
 and autostart configuration were unchanged. No real-user-data inference or
 medical-quality evaluation was performed.
+
+### Post-window structural diagnostics (local code and mock only)
+
+- Commit `6d522da` classifies a rejected llama.cpp channel as only `empty`,
+  `no_object_start`, `invalid_json`, `non_object`, or `trailing_data`. The HTTP
+  contract remains 502 `invalid_model_output` and still never logs generated
+  text, prompts, images, credentials, or raw response bytes.
+- Added mocks proving that private generated text is absent from the diagnostic
+  and that a harmless preamble followed by exactly one JSON object remains
+  accepted.
+- Focused MedGemma suites passed 19/19. The full runnable local suite passed
+  180 with one skipped. Complete discovery attempted 182 and had only the two
+  pre-existing unavailable optional imports, `pytorch_grad_cam` and `qrcode`;
+  no package was installed.
+- This diagnostic commit was not deployed to either Jetson. No additional model
+  start, controller restart, mutation, or inference occurred after fail-closed
+  recovery.

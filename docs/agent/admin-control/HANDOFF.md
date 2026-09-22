@@ -71,12 +71,19 @@ remain unavailable, so their modules were not run. No package was installed.
 The minimum-budget change is deployed only as part of B's detached `1eb41c2`
 release. A was not changed.
 
+Local commit `6d522da`, which is not deployed, adds bounded output-structure
+diagnostics for a future approved run. It can distinguish empty channels, no
+JSON object start, invalid JSON, non-object JSON, and trailing data without
+recording generated text, prompts, images, or response bytes. Focused MedGemma
+tests pass 19/19 and the runnable local suite passes 180 with one skipped. Full
+discovery has only the two pre-existing missing optional imports
+`pytorch_grad_cam` and `qrcode`.
+
 ## Remaining gates
 
-- Diagnose the managed llama.cpp output boundary without another inference.
-  Any future diagnostic must preserve the no-raw-output rule and record only
-  bounded structural metadata needed to distinguish channel contamination,
-  trailing data, missing JSON, and contract mismatch.
+- Review undeployed structural-diagnostic commit `6d522da`. A future approved
+  run can use it to distinguish channel contamination, trailing data, and
+  missing/invalid JSON while preserving the no-raw-output rule.
 - A further synthetic VLM attempt requires a new explicit maintenance approval.
   Do not infer that a larger token budget will resolve the failure.
 - Preserve `1eb41c2`, exact `1:1:chat_only`, every existing audit row, owner-only
