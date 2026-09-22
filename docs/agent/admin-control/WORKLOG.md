@@ -703,3 +703,35 @@ This window produced lifecycle/readiness evidence only. E2 remains incomplete:
 there is no C12 job, HTTP response, analysis, prediction, or runtime receipt to
 score. No model output, prompt, image, response bytes, or key was printed or
 persisted, and no medical-quality evaluation was performed.
+
+## 2026-09-22 — authenticated readiness hardening deployed read-only on B
+
+- Revalidated B release `ee7e03e` before deployment: controller PID 46899 was
+  exact-owned and read-only, chat PID 46810 was healthy, MedGemma was stopped,
+  applied state and the private seven-field receipt were exact
+  `1:1:chat_only`, admission was open, raw bypass was closed, active/unknown
+  leases were zero, and all nine operation audit rows were present.
+- Created the independent detached release
+  `/home/jetson2/mediflow-ai/control/releases/86bebb6` at exact source
+  `86bebb6d1fd10984a48f8fd401e5c483f8499244`. The prior `ee7e03e` release and
+  all rollback material remain intact.
+- In the new release, all 32 Admin Control tests and all 19 MedGemma tests
+  passed. Source compilation, release-diff checks, exact-owner observation,
+  the read-only bootstrap, an authenticated no-network
+  `medgemma_service.ready` mock, the not-ready rollback regression, and real
+  shared lifecycle-lock contention also passed. The owner-only key was neither
+  displayed nor copied.
+- Restarted only the exact-owned controller from PID 46899 to PID 47037 in the
+  new release, with drafts and mutations disabled. Chat PID 46810 was unchanged;
+  neither chat nor MedGemma was started, stopped, or restarted, and no profile
+  transition occurred.
+- The final audit passed at release `86bebb6`: exact `1:1:chat_only`, healthy
+  chat, stopped VLM with loopback 18081 closed, open admission, raw-bypass
+  closure, zero active/unknown leases, the exact seven-field receipt,
+  drafts/mutations false, and all nine operation rows preserved. Managed ingress
+  remained on 8080, while controller 8090 and raw chat 18080 remained loopback
+  only.
+
+No E2 worker, inference request, sample, run, job, or model-profile mutation was
+performed. Model files, keys, environment files, ports, databases, user data,
+CUDA/PyTorch, cloud fallback, and medical-quality status were unchanged.

@@ -8,10 +8,11 @@
 | C3 | Versioned local-chat sampling, runtime draft and validation plan, apply disabled | CODE + MOCK |
 | C4 | Managed ingress, shared device lock, durable operation, drain/switch/rollback | DEVICE_INGRESS VERIFIED; exact chat recovery verified |
 | C5 | Research queue/run lock and effective B receipt | Direct managed contract DONE; A key-file client deployed; E2 stopped by unauthenticated readiness audit |
-| C6 | Read-only deployment then approved device mutation verification | `ee7e03e` DEPLOYED; sequential VLM success and exact chat-only restore; controller read-only |
+| C6 | Read-only deployment then approved device mutation verification | `86bebb6` controller DEPLOYED read-only; inference lifecycle unchanged; exact chat-only |
 
-The approved C1/C2 bootstrap, C4 managed inference ingress, and `ee7e03e`
-MedGemma output/lifecycle release are deployed. The A-to-B management
+The approved C1/C2 bootstrap, C4 managed inference ingress, `ee7e03e`
+MedGemma output/lifecycle release, and `86bebb6` read-only controller are
+deployed. The A-to-B management
 API remains on its loopback SSH tunnel, drafts/mutations are off, raw chat is
 loopback-only, VLM is stopped, and network inference is exposed only through
 managed ingress. Applied state is restored to exact `1:1:chat_only` after the
@@ -45,5 +46,7 @@ Recovery returned B to exact `1:1:chat_only` with controller mutations disabled.
 Local source now performs an additional authenticated `medgemma_service.ready`
 check during start and withholds the receipt while not ready, allowing operation
 rollback to stop the exact-owned process before restoring chat. This change
-passes 32 Admin Control and 19 MedGemma tests and remains undeployed. Deploy and
-validate it separately before considering a new isolated E2 attempt.
+passes 32 Admin Control and 19 MedGemma tests and is deployed read-only in
+`86bebb6` after authenticated mock, exact-owner, rollback, chat-health, receipt,
+lease, and shared-lock gates passed. Any new isolated E2 attempt remains a
+separately approved operation.

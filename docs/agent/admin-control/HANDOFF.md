@@ -1,7 +1,8 @@
 # Admin Control Handoff
 
 Current phase: C0-C6 and the direct managed VLM contract gate are complete.
-Clean detached release `ee7e03e` remains deployed on Jetson B. The subsequent
+Authenticated readiness hardening is deployed on Jetson B as clean detached
+release `86bebb6`; `ee7e03e` remains preserved as rollback material. The subsequent
 one-time managed-ingress E2 survey-worker attempt failed before ingress with
 bounded error `misconfigured` because A's deployed client cannot read the
 owner-only VLM key file. A's exact two-file key-file client fix is deployed as
@@ -12,7 +13,7 @@ route. B is recovered to exact
 
 ## Final verified device state
 
-- B controller is exact-owned PID 46899 from release `ee7e03e`, loopback-only on
+- B controller is exact-owned PID 47037 from release `86bebb6`, loopback-only on
   8090. Capabilities report drafts false, mutations false, managed ingress true,
   and no operations.
 - B managed ingress remains on network port 8080. Its journal is open at
@@ -130,7 +131,8 @@ Post-apply protected-file hashes and key mode 0600 were unchanged.
 
 ## Remaining gates
 
-- Preserve `ee7e03e`, exact `1:1:chat_only`, every existing audit row, owner-only
+- Preserve current controller release `86bebb6`, rollback release `ee7e03e`,
+  exact `1:1:chat_only`, every existing audit row, owner-only
   files, and all rollback material. Stop at the first drift, ownership, lease,
   port, receipt, output-contract, or rollback failure.
 - The direct managed VLM contract gate needs no additional synthetic retry. The
@@ -158,9 +160,10 @@ Post-apply protected-file hashes and key mode 0600 were unchanged.
   shared lock. Both new operations remain preserved as `succeeded` audit rows.
 - Local source now requires MedGemma's authenticated owner-only `/readyz` probe
   during start and verification. Admin Control tests pass 32 and MedGemma tests
-  pass 19. This hardening is not deployed; B continues to run `ee7e03e`.
+  pass 19. Authenticated no-network readiness, not-ready rollback, exact-owner,
+  read-only bootstrap, and shared-lock gates passed on B before the controller
+  alone moved to `86bebb6`.
 
-Before another E2 window, deploy the authenticated readiness hardening as a new detached B release
-and prove with mock, exact-owner, rollback, chat health, and read-only recovery
-gates. Do not reuse the C11 failed job or the C12 sample, and do not perform an
-inference retry under the deployment approval.
+The readiness deployment gate is complete. A later E2 window still requires
+separate approval, another isolated store and identifiers, and all runtime
+gates. Do not reuse the C11 failed job or the C12 sample.
