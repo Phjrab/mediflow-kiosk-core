@@ -204,6 +204,34 @@ class MedGemmaServiceContractTest(unittest.TestCase):
             result = service._llama_cpp_generate(image, 'fixture prompt', 64)
         self.assertEqual(result, analysis)
 
+    def test_process_output_failure_reports_only_bounded_structure(self):
+        secret_text = 'private generated explanation'
+        with self.assertRaises(service.ModelOutputError) as raised:
+            service.runtime.update(
+                backend='llama_cpp_cli', model='/private/model.gguf',
+                processor='/private/mmproj.gguf', cli='/private/llama-mtmd-cli',
+            )
+            image = Image.new('RGB', (16, 16), (30, 60, 90))
+            completed = subprocess.CompletedProcess(
+                [], 0,
+                stdout='prefix {"schema_version":"1.0"} ' + secret_text,
+                stderr=secret_text,
+            )
+            with patch.object(service.subprocess, 'run', return_value=completed):
+                service._llama_cpp_generate(image, 'fixture prompt', 512)
+        self.assertEqual(
+            str(raised.exception),
+            'stdout=trailing_data,stderr=no_object_start',
+        )
+        self.assertNotIn(secret_text, str(raised.exception))
+
+    def test_process_output_structure_accepts_preamble_before_one_object(self):
+        value = {'schema_version': '1.0'}
+        self.assertEqual(
+            service._parse_process_json_output('diagnostic preamble\n' + json.dumps(value), ''),
+            value,
+        )
+
     def test_invalid_runtime_output_is_not_reported_as_a_client_request_error(self):
         service.runtime.update(
             backend='llama_cpp_cli', model='/private/model.gguf',

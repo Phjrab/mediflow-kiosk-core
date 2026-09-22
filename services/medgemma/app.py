@@ -216,23 +216,33 @@ def _parse_json_output(text: str) -> dict:
     candidate = text.strip()
     start = candidate.find('{')
     if start < 0:
-        raise ValueError('invalid_model_output')
-    value, offset = json.JSONDecoder().raw_decode(candidate[start:])
-    if candidate[start + offset:].strip() or not isinstance(value, dict):
-        raise ValueError('invalid_model_output')
+        raise ValueError('no_object_start')
+    try:
+        value, offset = json.JSONDecoder().raw_decode(candidate[start:])
+    except json.JSONDecodeError:
+        raise ValueError('invalid_json') from None
+    if not isinstance(value, dict):
+        raise ValueError('non_object')
+    if candidate[start + offset:].strip():
+        raise ValueError('trailing_data')
     return value
 
 
 def _parse_process_json_output(stdout: str, stderr: str) -> dict:
     """Accept llama.cpp's JSON channel without merging diagnostic streams."""
-    for candidate in (stdout, stderr):
+    failures = []
+    for name, candidate in (('stdout', stdout), ('stderr', stderr)):
         if not candidate.strip():
+            failures.append(f'{name}=empty')
             continue
         try:
             return _parse_json_output(candidate)
-        except (ValueError, json.JSONDecodeError):
-            continue
-    raise ValueError('invalid_model_output')
+        except ValueError as exc:
+            reason = str(exc)
+            if reason not in {'no_object_start', 'invalid_json', 'non_object', 'trailing_data'}:
+                reason = 'invalid_json'
+            failures.append(f'{name}={reason}')
+    raise ValueError(','.join(failures))
 
 
 def _llama_cpp_generate(image: Image.Image, prompt: str, max_new_tokens: int) -> dict:
@@ -271,8 +281,8 @@ def _llama_cpp_generate(image: Image.Image, prompt: str, max_new_tokens: int) ->
         # mistaken for a model response, then accept the first strict JSON body.
         try:
             return _parse_process_json_output(result.stdout, result.stderr)
-        except (ValueError, json.JSONDecodeError):
-            raise ModelOutputError('invalid_model_output') from None
+        except ValueError as exc:
+            raise ModelOutputError(str(exc)) from None
     finally:
         if temporary_path is not None:
             temporary_path.unlink(missing_ok=True)
@@ -405,8 +415,10 @@ def analyze_eye():
         if runtime_receipt is not None:
             response['runtime_receipt'] = runtime_receipt
         return jsonify(response)
-    except ModelOutputError:
-        app.logger.warning('model output rejected without response content')
+    except ModelOutputError as exc:
+        app.logger.warning(
+            'model output rejected without response content: %s', str(exc)
+        )
         return jsonify({'status': 'invalid_model_output'}), 502
     except (ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         app.logger.info('request rejected: %s', type(exc).__name__)
