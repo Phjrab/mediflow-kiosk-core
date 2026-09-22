@@ -7,7 +7,7 @@
 | C2 | Separate A management client, same-origin admin proxy, existing `/admin/config` read UI | DEVICE_READ_ONLY; kiosk process remains stopped |
 | C3 | Versioned local-chat sampling, runtime draft and validation plan, apply disabled | CODE + MOCK |
 | C4 | Managed ingress, shared device lock, durable operation, drain/switch/rollback | DEVICE_INGRESS VERIFIED; exact chat recovery verified |
-| C5 | Research queue/run lock and effective B receipt | Direct managed contract DONE; A key-file client deployed; managed E2 retry NOT_RUN |
+| C5 | Research queue/run lock and effective B receipt | Direct managed contract DONE; A key-file client deployed; E2 blocked by VLM readiness |
 | C6 | Read-only deployment then approved device mutation verification | `ee7e03e` DEPLOYED; sequential VLM success and exact chat-only restore; controller read-only |
 
 The approved C1/C2 bootstrap, C4 managed inference ingress, and `ee7e03e`
@@ -36,3 +36,13 @@ Protected file hashes were unchanged and no web process was running, so none was
 restarted. A later E2 attempt must use another isolated set of identifiers and
 its own approval. The applied scope is preserved in
 `A_VLM_KEYFILE_CLIENT.diff` and `A_VLM_KEYFILE_CLIENT_MIGRATION.md`.
+
+The next approved E2 window stopped before run/job creation when the independent
+post-transition check found `vlm_ready=false`. Exact ownership and receipt data
+matched and there were zero leases, but readiness is a mandatory gate. Recovery
+returned B to exact `1:1:chat_only` with controller mutations disabled. Local
+source now requires MedGemma's fixed `/readyz` probe during start and withholds
+the receipt while not ready, allowing operation rollback to stop the exact-owned
+process before restoring chat. This change passes 32 Admin Control and 19
+MedGemma tests and remains undeployed. Deploy and validate it in a separate
+maintenance scope before considering a new isolated E2 attempt.

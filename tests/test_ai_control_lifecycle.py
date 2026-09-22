@@ -183,6 +183,45 @@ class LifecycleAdapterTest(unittest.TestCase):
             engine.stop()
             self.assertEqual(stopped, [4242])
 
+    def test_medgemma_not_ready_start_remains_exact_owned_for_rollback(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            pid_path = root / 'medgemma.pid.json'
+            executable = '/fixture/python3'
+            argv = (executable, '-m', 'services.medgemma.app')
+            record = {
+                'version': 1, 'pid': 4242, 'uid': os.geteuid(),
+                'executable': executable, 'argv': list(argv), 'cwd': str(root),
+                'start_ticks': 100, 'boot_id': 'fixture-boot',
+            }
+            live = ProcessSnapshot(
+                4242, os.geteuid(), executable, argv, str(root), 'S', 100, 'fixture-boot'
+            )
+            stopped = []
+
+            def start(_desired):
+                pid_path.write_text(json.dumps(record), encoding='utf-8')
+                pid_path.chmod(0o600)
+
+            def stop(pid):
+                stopped.append(pid)
+                pid_path.unlink()
+
+            engine = OwnedMedGemmaEngine(
+                OwnedProcessSpec(pid_path, os.geteuid(), executable, argv, str(root)),
+                start=start, stop=stop,
+                receipt=lambda: {'artifact_id': 'fixture'}, unmanaged_present=lambda: False,
+                ready=lambda: False, read_snapshot=lambda _pid: live,
+            )
+            with self.assertRaisesRegex(LifecycleFailure, 'start_not_ready'):
+                engine.start({'active_profile': 'vlm_only'})
+            state = engine.snapshot()
+            self.assertTrue(state.managed)
+            self.assertEqual(state.state, 'running')
+            self.assertIsNone(state.receipt)
+            engine.stop()
+            self.assertEqual(stopped, [4242])
+
 
 if __name__ == '__main__':
     unittest.main()

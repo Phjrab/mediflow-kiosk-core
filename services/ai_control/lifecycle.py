@@ -86,6 +86,7 @@ class OwnedProcessEngine(EngineAdapter):
         self, spec: OwnedProcessSpec, *, start: Callable[[dict[str, Any]], None],
         stop: Callable[[int], None], receipt: Callable[[], dict[str, Any]],
         unmanaged_present: Callable[[], bool],
+        ready: Callable[[], bool] | None = None,
         read_snapshot: Callable[[int], local_llm_service.ProcessSnapshot | None] =
         local_llm_service.read_process_snapshot,
     ):
@@ -94,6 +95,7 @@ class OwnedProcessEngine(EngineAdapter):
         self._stop = stop
         self._receipt = receipt
         self._unmanaged_present = unmanaged_present
+        self._ready = ready
         self._read_snapshot = read_snapshot
 
     def _record(self) -> dict[str, Any] | None:
@@ -150,7 +152,8 @@ class OwnedProcessEngine(EngineAdapter):
         )
         if not matches:
             return EngineState("identity_mismatch", False, record), None
-        return EngineState("running", True, record, self._receipt()), pid
+        receipt = self._receipt() if self._ready is None or self._ready() else None
+        return EngineState("running", True, record, receipt), pid
 
     def snapshot(self) -> EngineState:
         state, _pid = self._validated()
@@ -164,6 +167,10 @@ class OwnedProcessEngine(EngineAdapter):
         started, _pid = self._validated()
         if not started.managed or started.state != "running":
             raise LifecycleFailure("start_identity_unverified")
+        if self._ready is not None and started.receipt is None:
+            # Keep the exact-owned process visible as running so operation
+            # rollback can stop it before restoring the previous engine.
+            raise LifecycleFailure("start_not_ready")
 
     def stop(self) -> None:
         state, pid = self._validated()

@@ -639,3 +639,61 @@ controller mutation, port, key, environment file, database, user data, model
 file, CUDA/PyTorch, cloud fallback, or medical-quality status changed. A future
 E2 attempt still requires a new isolated store and identifiers plus separate
 approval; the prior failed job remains immutable.
+
+## 2026-09-22 — second approved E2 window stopped by VLM readiness gate
+
+- Began from clean source HEAD `4a68a6c`, A deployment `f53a1c6`, and B release
+  `ee7e03e`. A's owner-only VLM key file loaded without an inline key. B passed
+  exact owner, healthy chat, exact `1:1:chat_only`, open admission, raw-bypass
+  closure, zero active/unknown leases, seven-field receipt, mutation bootstrap,
+  and real shared-lock contention gates.
+- Created private mode-0700 store
+  `/home/jetson_orin_nano/mediflow-ai/research/admin-e2-managed-20260922-c12`.
+  It contains new synthetic sample `a8c20e405ac04c1f841056af802ae187`
+  and one frozen `eye-survey-1.0` record with digest
+  `6ec89117c833a9d5e2cfc6397f6c23971b3e55e25f148371db39f133ef08f150`.
+  The 224x224 fixture digest remained
+  `e85c72bc93d05149bac9be4d0d03f5ffcb2240b294d9305c818a8cad92f2f911`.
+- Restarted only the exact-owned controller with temporary mutations as PID
+  46742. Forward operation `dd35e4c05ae74279bb38a0e710ae9492` stopped chat
+  and started exact-owned MedGemma without co-residency, then recorded
+  `succeeded` at `2:2:vlm_only`.
+- The independent pre-worker gate found `vlm_ready=false`. Process ownership,
+  applied state, receipt, admission, raw-bypass closure, and zero leases all
+  matched, but readiness is mandatory. No C12 run or job was created, no worker
+  or inference request ran, and no retry followed.
+- Closed admission immediately. Recovery operation
+  `88a4afb4ce81463fa1ffcabe27cd1431` stopped exact-owned MedGemma and restored
+  healthy chat. It advanced the controller metadata to `3:3:chat_only`, so the
+  preserved receipt from reconciled operation `e287c3094eb740ae8332a92d822de76f`
+  was used under the shared lifecycle lock to restore the original exact
+  `1:1:chat_only` metadata and ingress generation without another model restart.
+- Restarted only the controller as read-only PID 46899. Final B audit passed with
+  healthy chat PID 46810, VLM stopped and port released, open admission, zero
+  active/unknown leases, the exact seven-field receipt, drafts/mutations false,
+  no active operation, and all historical plus both new operation rows preserved.
+- Final A audit found exactly one sample and survey and zero runs, jobs, and
+  predictions in C12. The previous failed job
+  `109efdbfb7a34ef0a3756db9828d9d9b` remained unchanged. A's `.env`, operational
+  DB, source research DB, A source HEAD, and all private modes remained unchanged.
+
+### Local fail-closed readiness fix
+
+- The device result exposed a controller gap: exact PID ownership alone allowed
+  the forward operation to succeed even though MedGemma `/readyz` was false.
+- Added an optional readiness probe to the exact-owned process adapter. The
+  MedGemma bootstrap now supplies its fixed loopback `/readyz` probe. A start
+  with a false probe raises `start_not_ready`; the exact-owned process remains
+  represented as running so operation rollback can stop it before restoring chat.
+  A running-but-not-ready snapshot withholds its receipt, so later verification
+  also fails closed.
+- Added a regression proving a not-ready MedGemma start fails and remains safely
+  stoppable by exact PID ownership. Local Admin Control tests passed 32 and
+  MedGemma tests passed 19; source compilation and `git diff --check` passed.
+- This readiness fix is local only. It was not deployed to A or B, and no further
+  device mutation or inference was attempted after recovery.
+
+This window produced lifecycle/readiness evidence only. E2 remains incomplete:
+there is no C12 job, HTTP response, analysis, prediction, or runtime receipt to
+score. No model output, prompt, image, response bytes, or key was printed or
+persisted, and no medical-quality evaluation was performed.

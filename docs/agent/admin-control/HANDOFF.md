@@ -4,19 +4,20 @@ Current phase: C0-C6 and the direct managed VLM contract gate are complete.
 Clean detached release `ee7e03e` remains deployed on Jetson B. The subsequent
 one-time managed-ingress E2 survey-worker attempt failed before ingress with
 bounded error `misconfigured` because A's deployed client cannot read the
-owner-only VLM key file. A's exact two-file key-file client fix is now deployed
-as `f53a1c6`; no E2 retry followed. B remains exact `1:1:chat_only` with
-controller drafts and mutations disabled.
+owner-only VLM key file. A's exact two-file key-file client fix is deployed as
+`f53a1c6`. A second approved window stopped before job creation because the
+exact-owned MedGemma process was not ready. B is recovered to exact
+`1:1:chat_only`; controller drafts and mutations are disabled.
 
 ## Final verified device state
 
-- B controller is exact-owned PID 46468 from release `ee7e03e`, loopback-only on
+- B controller is exact-owned PID 46899 from release `ee7e03e`, loopback-only on
   8090. Capabilities report drafts false, mutations false, managed ingress true,
   and no operations.
 - B managed ingress remains on network port 8080. Its journal is open at
   generation 1 with zero active and zero unknown leases. From A, only B:8080 is
   reachable; 8081, 18080, and 18081 are not network-exposed.
-- The pinned general LLM is exact-owned PID 46419 and healthy on B loopback
+- The pinned general LLM is exact-owned PID 46810 and healthy on B loopback
   18080. MedGemma is stopped, has no PID record, and loopback 18081 is closed.
   No heavy model co-residency occurred.
 - Applied state and the private ingress receipt are exact `1:1:chat_only` with
@@ -138,3 +139,25 @@ Post-apply protected-file hashes and key mode 0600 were unchanged.
 - A future device mutation, sustained load/thermal evaluation, or real-data
   protocol requires its own reviewed scope.
 - Real-user-data validation and medical-quality evaluation remain `NOT_RUN`.
+
+## Second E2 window and readiness finding
+
+- Private C12 store:
+  `/home/jetson_orin_nano/mediflow-ai/research/admin-e2-managed-20260922-c12`
+- New sample: `a8c20e405ac04c1f841056af802ae187`; frozen survey digest:
+  `6ec89117c833a9d5e2cfc6397f6c23971b3e55e25f148371db39f133ef08f150`.
+- Forward operation `dd35e4c05ae74279bb38a0e710ae9492` reached exact-owned
+  `2:2:vlm_only`, but the independent gate observed `vlm_ready=false`.
+- No C12 run/job was allocated and no worker, lease, HTTP inference, prediction,
+  or retry occurred. C12 remains one sample, one survey, zero runs/jobs/results.
+- Recovery operation `88a4afb4ce81463fa1ffcabe27cd1431` restored chat; the
+  preserved original receipt then restored exact `1:1:chat_only` under the
+  shared lock. Both new operations remain preserved as `succeeded` audit rows.
+- Local source now requires the fixed MedGemma `/readyz` probe during start and
+  verification. Admin Control tests pass 32 and MedGemma tests pass 19. This fix
+  is not deployed; B continues to run `ee7e03e`.
+
+Before another E2 window, deploy the readiness fix as a new detached B release
+and prove with mock, exact-owner, rollback, chat health, and read-only recovery
+gates. Do not reuse the C11 failed job or the C12 sample, and do not perform an
+inference retry under the deployment approval.
