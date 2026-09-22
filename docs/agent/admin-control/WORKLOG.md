@@ -502,3 +502,42 @@ E1/E2 remains incomplete. Existing model files, keys, environment and rollback
 files, application/user databases, user data, CUDA/PyTorch, A tunnel, cloud
 fallback, and autostart configuration were unchanged. No real-user-data
 inference or medical-quality evaluation was performed.
+
+## 2026-09-22 — approved logger-fix deployment and managed VLM success
+
+- Revalidated clean local/remote HEAD `ee7e03e`, exact `1:1:chat_only`, healthy
+  exact-owned chat, open admission, raw-bypass closure, zero active/unknown
+  leases, the exact seven-field receipt, a read-only controller, and all
+  preserved operation rows before deployment.
+- Created clean detached B release
+  `/home/jetson2/mediflow-ai/control/releases/ee7e03e`. B release suites passed
+  31 Admin Control, 19 MedGemma, and 10 local-LLM tests. Mutation bootstrap and
+  real shared-lock contention passed without changing a model process.
+- Restarted only the exact-owned controller into temporary mutations as PID
+  45817. Operation `01e9eaf212064800becdce1c6f2a1d6f` successfully switched
+  chat→MedGemma. Applied state reached exact `2:2:vlm_only`; MedGemma PID 45858
+  was exact-owned and ready, chat was stopped, admission was open with zero
+  active/unknown leases, and no GPU-heavy co-residency occurred.
+- Sent exactly one 224×224 split red/blue synthetic request with
+  `max_new_tokens=512`. It returned HTTP 200 in 74.62 seconds with
+  `vision_ingested=true`, a strict-schema `abstain` analysis, and a matching
+  runtime receipt. The generation-2 lease ran from `2026-09-22T03:34:15Z` to
+  `03:35:30Z` and ended `completed`. The client emitted only contract-validation
+  metadata; model text, prompt, image, credentials, and response bytes were not
+  printed, logged, or persisted.
+- Closed admission after the single success, confirmed zero active/unknown
+  leases, stopped exact-owned MedGemma, verified port 18081 release, restored
+  the original receipt and exact `1:1:chat_only`, and started only pinned chat as
+  PID 45982. Restarted only the controller into read-only `ee7e03e` as PID 46032.
+- Final A verification reports chat HTTP 200 with a matching receipt, drafts and
+  mutations false, no operations, and only B:8080 network-reachable. Final B
+  audit reports open generation 1, zero active/unknown leases, VLM stopped, no
+  active operation, and all historical and forward operation rows preserved.
+
+The Admin Control managed VLM contract gate is now complete for one synthetic
+engineering image. This is image-ingestion, response-contract, receipt, and
+sequential lifecycle evidence only. It is not real-data, E2 survey-worker, load,
+thermal, accuracy, or medical-quality evidence. Existing model files, keys,
+environment and rollback files, application/user databases, user data,
+CUDA/PyTorch, A tunnel, cloud fallback, and autostart configuration were
+unchanged.

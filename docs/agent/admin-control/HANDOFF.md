@@ -1,20 +1,20 @@
 # Admin Control Handoff
 
-Current phase: C0-C4 and controller-authoritative ingress are complete. Clean
-detached release `c821ec7` is deployed on Jetson B. Its single approved 224×224,
-512-token request returned `502 invalid_model_output` with bounded diagnostic
-`stdout=empty,stderr=empty`; fail-closed recovery restored exact
-`1:1:chat_only`. Controller mutations are disabled. E1/E2 remains incomplete.
+Current phase: C0-C6 and the managed VLM contract gate are complete. Clean
+detached release `ee7e03e` is deployed on Jetson B. Its single approved 224×224,
+512-token request returned HTTP 200 with image ingestion, a strict-schema
+analysis, and a matching runtime receipt. The approved restore then returned the
+device to exact `1:1:chat_only`; controller mutations are disabled.
 
 ## Final verified device state
 
-- B controller is exact-owned PID 45002 from release `c821ec7`, loopback-only on
+- B controller is exact-owned PID 46032 from release `ee7e03e`, loopback-only on
   8090. Capabilities report drafts false, mutations false, managed ingress true,
   and no operations.
 - B managed ingress remains on network port 8080. Its journal is open at
   generation 1 with zero active and zero unknown leases. From A, only B:8080 is
   reachable; 8081, 18080, and 18081 are not network-exposed.
-- The pinned general LLM is exact-owned PID 44953 and healthy on B loopback
+- The pinned general LLM is exact-owned PID 45982 and healthy on B loopback
   18080. MedGemma is stopped, has no PID record, and loopback 18081 is closed.
   No heavy model co-residency occurred.
 - Applied state and the private ingress receipt are exact `1:1:chat_only` with
@@ -59,45 +59,54 @@ detached release `c821ec7` is deployed on Jetson B. Its single approved 224×224
   was exactly `stdout=empty,stderr=empty`; no raw output was retained. Recovery
   then restored chat-only and no request was retried.
 
+- Logger-fix operation `01e9eaf212064800becdce1c6f2a1d6f` remains
+  `succeeded`; it reached exact `2:2:vlm_only` with MedGemma PID 45858 and no
+  chat/VLM co-residency.
+- Its single 224×224, 512-token request returned HTTP 200 in 74.62 seconds with
+  `vision_ingested=true`, strict-schema `analysis_status=abstain`, and a matching
+  runtime receipt. The lease from `2026-09-22T03:34:15Z` to `03:35:30Z` ended
+  `completed`. Only validation metadata was emitted; no model response content
+  was logged or persisted.
+
 ## Source and deployed release after the window
 
-Deployed release `c821ec7` includes the generation-budget guard from `8f2b62b`
-and bounded structural diagnostics from `6d522da`:
+Deployed release `ee7e03e` includes the generation-budget guard from `8f2b62b`,
+bounded structural diagnostics from `6d522da`, and logger fix `70774a5`:
 
 - `MIN_ANALYSIS_NEW_TOKENS=256` rejects budgets below the complete seven-field
   response contract before starting generation;
 - production `VLMConfig.max_new_tokens=512` remains unchanged;
-- 512-token managed requests proved the earlier 64-token budget was not the sole
-  cause;
-- the latest bounded result was `stdout=empty,stderr=empty`, without exposing
-  raw model output.
+- `c821ec7` diagnosed the previous failure as `stdout=empty,stderr=empty`
+  without exposing raw model output;
+- source inspection showed `--log-disable` suppressed generated tokens;
+- `70774a5` preserves verbosity-0 generic output while disabling colors,
+  prefixes, timestamps, and higher diagnostic levels;
+- the managed request now returns a valid response through ingress.
 
 The two existing optional local dependencies `pytorch_grad_cam` and `qrcode`
 remain unavailable, so their modules were not run. No package was installed.
-These changes are deployed only as part of B's detached `c821ec7` release. A was
+These changes are deployed only as part of B's detached `ee7e03e` release. A was
 not changed.
 
-The bounded diagnostic from `6d522da` is now deployed as part of `c821ec7` and
-identified both process output channels as empty. Read-only inspection of pinned
+The bounded diagnostic from `6d522da` identified both process output channels as
+empty in the preceding release. Read-only inspection of pinned
 llama.cpp commit `391fac16460f15233a7740550d858ac96df3419d` confirms the cause:
 `mtmd-cli` emits generated tokens via `LOG(...)`, and `--log-disable` pauses that
 logger entirely.
 
-Local commit `70774a5`, which is not deployed, replaces `--log-disable` with
+Commit `70774a5`, deployed as part of `ee7e03e`, replaces `--log-disable` with
 verbosity 0 and disables colors, prefixes, and timestamps. This preserves only
 generic generated output at the pinned runtime while suppressing diagnostic log
 levels. Focused MedGemma tests pass 19/19 and the runnable local suite passes 180
-with one skipped.
+with one skipped. The successful device request confirms the corrected output
+path under managed ingress.
 
 ## Remaining gates
 
-- Review undeployed logger fix `70774a5` before any new detached B release.
-- A further synthetic VLM attempt requires a new explicit maintenance approval.
-  Preserve the bounded structural diagnostic and never log model output.
-- Preserve `c821ec7`, exact `1:1:chat_only`, every existing audit row, owner-only
+- Preserve `ee7e03e`, exact `1:1:chat_only`, every existing audit row, owner-only
   files, and all rollback material. Stop at the first drift, ownership, lease,
   port, receipt, output-contract, or rollback failure.
-- E1/E2 remains incomplete until managed ingress returns HTTP 200 with
-  `vision_ingested=true`, a schema-valid analysis object, and a matching closed
-  receipt. Real-user-data validation and medical-quality evaluation remain
-  `NOT_RUN`.
+- The managed VLM contract gate needs no additional synthetic retry. A future
+  device mutation, E2 survey-worker rerun, sustained load/thermal evaluation, or
+  real-data protocol requires its own reviewed scope.
+- Real-user-data validation and medical-quality evaluation remain `NOT_RUN`.
