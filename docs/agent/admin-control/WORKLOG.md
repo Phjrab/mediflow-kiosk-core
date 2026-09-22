@@ -382,3 +382,51 @@ reconciliation was written.
 Model files, key contents, `.env`, application/user databases, user data,
 CUDA/PyTorch, managed ingress, A tunnel, and cloud provider behavior were
 preserved. No medical-quality evaluation or real-user-data inference occurred.
+
+## 2026-09-22 — approved 512-token managed VLM verification and fail-closed recovery
+
+- Revalidated clean local/remote HEAD `1eb41c2` and the complete maintenance
+  gate before changing a process: exact-owned healthy chat, exact
+  `1:1:chat_only`, open admission, raw-bypass closure, zero active/unknown
+  leases, the exact seven-field runtime receipt, all prior operation rows, and
+  a read-only controller.
+- Created the clean detached B release
+  `/home/jetson2/mediflow-ai/control/releases/1eb41c2`. Its focused suites passed
+  31 Admin Control, 17 MedGemma, and 10 local-LLM tests. Mutation bootstrap and
+  real shared-lock contention also passed without changing a model process.
+- Restarted only the exact-owned controller in `1eb41c2` with temporary
+  drafts/mutations. The single approved operation
+  `851d43b10e16474295d03ea8aaeb69fc` successfully switched
+  chat→MedGemma. Applied state reached exact `2:2:vlm_only`; chat was stopped,
+  MedGemma PID 44300 was exact-owned and ready, admission was open with zero
+  active/unknown leases, and the two GPU-heavy engines were never resident
+  together.
+- Sent exactly one managed request using a generated 224×224 split red/blue PNG
+  and `max_new_tokens=512`. Its generation-2 VLM lease ran from
+  `2026-09-22T02:38:03Z` to `02:39:17Z` and ended `completed`, but the endpoint
+  returned HTTP 502 `invalid_model_output`. The service logged only
+  `model output rejected without response content`; raw model output, the image,
+  and the prompt were not logged or persisted.
+- The same output-contract failure at 512 tokens rules out the earlier 64-token
+  budget as the sole cause. The 256-token lower bound remains a useful early
+  request guard, but it does not make managed output valid. Because raw output
+  was deliberately unavailable, the exact generation/parser mismatch remains
+  unknown and no stronger cause is claimed.
+- Followed the approved failure branch immediately and made no inference retry:
+  closed admission, confirmed zero active/unknown leases, stopped exact-owned
+  MedGemma, verified loopback 18081 release, restored the original receipt and
+  exact `1:1:chat_only`, and started only the pinned general LLM as PID 44429.
+- Restarted only the exact-owned controller into read-only mode in the same
+  `1eb41c2` release as PID 44478. Final A verification reports drafts false,
+  mutations false, no operations, managed ingress true, chat HTTP 200 with a
+  matching receipt, and only B:8080 network-reachable. Final B audit reports
+  open generation 1, zero active/unknown leases, MedGemma stopped, no active
+  operation, the historical reconciled row and all three successful forward
+  operation rows preserved.
+
+E1/E2 remains incomplete because the managed request did not return HTTP 200,
+`vision_ingested=true`, a schema-valid analysis object, and a matching runtime
+receipt. Existing model files, keys, owner-only environment and rollback files,
+application/user databases, user data, CUDA/PyTorch, A tunnel, cloud fallback,
+and autostart configuration were unchanged. No real-user-data inference or
+medical-quality evaluation was performed.

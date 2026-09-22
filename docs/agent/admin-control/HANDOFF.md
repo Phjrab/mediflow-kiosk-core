@@ -1,22 +1,21 @@
 # Admin Control Handoff
 
 Current phase: C0-C4 and controller-authoritative ingress are complete. Clean
-detached release `14d7dc3` is deployed on Jetson B. The approved single
-output-channel retry proved exact sequential chat→MedGemma activation and proper
-`502 invalid_model_output` classification, then fail-closed recovery restored the
-original `1:1:chat_only` state. Controller mutations are disabled. E1/E2 remains
-incomplete because no managed VLM response has returned a valid analysis object
-with a matching runtime receipt.
+detached release `1eb41c2` is deployed on Jetson B. The approved single
+224×224, 512-token managed request again returned `502 invalid_model_output`,
+then fail-closed recovery restored exact `1:1:chat_only`. Controller mutations
+are disabled. E1/E2 remains incomplete because no managed VLM response has
+returned a valid analysis object with a matching runtime receipt.
 
 ## Final verified device state
 
-- B controller is exact-owned PID 44037 from release `14d7dc3`, loopback-only on
+- B controller is exact-owned PID 44478 from release `1eb41c2`, loopback-only on
   8090. Capabilities report drafts false, mutations false, managed ingress true,
   and no operations.
 - B managed ingress remains on network port 8080. Its journal is open at
   generation 1 with zero active and zero unknown leases. From A, only B:8080 is
   reachable; 8081, 18080, and 18081 are not network-exposed.
-- The pinned general LLM is exact-owned PID 43988 and healthy on B loopback
+- The pinned general LLM is exact-owned PID 44429 and healthy on B loopback
   18080. MedGemma is stopped, has no PID record, and loopback 18081 is closed.
   No heavy model co-residency occurred.
 - Applied state and the private ingress receipt are exact `1:1:chat_only` with
@@ -44,32 +43,43 @@ with a matching runtime receipt.
   confirmed, MedGemma stopped with port release, exact chat-only was restored,
   and the controller returned to read-only.
 
-## Local source after the window
+- The 512-token forward operation `851d43b10e16474295d03ea8aaeb69fc`
+  remains `succeeded`; it reached exact `2:2:vlm_only` with MedGemma PID 44300
+  and no chat/VLM co-residency.
+- Its one 224×224 split red/blue synthetic request used
+  `max_new_tokens=512`. The generation-2 lease ran from
+  `2026-09-22T02:38:03Z` to `02:39:17Z` and ended `completed`, but the response
+  was HTTP 502 `invalid_model_output`. Raw generated output was neither logged
+  nor persisted. No inference retry followed.
 
-Pushed commit `8f2b62b` contains an undeployed generation-budget guard after
-device release `14d7dc3`:
+## Source and deployed release after the window
+
+Pushed and deployed HEAD `1eb41c2` includes generation-budget guard commit
+`8f2b62b`:
 
 - `MIN_ANALYSIS_NEW_TOKENS=256` rejects budgets below the complete seven-field
   response contract before starting generation;
 - production `VLMConfig.max_new_tokens=512` remains unchanged;
-- the failed maintenance fixture used 64 tokens, while an earlier direct custom
-  API probe produced a valid contract object in 73.253 seconds. This makes the
-  too-small maintenance budget the strongest configuration explanation, though
-  raw-output truncation was not directly observed;
+- an earlier failed maintenance fixture used 64 tokens, but the approved 512-token
+  managed request now failed with the same output classification. The old budget
+  is therefore not the sole cause. The exact model-output/parser mismatch is
+  unknown because raw output is intentionally unavailable;
 - focused tests pass 34/34 and the runnable suite passes 178 with one skipped.
 
 The two existing optional local dependencies `pytorch_grad_cam` and `qrcode`
 remain unavailable, so their modules were not run. No package was installed.
-The minimum-budget change is not deployed to A or B.
+The minimum-budget change is deployed only as part of B's detached `1eb41c2`
+release. A was not changed.
 
 ## Remaining gates
 
-- Review pushed generation-budget guard `8f2b62b` before any future detached B
-  release.
-- A further synthetic VLM attempt requires a new explicit maintenance approval
-  and must use at least 256 tokens; 512 matches the production default and prior
-  successful direct-probe configuration class.
-- Preserve `14d7dc3`, exact `1:1:chat_only`, every existing audit row, owner-only
+- Diagnose the managed llama.cpp output boundary without another inference.
+  Any future diagnostic must preserve the no-raw-output rule and record only
+  bounded structural metadata needed to distinguish channel contamination,
+  trailing data, missing JSON, and contract mismatch.
+- A further synthetic VLM attempt requires a new explicit maintenance approval.
+  Do not infer that a larger token budget will resolve the failure.
+- Preserve `1eb41c2`, exact `1:1:chat_only`, every existing audit row, owner-only
   files, and all rollback material. Stop at the first drift, ownership, lease,
   port, receipt, output-contract, or rollback failure.
 - E1/E2 remains incomplete until managed ingress returns HTTP 200 with
