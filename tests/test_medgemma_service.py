@@ -169,7 +169,7 @@ class MedGemmaServiceContractTest(unittest.TestCase):
         self.assertIn('--offline', observed['command'])
         self.assertIn('--no-mmproj-offload', observed['command'])
         self.assertIn('--json-schema', observed['command'])
-        self.assertNotIn('--log-disable', observed['command'])
+        self.assertIn('--log-disable', observed['command'])
         self.assertEqual(observed['kwargs']['timeout'], 180)
         self.assertIs(observed['kwargs']['stdin'], subprocess.DEVNULL)
 
@@ -189,6 +189,22 @@ class MedGemmaServiceContractTest(unittest.TestCase):
         with patch.object(service.subprocess, 'run', side_effect=fake_run):
             result = service._llama_cpp_generate(image, 'fixture prompt', 64)
         self.assertEqual(result, analysis)
+
+    def test_invalid_runtime_output_is_not_reported_as_a_client_request_error(self):
+        service.runtime.update(
+            backend='llama_cpp_cli', model='/private/model.gguf',
+            processor='/private/mmproj.gguf', manifest={},
+            device_map=['cuda:0:text', 'cpu:mmproj'], cli='/private/llama-mtmd-cli',
+        )
+        with patch.object(
+            service, '_llama_cpp_generate',
+            side_effect=service.ModelOutputError('invalid_model_output'),
+        ):
+            response = self.client.post(
+                '/v1/analyze-eye', headers=self.headers(), json=self.payload(source='fixture')
+            )
+        self.assertEqual(response.status_code, 502)
+        self.assertEqual(response.get_json()['status'], 'invalid_model_output')
 
 
 if __name__ == '__main__':

@@ -254,3 +254,70 @@ No LLM or VLM was started, stopped, restarted, or switched. No cloud fallback, m
 No model file, key, operational/application DB, user data, CUDA/PyTorch setup,
 cloud fallback, real-user-data inference, or medical-quality evaluation was
 changed or performed.
+
+## 2026-09-22 — approved reconciliation deployment and single VLM retry
+
+- Revalidated local/remote HEAD `27c5da9`, a clean worktree, exact-owned chat PID
+  42774 and controller PID 42828, `1:1:chat_only`, open admission, raw-bypass
+  closure, zero active/unknown leases, exact seven-field receipt, and the
+  preserved manual-intervention row before deployment.
+- Created the clean detached B release
+  `/home/jetson2/mediflow-ai/control/releases/27c5da9`. B release tests passed 31
+  Admin Control, 15 MedGemma, and 10 local-LLM tests. The real shared lifecycle
+  lock rejected a competing CLI action and no model process changed during
+  bootstrap.
+- Restarted only the exact-owned controller in `27c5da9` with temporary
+  drafts/mutations. Through the authenticated A tunnel, the new reconciliation
+  API rechecked the actual `1:1:chat_only` state and changed operation
+  `e287c3094eb740ae8332a92d822de76f` from
+  `manual_intervention_required` to `reconciled`. The original
+  `rollback_failed` error and row identity remain preserved; no row was deleted
+  or overwritten and the applied state did not change.
+- The one approved retry operation `2059f3ef40e049509cb688d8105d194d`
+  successfully switched chat→MedGemma. Applied state reached `2:2:vlm_only`
+  with an exact seven-field receipt. Chat was stopped, MedGemma PID 43386 was
+  exact-owned and ready on loopback 18081, admission was open at generation 2,
+  and active/unknown leases were zero. No GPU-heavy co-residency occurred.
+- The 16×16 synthetic-image request then ran through managed ingress for about
+  72 seconds. Its generation-2 VLM lease was durably `completed`, proving the
+  request passed ingress and reached the backend, but the endpoint returned HTTP
+  400 `invalid_request`. This is not a successful VLM receipt or E1/E2 result.
+  No user image, medical data, or medical-quality evaluation was used.
+- Followed the approved failure branch without retry: closed admission, confirmed
+  zero active/unknown leases, stopped exact-owned MedGemma, waited for loopback
+  18081 to be released, restored the original seven-field receipt and
+  `1:1:chat_only`, then started only the pinned general LLM as PID 43513.
+- Restarted only the controller into read-only mode in the same `27c5da9` release
+  as PID 43566. Final A verification reports drafts false, mutations false, no
+  operations, managed ingress true, chat HTTP 200 with matching receipt, and only
+  B:8080 reachable from the network. Final B audit reports open admission at
+  generation 1, zero active/unknown leases, MedGemma stopped, no active
+  operation, the historical row reconciled, and the retry forward operation
+  preserved as succeeded.
+
+### HTTP 400 postmortem code/mock
+
+- The completed 72-second lease and request path show that the second failure
+  occurred after backend generation began, unlike the earlier pre-admission 409.
+  The deployed service collapses a strict JSON parse failure into the same 400
+  used for client validation and logs no response content, so the exact generated
+  text cannot and should not be claimed.
+- Verified without inference that the pinned `llama-mtmd-cli` supports
+  `--log-disable`. Locally added that flag so CLI diagnostics cannot contaminate
+  the captured JSON channel.
+- Added a distinct `ModelOutputError` response: completed generation that does
+  not yield one contract JSON object now returns HTTP 502
+  `invalid_model_output`, while actual malformed client requests remain HTTP
+  400. Raw model output is never logged or persisted.
+- Focused postmortem tests passed 33. Full runnable local suite passed 177 with
+  one skipped and zero failures/errors. The two pre-existing optional modules
+  requiring unavailable `pytorch_grad_cam` and `qrcode` remain excluded; no
+  dependency was installed.
+- This HTTP-output postmortem code is not deployed to either Jetson, and no
+  further model start, controller mutation window, or synthetic inference was
+  attempted after fail-closed recovery.
+
+Existing model files, key contents, `.env`, application/user databases, user
+data, CUDA/PyTorch, A tunnel, managed ingress, and cloud provider behavior were
+preserved. Only the explicitly approved Admin Control operation journal
+reconciliation was written.

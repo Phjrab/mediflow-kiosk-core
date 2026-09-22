@@ -84,6 +84,10 @@ runtime = {
 }
 
 
+class ModelOutputError(RuntimeError):
+    """The local runtime completed but did not emit one contract JSON object."""
+
+
 def _secret() -> str:
     try:
         return secret(os.environ, 'MEDGEMMA')
@@ -241,7 +245,7 @@ def _llama_cpp_generate(image: Image.Image, prompt: str, max_new_tokens: int) ->
             image.save(handle, format='PNG')
         os.chmod(temporary_path, 0o600)
         command = [
-            runtime['cli'], '--offline',
+            runtime['cli'], '--offline', '--log-disable',
             '-m', runtime['model'], '--mmproj', runtime['processor'],
             '--image', str(temporary_path), '-p', prompt,
             '--temp', '0', '-n', str(max_new_tokens),
@@ -264,7 +268,10 @@ def _llama_cpp_generate(image: Image.Image, prompt: str, max_new_tokens: int) ->
         # llama-mtmd-cli has emitted generated text on either stream across
         # revisions/build modes. Keep them separate so diagnostics cannot be
         # mistaken for a model response, then accept the first strict JSON body.
-        return _parse_process_json_output(result.stdout, result.stderr)
+        try:
+            return _parse_process_json_output(result.stdout, result.stderr)
+        except (ValueError, json.JSONDecodeError):
+            raise ModelOutputError('invalid_model_output') from None
     finally:
         if temporary_path is not None:
             temporary_path.unlink(missing_ok=True)
@@ -397,6 +404,9 @@ def analyze_eye():
         if runtime_receipt is not None:
             response['runtime_receipt'] = runtime_receipt
         return jsonify(response)
+    except ModelOutputError:
+        app.logger.warning('model output rejected without response content')
+        return jsonify({'status': 'invalid_model_output'}), 502
     except (ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         app.logger.info('request rejected: %s', type(exc).__name__)
         return jsonify({'status': 'invalid_request'}), 400

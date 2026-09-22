@@ -1,84 +1,75 @@
 # Admin Control Handoff
 
-Current phase: C0-C4 implementation and the controller-authoritative ingress are
-complete. The C5 fixed MedGemma owner manager was deployed from pushed commit
-`8a9efa3`, but the approved synthetic chat→MedGemma→chat window exposed a receipt
-contract defect and then a rollback failure. The device was safely returned to
-the original `1:1:chat_only` state and mutations were disabled. C5 VLM receipt
-verification remains incomplete.
+Current phase: C0-C4 and the controller-authoritative ingress are complete. The
+`27c5da9` reconciliation/lifecycle release is deployed on Jetson B. The approved
+single retry proved exact sequential chat→MedGemma activation and fixed the E3
+receipt boundary, but the synthetic VLM generation ended with HTTP 400 rather
+than a valid analysis response. Fail-closed recovery returned the device to the
+original `1:1:chat_only` state, and controller mutations are disabled.
 
 ## Final verified device state
 
-- B controller runs the clean detached `8a9efa3` release as exact-owned PID
-  42828 on `127.0.0.1:8090`. Capabilities report drafts false, mutations false,
-  managed ingress true, and an empty operations list.
+- B controller is exact-owned PID 43566 from clean detached release `27c5da9`,
+  loopback-only on 8090. Capabilities report drafts false, mutations false,
+  managed ingress true, and no operations.
 - B managed ingress remains on network port 8080. Its journal is open at
-  generation 1 with zero active and zero unknown leases. Network checks from A
-  show only B:8080 reachable; 8081, 18080, and 18081 are not exposed.
-- The pinned general LLM is exact-owned PID 42774, healthy on B loopback
-  `127.0.0.1:18080`. MedGemma is stopped and loopback 18081 is closed. No heavy
-  model co-residency occurred.
-- Durable applied state and the private ingress receipt are restored to
-  `1:1:chat_only`. A-to-B synthetic chat returned 200 with an exact E3 receipt.
-- A's existing loopback Admin Control tunnel and private VLM URL remain in their
-  prior C4 state. Existing keys and environment/rollback files remain
-  owner-only. No autostart was added.
-- Operation `e287c3094eb740ae8332a92d822de76f` remains
-  `manual_intervention_required/rollback_failed` in B's owner-only journal. Do
-  not delete or rewrite it. It deliberately blocks another apply until the local
-  evidence-backed reconciliation path is reviewed, deployed, and invoked.
+  generation 1 with zero active and zero unknown leases. From A, only B:8080 is
+  reachable; 8081, 18080, and 18081 are not network-exposed.
+- The pinned general LLM is exact-owned PID 43513 and healthy on B loopback
+  18080. MedGemma is stopped, has no PID record, and loopback 18081 is closed.
+  No heavy model co-residency occurred.
+- Durable applied state and private ingress receipt are restored to
+  `1:1:chat_only`. A-to-B synthetic chat returned HTTP 200 with the exact closed
+  seven-field receipt.
+- A's existing Admin Control tunnel and private VLM URL are unchanged. Existing
+  keys, environment files, rollback material, model files, CUDA/PyTorch,
+  application/user DBs, and user data are unchanged. No autostart was added.
 
-## What the device window proved
+## Audit and retry evidence
 
-- Exact-owned sequential chat→MedGemma switching worked once. Operation
-  `3f0dd84d4d5b4e4d89c74e16449cedd9` reached `2:2:vlm_only`; MedGemma was ready
-  on loopback and chat was stopped.
-- The synthetic VLM request returned HTTP 409 before ingress created a lease and
-  before generation. A/B role-prompt hashes match. The operation receipt stored
-  eight fields because `observed_profile` leaked into the closed seven-field E3
-  expectation, so this window does not provide an E1/E2 VLM receipt or inference
-  result.
-- The reverse operation failed before a chat start was logged, then its single
-  rollback attempt also failed. Both engines were stopped, admission was closed,
-  and no active/unknown inference remained when manual recovery began. The old
-  code did not preserve the two underlying exception codes, so the precise
-  rollback exception is not asserted.
-- The approved exact recovery restored only the original chat runtime and then
-  locked the controller read-only. No further transition or model restart was
-  attempted.
+- Operation `e287c3094eb740ae8332a92d822de76f` is preserved as `reconciled`; its
+  historical `rollback_failed` error remains. The reconciliation endpoint
+  changed no process or applied configuration and succeeded only after exact
+  recovery-state, receipt, ownership, admission, raw-bypass, and zero-lease
+  evidence matched.
+- Retry operation `2059f3ef40e049509cb688d8105d194d` succeeded in switching
+  chat→MedGemma. Applied state reached `2:2:vlm_only` with an exact seven-field
+  receipt; chat was stopped and exact-owned MedGemma PID 43386 was ready on
+  loopback 18081.
+- The 16×16 synthetic request created one generation-2 VLM lease from
+  `2026-09-22T02:01:55Z` to `02:03:07Z`; the lease ended `completed`. The endpoint
+  returned HTTP 400 `invalid_request`, so no VLM runtime receipt, E1/E2 result,
+  or medical-quality result is claimed.
+- After that first failure, admission was closed and no retry occurred. Exact
+  recovery stopped MedGemma, verified port release, restored the original chat
+  receipt/state, started only chat, and returned the controller to read-only.
 
 ## Local source after the window
 
-Pushed commit `30f3ee4` contains the undeployed postmortem fix after `8a9efa3`:
+The branch has an additional undeployed HTTP-output postmortem change after
+`27c5da9`:
 
-- lifecycle verification returns and persists only the exact seven-field runtime
-  expectation;
-- the MedGemma owner manager waits until loopback port 18081 is actually released
-  after exact process termination;
-- future manual-intervention records contain safe primary and rollback error
-  codes in addition to the stable `rollback_failed` status;
-- an explicit reconciliation endpoint preserves the historical row and changes
-  no process/configuration; it succeeds only when exact applied state, runtime
-  receipt, ownership, admission, raw-bypass, and zero-lease evidence all match;
-- focused tests pass and the runnable suite passes 176 with one skipped.
+- the pinned, device-confirmed `llama-mtmd-cli --log-disable` option prevents CLI
+  diagnostics from contaminating the captured JSON channel;
+- completed generation with invalid contract JSON now returns HTTP 502
+  `invalid_model_output` instead of being mislabeled as a client HTTP 400;
+- raw generated text is neither logged nor persisted;
+- focused tests pass 33/33 and the runnable suite passes 177 with one skipped.
 
-The two pre-existing optional local dependencies `pytorch_grad_cam` and `qrcode`
-are unavailable, so their modules were not run. No package was installed. The
-pushed postmortem source must be reviewed before any future device window; it is
-not present on A or B yet.
+The two existing optional local dependencies `pytorch_grad_cam` and `qrcode`
+remain unavailable, so their modules were not run. No package was installed.
+This latest local change is not deployed to A or B.
 
 ## Remaining gates
 
-- Review the postmortem and reconciliation diff and deploy it to a new detached B
-  release only in a new approved maintenance window. Preserve the current
-  `8a9efa3` release and all rollback material. Invoke reconciliation only after
-  it re-verifies exact `1:1:chat_only`, open admission, zero active/unknown
-  leases, exact-owned healthy chat, stopped VLM, and closed raw bypass.
-- A second synthetic chat→MedGemma→chat attempt requires new explicit approval.
-  It must stop after the first drift, ownership, lease, port-release, receipt, or
-  rollback failure. Do not claim E1/E2 until the managed-ingress VLM response is
-  200, `vision_ingested` is true, and its closed receipt matches.
-- Real-user-data validation and medical-quality evaluation remain `NOT_RUN`.
-
-Models, key contents, application/operational DBs, user data, CUDA/PyTorch, and
-cloud provider behavior remain unchanged.
+- Commit and push the HTTP-output postmortem change, then review it before any
+  new detached B release.
+- A further synthetic VLM attempt requires a new explicit maintenance approval.
+  Preserve `27c5da9`, the current `1:1:chat_only` state, the reconciled historical
+  row, the successful forward-operation row, and all rollback material.
+- Any future attempt must stop at the first drift, ownership, lease, port,
+  receipt, output-contract, or rollback failure and return to exact chat-only.
+- E1/E2 remains incomplete until managed ingress returns HTTP 200 with
+  `vision_ingested=true`, a schema-valid analysis object, and a matching closed
+  runtime receipt. Real-user-data validation and medical-quality evaluation
+  remain `NOT_RUN`.
