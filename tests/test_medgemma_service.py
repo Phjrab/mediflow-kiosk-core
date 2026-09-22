@@ -43,7 +43,7 @@ class MedGemmaServiceContractTest(unittest.TestCase):
         role = service.ROLE_PATH.read_text(encoding='utf-8').strip()
         return {
             'model': service.EXPECTED_MODEL_ID,
-            'max_new_tokens': 64,
+            'max_new_tokens': service.MIN_ANALYSIS_NEW_TOKENS,
             'prompt_digest': hashlib.sha256(role.encode('utf-8')).hexdigest(),
             'class_mapping': {'3': 'normal'},
             'context': context,
@@ -140,6 +140,20 @@ class MedGemmaServiceContractTest(unittest.TestCase):
             response = self.client.post('/v1/analyze-eye', headers=self.headers(), json=payload)
         self.assertEqual(response.status_code, 409)
         self.assertEqual(response.get_json()['status'], 'configuration_drift')
+        generate.assert_not_called()
+
+    def test_generation_budget_below_contract_minimum_is_rejected_before_generation(self):
+        service.runtime.update(
+            backend='llama_cpp_cli', model='/private/model.gguf',
+            processor='/private/mmproj.gguf', manifest={},
+            device_map=['cuda:0:text', 'cpu:mmproj'], cli='/private/llama-mtmd-cli',
+        )
+        payload = self.payload()
+        payload['max_new_tokens'] = service.MIN_ANALYSIS_NEW_TOKENS - 1
+        with patch.object(service, '_llama_cpp_generate') as generate:
+            response = self.client.post('/v1/analyze-eye', headers=self.headers(), json=payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.get_json()['status'], 'invalid_request')
         generate.assert_not_called()
 
     def test_llama_cpp_generation_is_offline_bounded_and_removes_temp_image(self):

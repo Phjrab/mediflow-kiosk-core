@@ -21,6 +21,7 @@ from utils.runtime_receipt import validate_runtime_expectation
 
 MAX_IMAGE_BYTES = 5 * 1024 * 1024
 MAX_PIXELS = 16_000_000
+MIN_ANALYSIS_NEW_TOKENS = 256
 EXPECTED_MODEL_ID = 'google/medgemma-1.5-4b-it'
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ROLE_PATH = PROJECT_ROOT / 'config' / 'vlm_analysis_role.txt'
@@ -346,7 +347,7 @@ def analyze_eye():
             raise ValueError('invalid_image')
         image = _decode_image(image_payload['data_base64'])
         max_new_tokens = int(payload['max_new_tokens'])
-        if not 1 <= max_new_tokens <= 4096:
+        if not MIN_ANALYSIS_NEW_TOKENS <= max_new_tokens <= 4096:
             raise ValueError('invalid_request')
         role = ROLE_PATH.read_text(encoding='utf-8').strip()
         expected_prompt_digest = hashlib.sha256(role.encode('utf-8')).hexdigest()

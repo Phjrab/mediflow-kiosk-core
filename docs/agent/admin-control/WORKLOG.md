@@ -323,3 +323,60 @@ Existing model files, key contents, `.env`, application/user databases, user
 data, CUDA/PyTorch, A tunnel, managed ingress, and cloud provider behavior were
 preserved. Only the explicitly approved Admin Control operation journal
 reconciliation was written.
+
+## 2026-09-22 — approved output-channel deployment and single VLM retry
+
+- Revalidated clean local/remote HEAD `14d7dc3` and the complete final device
+  gate: exact `1:1:chat_only`, chat health, open admission, raw-bypass closure,
+  zero active/unknown leases, exact seven-field receipt, reconciled historical
+  operation, both successful forward-operation rows, and read-only controller.
+- Created clean detached B release
+  `/home/jetson2/mediflow-ai/control/releases/14d7dc3`. B tests passed 31 Admin
+  Control, 16 MedGemma, and 10 local-LLM tests. Mutation bootstrap, preserved
+  audit rows, and real shared-lock contention passed without changing a model.
+- Restarted only the exact-owned controller in `14d7dc3` with temporary
+  drafts/mutations. The one approved operation
+  `37fdb2ca80f64fd88b73d915ee29e38e` successfully switched chat→MedGemma.
+  Applied state reached `2:2:vlm_only` with an exact seven-field receipt; chat
+  was stopped, MedGemma PID 43861 was exact-owned and ready, active/unknown
+  leases were zero, and no co-residency occurred.
+- Sent one 16×16 synthetic request through managed ingress. The generation-2 VLM
+  lease ran from `2026-09-22T02:21:10Z` to `02:22:20Z` and ended `completed`.
+  The deployed output-channel hardening returned HTTP 502
+  `invalid_model_output`, with only the non-sensitive warning
+  `model output rejected without response content`. Raw output was not logged or
+  persisted. This is not an E1/E2 success or medical-quality result.
+- Followed the approved failure branch immediately and did not retry: closed
+  admission, confirmed zero active/unknown leases, stopped exact-owned MedGemma,
+  verified loopback 18081 release, restored the original receipt and
+  `1:1:chat_only`, and started only pinned chat as PID 43988.
+- Restarted only the controller into read-only mode in `14d7dc3` as PID 44037.
+  Final A verification reports drafts false, mutations false, no operations,
+  managed ingress true, chat HTTP 200 with matching receipt, and only B:8080
+  network-reachable. Final B audit reports open generation 1, zero active/unknown
+  leases, MedGemma stopped, no active operation, and all historical rows intact.
+
+### Generation-budget postmortem code/mock
+
+- The maintenance fixture requested only 64 new tokens, while the closed analysis
+  schema requires seven fields and the production `VLMConfig` default is 512.
+  The earlier direct custom-API synthetic probe returned a valid contract object
+  in 73.253 seconds. The similar 70-second completed lease plus the too-small
+  maintenance budget is the strongest available configuration explanation; raw
+  generated text was intentionally unavailable, so truncation is not claimed as
+  directly observed fact.
+- Locally added `MIN_ANALYSIS_NEW_TOKENS=256`. Requests below the minimum now fail
+  before generation as client HTTP 400; production's 512-token default remains
+  unchanged. This prevents an impossible budget from consuming a full model run
+  and later appearing as a backend output failure.
+- Focused postmortem tests passed 34. Full runnable local suite passed 178 with
+  one skipped and zero failures/errors. The two pre-existing optional modules
+  requiring unavailable `pytorch_grad_cam` and `qrcode` remain excluded; no
+  dependency was installed.
+- The minimum-budget change is not deployed to either Jetson. No additional
+  model start, controller mutation window, or synthetic inference was attempted
+  after fail-closed recovery.
+
+Model files, key contents, `.env`, application/user databases, user data,
+CUDA/PyTorch, managed ingress, A tunnel, and cloud provider behavior were
+preserved. No medical-quality evaluation or real-user-data inference occurred.
