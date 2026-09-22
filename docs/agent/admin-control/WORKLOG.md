@@ -447,3 +447,58 @@ medical-quality evaluation was performed.
 - This diagnostic commit was not deployed to either Jetson. No additional model
   start, controller restart, mutation, or inference occurred after fail-closed
   recovery.
+
+## 2026-09-22 — approved bounded-output deployment and single verification
+
+- Revalidated clean local/remote HEAD `c821ec7`, exact `1:1:chat_only`, healthy
+  exact-owned chat, open admission, raw-bypass closure, zero active/unknown
+  leases, the exact seven-field receipt, a read-only controller, and every
+  preserved operation row before deployment.
+- Created clean detached B release
+  `/home/jetson2/mediflow-ai/control/releases/c821ec7`. B release tests passed
+  31 Admin Control, 19 MedGemma, and 10 local-LLM tests. Mutation bootstrap and
+  real shared-lock contention passed without changing a model process.
+- Restarted only the exact-owned controller into temporary mutations as PID
+  44756. Operation `2d1b2db5abaf4b0c911c4b3e15551549` successfully switched
+  chat→MedGemma. Applied state reached exact `2:2:vlm_only`; MedGemma PID 44797
+  was exact-owned and ready, chat was stopped, admission was open with zero
+  active/unknown leases, and no GPU-heavy co-residency occurred.
+- Sent exactly one 224×224 split red/blue synthetic request with
+  `max_new_tokens=512`. Its generation-2 lease ran from
+  `2026-09-22T03:06:24Z` to `03:07:39Z` and ended `completed`, but the response
+  was HTTP 502 `invalid_model_output`. The newly deployed bounded diagnostic was
+  `stdout=empty,stderr=empty`; no model text, prompt, image, credentials, or
+  response bytes were logged or persisted.
+- Closed admission immediately. The first close audit accidentally loaded the
+  prior `1eb41c2` code root and therefore reported a cwd metadata mismatch while
+  admission was already closed and leases were zero. No process action was taken
+  from that result. Re-running the audit against `c821ec7` proved PID 44797 was
+  exact-owned before the recovery continued.
+- Stopped exact-owned MedGemma, verified port 18081 release, restored the
+  original receipt and exact `1:1:chat_only`, and started only pinned chat as PID
+  44953. Restarted only the controller into read-only `c821ec7` as PID 45002.
+  Final A verification reports chat HTTP 200 with matching receipt, drafts and
+  mutations false, no operations, and only B:8080 network-reachable. Final B
+  audit reports open generation 1, zero active/unknown leases, VLM stopped, no
+  active operation, and all historical and forward operation rows preserved.
+
+### Confirmed logger cause and local-only fix
+
+- Read-only inspection of pinned llama.cpp source commit
+  `391fac16460f15233a7740550d858ac96df3419d` shows that `mtmd-cli` emits every
+  generated token through `LOG(...)`, while `--log-disable` pauses the entire
+  common logger. This exactly explains a successful process exit with empty
+  stdout and stderr; it is no longer only a hypothesis.
+- Local commit `70774a5` removes `--log-disable` and selects
+  `--verbosity 0 --log-colors off --no-log-prefix --no-log-timestamps` instead.
+  At this pinned revision, verbosity 0 preserves only generic `LOG(...)` output
+  while excluding error, warning, info, trace, and debug diagnostics from the
+  captured JSON channel.
+- Focused MedGemma suites passed 19/19 and the runnable local suite passed 180
+  with one skipped. This fix was not deployed and no further controller restart,
+  model start, or inference was attempted after recovery.
+
+E1/E2 remains incomplete. Existing model files, keys, environment and rollback
+files, application/user databases, user data, CUDA/PyTorch, A tunnel, cloud
+fallback, and autostart configuration were unchanged. No real-user-data
+inference or medical-quality evaluation was performed.

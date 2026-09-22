@@ -8,18 +8,18 @@
 | C3 | Versioned local-chat sampling, runtime draft and validation plan, apply disabled | CODE + MOCK |
 | C4 | Managed ingress, shared device lock, durable operation, drain/switch/rollback | DEVICE_INGRESS VERIFIED; exact chat recovery verified |
 | C5 | Research queue/run lock and effective B receipt | PARTIAL; exact VLM activation receipt and output-error classification verified, valid managed analysis BLOCKED_GATE |
-| C6 | Read-only deployment then approved device mutation verification | `1eb41c2` DEPLOYED; 224×224/512-token retry returned 502 and recovered fail-closed; controller read-only |
+| C6 | Read-only deployment then approved device mutation verification | `c821ec7` DEPLOYED; bounded diagnostic proved empty CLI channels; recovered fail-closed; controller read-only |
 
-The approved C1/C2 bootstrap, C4 managed inference ingress, and `1eb41c2`
+The approved C1/C2 bootstrap, C4 managed inference ingress, and `c821ec7`
 MedGemma output/lifecycle release are deployed. The A-to-B management
 API remains on its loopback SSH tunnel, drafts/mutations are off, raw chat is
 loopback-only, VLM is stopped, and network inference is exposed only through
 managed ingress. Applied state is restored to exact `1:1:chat_only` after the
 single 224×224, 512-token retry reached VLM but returned
-`502 invalid_model_output` after a completed 74-second backend lease. This rules
-out the prior 64-token budget as the sole cause. The deployed guard still rejects
-budgets below 256 before generation; production remains 512. Undeployed local
-commit `6d522da` now provides safe structural diagnostics for the managed
-llama.cpp output boundary without recording model text. Its mock and runnable
-local regressions pass. Any deployment or further synthetic inference requires
-separate approval; E1/E2 is not complete.
+`502 invalid_model_output` after a completed 75-second backend lease. The bounded
+diagnostic proved both captured channels were empty. Pinned source inspection
+then confirmed `--log-disable` suppresses `mtmd-cli` generated tokens because
+they use `LOG(...)`. Undeployed local commit `70774a5` preserves verbosity-0
+generic output while suppressing higher diagnostic levels; its focused and
+runnable regressions pass. Any deployment or further synthetic inference
+requires separate approval; E1/E2 is not complete.
