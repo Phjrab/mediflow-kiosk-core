@@ -541,3 +541,60 @@ thermal, accuracy, or medical-quality evidence. Existing model files, keys,
 environment and rollback files, application/user databases, user data,
 CUDA/PyTorch, A tunnel, cloud fallback, and autostart configuration were
 unchanged.
+
+## 2026-09-22 — approved managed-ingress E2 attempt and fail-closed recovery
+
+- Revalidated the approved preconditions before mutation: B release `ee7e03e`,
+  exact-owned healthy chat, exact `1:1:chat_only`, open admission, closed raw
+  bypass, zero active/unknown leases, and the exact seven-field runtime receipt.
+- Created a new private research store at
+  `/home/jetson_orin_nano/mediflow-ai/research/admin-e2-managed-20260922-c11`
+  with mode 0700 and owner-only files. It reused only the existing normalized
+  224x224 red/blue engineering fixture and created new identifiers: sample
+  `c69d553984774e7e92103db399a3a86d`, run
+  `93efe0ad577942ad888022b2261b08e8`, and job
+  `109efdbfb7a34ef0a3756db9828d9d9b`.
+- Froze one bounded `eye-survey-1.0` record with digest
+  `6ec89117c833a9d5e2cfc6397f6c23971b3e55e25f148371db39f133ef08f150`.
+  The isolated database contained one sample and survey before execution; no
+  prior research row or operational database row was reused or overwritten.
+- Temporarily enabled controller mutations and performed the one approved
+  chat-to-MedGemma transition. Operation
+  `4b289618a6a740359653a74d566091e7` succeeded, reaching exact
+  `2:2:vlm_only` with no chat/VLM co-residency and zero leases.
+- Invoked the E2 worker exactly once. The worker terminally marked the isolated
+  job `failed` with bounded error `misconfigured` before any managed-ingress VLM
+  lease or backend generation began. It persisted no prediction and did not
+  emit model output, prompt, image, response bytes, or key material. Per the
+  approved stop condition, no retry was attempted.
+- Immediately closed admission, stopped exact-owned MedGemma, confirmed raw VLM
+  port release, restored the original receipt and exact `1:1:chat_only`, and
+  disabled drafts/mutations. Final B audit recorded read-only controller PID
+  46468, healthy exact-owned chat PID 46419, VLM stopped, open admission, zero
+  active/unknown leases, and every prior operation row plus the new successful
+  transition row preserved.
+- Final isolated-store audit found one sample, one survey, one run, one failed
+  job, and zero predictions. The survey digest matched, the private tree stayed
+  owner-only, and SHA-256 baselines for A's `.env`, operational database, and
+  previous research database were unchanged.
+
+### Root cause and source evidence
+
+- Read-only diagnosis showed worker-mode validation passed while
+  `VLMConfig.from_env` returned `misconfigured`. The endpoint, model, numeric
+  limits, and owner-only key file independently validated.
+- A's deployed branch is at `1ec6f31` and its `utils/ai_config.py` reads only
+  inline `VLM_API_KEY`. It therefore cannot consume the approved
+  `VLM_API_KEY_FILE` without violating the no-inline-key constraint.
+- Current `codex/admin-control` already contains the safe file-secret path and
+  regression test from `8a9efa3`: `VLMConfig.from_env` calls
+  `secret(env, 'VLM')`, which accepts an owner-only file while preserving the
+  same bounded `misconfigured` error externally. Focused local tests passed: 22
+  AI-client, 6 experiment-worker, and 6 survey/hybrid tests.
+- This diagnosis did not change A or B. Deploying the existing safe client code
+  to A and attempting a new isolated E2 run both require new explicit scope.
+
+The managed-ingress E2 survey-worker gate remains incomplete because the job did
+not succeed and no analysis or matching runtime receipt was persisted. This was
+an engineering integration attempt only; no real-user-data inference, accuracy
+measurement, or medical-quality evaluation was performed.

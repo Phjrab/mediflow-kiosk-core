@@ -1,20 +1,21 @@
 # Admin Control Handoff
 
-Current phase: C0-C6 and the managed VLM contract gate are complete. Clean
-detached release `ee7e03e` is deployed on Jetson B. Its single approved 224×224,
-512-token request returned HTTP 200 with image ingestion, a strict-schema
-analysis, and a matching runtime receipt. The approved restore then returned the
-device to exact `1:1:chat_only`; controller mutations are disabled.
+Current phase: C0-C6 and the direct managed VLM contract gate are complete.
+Clean detached release `ee7e03e` remains deployed on Jetson B. The subsequent
+one-time managed-ingress E2 survey-worker attempt failed before ingress with
+bounded error `misconfigured` because A's deployed client cannot read the
+owner-only VLM key file. The approved fail-closed path restored exact
+`1:1:chat_only`; controller drafts and mutations are disabled.
 
 ## Final verified device state
 
-- B controller is exact-owned PID 46032 from release `ee7e03e`, loopback-only on
+- B controller is exact-owned PID 46468 from release `ee7e03e`, loopback-only on
   8090. Capabilities report drafts false, mutations false, managed ingress true,
   and no operations.
 - B managed ingress remains on network port 8080. Its journal is open at
   generation 1 with zero active and zero unknown leases. From A, only B:8080 is
   reachable; 8081, 18080, and 18081 are not network-exposed.
-- The pinned general LLM is exact-owned PID 45982 and healthy on B loopback
+- The pinned general LLM is exact-owned PID 46419 and healthy on B loopback
   18080. MedGemma is stopped, has no PID record, and loopback 18081 is closed.
   No heavy model co-residency occurred.
 - Applied state and the private ingress receipt are exact `1:1:chat_only` with
@@ -101,12 +102,37 @@ levels. Focused MedGemma tests pass 19/19 and the runnable local suite passes 18
 with one skipped. The successful device request confirms the corrected output
 path under managed ingress.
 
+## Managed-ingress E2 attempt
+
+- Isolated store:
+  `/home/jetson_orin_nano/mediflow-ai/research/admin-e2-managed-20260922-c11`
+- New sample/run/job:
+  `c69d553984774e7e92103db399a3a86d` /
+  `93efe0ad577942ad888022b2261b08e8` /
+  `109efdbfb7a34ef0a3756db9828d9d9b`
+- Frozen survey digest:
+  `6ec89117c833a9d5e2cfc6397f6c23971b3e55e25f148371db39f133ef08f150`
+- B transition operation: `4b289618a6a740359653a74d566091e7`, preserved as
+  `succeeded`.
+- Worker result: one terminal `failed/misconfigured` job, zero predictions, and
+  no ingress VLM lease. No retry occurred.
+
+A's deployed `codex/admin-control-a-deploy` head `1ec6f31` still reads only
+inline `VLM_API_KEY`. Current `codex/admin-control` has used
+`secret(env, 'VLM')` since `8a9efa3` and includes a regression proving
+`VLM_API_KEY_FILE` works. Deploy that existing safe client change to A before a
+future run; preserve the failed job, use new identifiers, and obtain a separate
+approval before any new E2 attempt.
+
 ## Remaining gates
 
 - Preserve `ee7e03e`, exact `1:1:chat_only`, every existing audit row, owner-only
   files, and all rollback material. Stop at the first drift, ownership, lease,
   port, receipt, output-contract, or rollback failure.
-- The managed VLM contract gate needs no additional synthetic retry. A future
-  device mutation, E2 survey-worker rerun, sustained load/thermal evaluation, or
-  real-data protocol requires its own reviewed scope.
+- The direct managed VLM contract gate needs no additional synthetic retry. The
+  E2 survey-worker gate is incomplete. A minimal A client deployment and any
+  later E2 rerun require separately reviewed scope; the failed job must remain
+  immutable.
+- A future device mutation, sustained load/thermal evaluation, or real-data
+  protocol requires its own reviewed scope.
 - Real-user-data validation and medical-quality evaluation remain `NOT_RUN`.
