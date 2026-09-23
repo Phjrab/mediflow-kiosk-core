@@ -871,3 +871,21 @@ change, or medical-quality evaluation was performed for this source update.
 No E2 job, inference request, model/profile transition, controller mutation,
 web process restart, key/environment/DB/user-data change, or medical-quality
 evaluation occurred during this deployment. B was not changed.
+
+## 2026-09-23 — Macro-F1 source correction
+
+- Pushed `4ff21a2` on `codex/admin-control`. Only `experiments/evaluate.py` and
+  `tests/test_experiment_evaluate.py` changed. F1 now derives from TP/FP/FN,
+  preserving zero for an assessed class with errors while leaving completely
+  absent classes undefined. The existing precision, recall, specificity,
+  coverage, accuracy, E3/E4, and engineering-fixture branches did not change.
+- All 10 evaluation tests passed, including the 50-sample five-class fixture
+  whose hand-calculated and computed Macro-F1 are both 0.2. The five focused
+  new F1 tests, 12 store tests, six E3 tests, and six survey/hybrid tests passed.
+  All 189 locally importable tests ran: 188 passed and one skipped. Full
+  discovery still has two unrelated import errors because this Mac Python
+  lacks `pytorch_grad_cam` and `qrcode`. No package was installed.
+- `git diff --check` passed before commit. No Jetson command, device change,
+  DB or `.env` edit, model execution, inference request, or medical-quality
+  evaluation accompanied this fix. A remains at deployed `265e545` and B at
+  last verified release `86bebb6`; the F1 commit is source-only.

@@ -212,3 +212,20 @@ ingress generation, or the receipt.
   ABI mismatch; no package was changed. Protected file and C11/C12/C13 DB
   hashes stayed fixed. No E2 run, inference request, or web process restart
   occurred.
+
+## Current source-only F1 correction
+
+- `codex/admin-control` is pushed at `4ff21a2` with a two-file Macro-F1 fix:
+  `experiments/evaluate.py` now uses `2*TP/(2*TP+FP+FN)`. A class with assessed
+  errors and no true positives contributes `0.0`; a class absent from both
+  assessed actuals and predictions remains undefined and is excluded.
+- Five new evaluation regressions cover perfect classification, one missed
+  class, a balanced five-class counterexample (hand-calculated Macro-F1 0.2),
+  absent classes, and all-wrong predictions (Macro-F1 0.0). All 10 evaluation
+  tests pass. E3/E4 and experiment-store tests also pass. Of 189 locally
+  importable tests, 188 pass and one is skipped. The other two test modules
+  cannot import because this Mac Python lacks `pytorch_grad_cam` and `qrcode`.
+- This commit has **not** been deployed to A or B. It changed no research DB,
+  operational DB, `.env`, model, controller, inference process, or device state.
+  Existing stored evaluation reports are not silently rewritten. A separate
+  deployment/re-evaluation scope is needed if this fix must be used on A.
