@@ -980,7 +980,8 @@
             return cache.connection_state === 'connected' && !cache.stale;
         });
         const ready = !!(configState.aiControl.enabled && configState.aiControl.drafts_enabled
-            && configState.aiControl.mutations_enabled && capabilities.drafts_enabled
+            && configState.aiControl.mutations_enabled && configState.aiControl.research_guard_ready
+            && capabilities.drafts_enabled
             && capabilities.mutations_enabled && capabilities.managed_ingress_verified
             && connected && plan && !(plan.blocking_reasons || []).length
             && Date.parse(plan.expires_at) > Date.now()
