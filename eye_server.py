@@ -563,10 +563,19 @@ def get_ai_control_bootstrap_status():
     node_id = os.getenv('AI_CONTROL_NODE_ID', 'jetson-b').strip() or 'jetson-b'
     key_file = os.getenv('AI_CONTROL_API_KEY_FILE', '').strip()
     base_url = os.getenv('AI_CONTROL_BASE_URL', '').strip()
+    research_guard_ready = False
+    try:
+        from utils.research_switch_guard import ResearchSwitchGuard
+        ResearchSwitchGuard.for_admin(os.environ)
+        root = _admin_research_root()
+        research_guard_ready = root.is_absolute() and root.is_dir() and root.stat().st_uid == os.geteuid()
+    except (AIError, OSError):
+        pass
     return {
         'enabled': enabled,
         'drafts_enabled': drafts_enabled,
         'mutations_enabled': mutations_enabled,
+        'research_guard_ready': research_guard_ready,
         'node_id': node_id,
         'credential_configured': bool(key_file),
         'transport': 'https' if base_url.startswith('https://') else (
@@ -584,6 +593,7 @@ def _ai_control_error(exc, status=503):
         'drafts_disabled': '설정 초안 기능이 비활성화되어 있습니다.',
         'active_experiment': '대기 또는 실행 중인 연구 작업이 있어 모델 변경을 막았습니다.',
         'activity_unknown': '추론 또는 관리 작업의 종료를 확인할 수 없어 모델 변경을 막았습니다.',
+        'research_guard_unavailable': '연구 작업 보호 상태를 확인할 수 없어 모델 변경을 막았습니다.',
         'state_changed': '검증 뒤 실제 상태가 바뀌었습니다. 새 계획을 검증해 주세요.',
         'idempotency_conflict': '같은 계획에 다른 적용 요청이 기록돼 있습니다.',
         'submission_unknown': '이전 적용 요청의 접수 여부가 불명확합니다. 새 계획은 시작하지 않습니다.',
@@ -4202,6 +4212,26 @@ def _ai_control_submission_store():
     return OperationSubmissionStore(os.getenv('AI_CONTROL_CLIENT_STATE_DIR', '').strip() or default_dir)
 
 
+def _research_switch_guard():
+    from utils.research_switch_guard import ResearchSwitchGuard
+    return ResearchSwitchGuard.for_admin(os.environ)
+
+
+def _admin_research_root():
+    from pathlib import Path
+    return Path(os.getenv('AI_CONTROL_RESEARCH_ROOT', '').strip())
+
+
+def _resume_research_after_verified_operation(submission, operation, client):
+    if (not submission or submission.get('operation_id') != operation.get('operation_id')
+            or operation.get('state') not in {'succeeded', 'rolled_back', 'cancelled'}):
+        return False
+    from utils.research_switch_guard import safe_to_resume
+    if not safe_to_resume(client.overview(force=True)):
+        return False
+    return _research_switch_guard().resume_for(submission['plan_id'], _admin_research_root())
+
+
 @app.route('/api/admin/ai-control/nodes/<node_id>/operations', methods=['POST'])
 def api_admin_ai_control_operations(node_id):
     csrf_error = require_admin_csrf()
@@ -4214,13 +4244,10 @@ def api_admin_ai_control_operations(node_id):
         return _ai_control_error(AIError('mutations_disabled'), 403)
     try:
         body = request.get_json(silent=True)
-        if os.getenv('AI_EXPERIMENTS_ENABLED', '0') == '1':
-            active = _experiment_store().active_job_summary()
-            if active['total']:
-                return _ai_control_error(AIError('active_experiment'), 409)
         client = client_from_env(dict(os.environ))
         overview = client.overview(force=True)
         body = validate_operation_gate(overview, body)
+        _research_switch_guard().pause_for(body['plan_id'], _admin_research_root())
         store = _ai_control_submission_store()
         result = store.submit(body, lambda payload, key: client.request(
             'POST', '/operations', payload, idempotency_key=key
@@ -4248,9 +4275,11 @@ def api_admin_ai_control_operation_latest(node_id):
             return jsonify({'status': 'ok', 'submission': None}), 200
         if submission['operation_id'] is None:
             return jsonify({'status': 'ok', 'submission': submission}), 200
-        operation = client_from_env(dict(os.environ)).request(
+        client = client_from_env(dict(os.environ))
+        operation = client.request(
             'GET', '/operations/' + submission['operation_id']
         )
+        _resume_research_after_verified_operation(submission, operation, client)
         return jsonify({'status': 'ok', 'submission': submission, 'operation': operation}), 200
     except AIError as exc:
         return _ai_control_error(exc)
@@ -4265,7 +4294,10 @@ def api_admin_ai_control_operation_get(node_id, operation_id):
     if not re.fullmatch(r'[0-9a-f]{32}', operation_id):
         return jsonify({'status': 'error', 'error_code': 'operation_not_found'}), 404
     try:
-        result = client_from_env(dict(os.environ)).request('GET', '/operations/' + operation_id)
+        client = client_from_env(dict(os.environ))
+        result = client.request('GET', '/operations/' + operation_id)
+        submission = _ai_control_submission_store().latest()
+        _resume_research_after_verified_operation(submission, result, client)
         return jsonify({'status': 'ok', 'operation': result}), 200
     except AIError as exc:
         return _ai_control_error(exc)
