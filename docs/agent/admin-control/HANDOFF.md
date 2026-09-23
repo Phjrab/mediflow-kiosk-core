@@ -1,6 +1,6 @@
 # Admin Control Handoff
 
-Latest repository integration: PR #5 merged into `main` as `1da439b` on
+Latest repository integration before this maintenance: PR #7 merged into `main` as `9c1b8e0` on
 2026-09-23. A's latest deployment branch is `e78003d` with the F1 fix and
 gated admin apply code, but its web process remains stopped and A's Admin
 Control mutation flags have not been enabled. B's latest verified controller
@@ -25,10 +25,11 @@ controller, model processes, receipt, generation, or operation history.
 
 ## Final verified device state
 
-- B controller is observed as PID 69967 from release `86bebb6`, loopback-only
-  on 8090. Its separate restart identity file is stale, so exact-owned
-  stop/restart is **not** established for a new maintenance action. Capabilities
-  report drafts false, mutations false, and managed ingress true.
+- B controller is exact-owned PID 94394 from release `86bebb6`, loopback-only
+  on 8090. Its owner-only identity file now matches UID, executable, argv, cwd,
+  boot ID and start tick 17692634. The old PID 47037 identity remains in a
+  mode-0600 backup. Capabilities report drafts false, mutations false, and
+  managed ingress true.
 - B managed ingress remains on network port 8080. Its journal is at generation
   3 with zero active and zero unknown leases, and admission is open. From A,
   only B:8080 is
@@ -253,7 +254,7 @@ ingress generation, or the receipt.
   unknown leases, healthy chat, stopped VLM, a matching seven-field receipt,
   and all 13 existing operation rows. No model or controller transition ran.
 
-## Permanent activation blocked by controller identity
+## Controller identity stop gate and subsequent repair
 
 - B's running controller is PID 69967 from release `86bebb6`, UID 1000,
   `/usr/bin/python3.10`, expected argv and cwd, start tick 9144933. The
@@ -267,3 +268,20 @@ ingress generation, or the receipt.
   draft/mutation flags false. Protected B env, key, and applied-state hashes
   remained unchanged. B mock suites passed 32 Admin Control and 19 MedGemma
   tests. See `CONTROLLER_IDENTITY_RECOVERY.md` before any new write attempt.
+
+- In a separately approved 2026-09-23 maintenance window, the clean pinned B
+  release, live PID 69967, stale PID 47037, process start time, UID, executable,
+  argv, cwd, boot ID and 8090 socket inode ownership were independently
+  verified. The shared-lock no-write preflight passed, as did 8 local repair
+  mock tests and B's 32 Admin Control plus 19 MedGemma mock tests.
+- The exact controller alone was restarted read-only as PID 94394. Its identity
+  file now matches start tick 17692634 and all process identity fields. Old
+  record bytes are preserved in owner-only
+  `controller.pid.before-recovery-69967`. Independent postchecks found healthy
+  `3:3:chat_only`, open admission, zero active/unknown leases, matching receipt,
+  unchanged chat PID 69924, stopped VLM, disabled drafts/mutations and all 13
+  operation rows intact. Env, key, applied-state and operation DB hashes stayed
+  fixed. See `CONTROLLER_IDENTITY_RECOVERY.md` for evidence.
+- Next: any permanent draft/mutation activation remains separate from this
+  repair and requires its own runtime and operational gates. This window made
+  no model or profile transition, inference request, A change, or DB edit.
