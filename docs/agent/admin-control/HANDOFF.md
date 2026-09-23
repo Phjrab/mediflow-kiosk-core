@@ -5,8 +5,9 @@ Authenticated readiness hardening is deployed on Jetson B as clean detached
 release `86bebb6`; `ee7e03e` remains preserved as rollback material. The subsequent
 one-time managed-ingress E2 survey-worker attempt failed before ingress with
 bounded error `misconfigured` because A's deployed client cannot read the
-owner-only VLM key file. A's exact two-file key-file client fix is deployed as
-`f53a1c6`. A second approved window stopped before job creation because an
+owner-only VLM key file. A's exact two-file key-file client fix was deployed as
+`f53a1c6`; A now runs its descendant `265e545` with the explicit research CLI
+environment option. A second approved window stopped before job creation because an
 unauthenticated audit probe could not verify the protected MedGemma readiness
 route. Before C13, B had been recovered to exact
 `1:1:chat_only` with controller drafts and mutations disabled. A new C13 E2
@@ -197,11 +198,17 @@ ingress generation, or the receipt.
   VLM, zero leases, seven-field receipt, disabled drafts/mutations, and all 13
   operation rows remained unchanged. No inference request ran.
 
-## Next local source step
+## Research CLI deployment on A
 
 - On A, the first C13 CLI launch stopped before job claim because the system
   Python lacks `python-dotenv`. The existing worker function then processed the
   queued job exactly once. Local source now offers an explicit `--explicit-env`
   CLI mode for already supplied process settings, with tests for missing
-  `python-dotenv`, an isolated store, and an empty E2 queue. This source change
-  is not deployed to A; the current A deployment remains `f53a1c6`.
+  `python-dotenv`, an isolated store, and an empty E2 queue. Exactly the CLI and
+  its new test were applied to A and pushed as `265e545` on
+  `codex/admin-control-a-deploy`. A's existing project virtualenv passed all
+  15 focused CLI, worker, and survey tests. A's system Python passed the CLI
+  and survey tests but its E0 worker test hit the pre-existing NumPy 2/OpenCV
+  ABI mismatch; no package was changed. Protected file and C11/C12/C13 DB
+  hashes stayed fixed. No E2 run, inference request, or web process restart
+  occurred.

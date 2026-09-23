@@ -846,3 +846,28 @@ fallback, or medical-quality status changed.
 
 No device command, worker, inference request, process change, research data
 change, or medical-quality evaluation was performed for this source update.
+
+### Jetson A exact two-file deployment
+
+- A began clean at `f53a1c6`. Baseline SHA-256 digests for `.env`, both
+  operational DBs, the owner-only VLM key file, and C11/C12/C13 research DBs
+  were captured. The key remained owner-only mode 0600. No web or research
+  worker process was running.
+- Applied only `scripts/run_ai_experiments.py` and
+  `tests/test_run_ai_experiments_cli.py` from the reviewed local change. Patch
+  SHA-256 was
+  `d6971aac86de7712b7096baff9a6bd366f028eb1aea89372a92b68f728b8ebe2`;
+  the two deployed source/test hashes matched the local pushed files.
+- A system Python passed the three new CLI tests and six survey/hybrid tests.
+  One of six experiment-worker tests failed because its E0 path imports the
+  existing OpenCV build against incompatible NumPy 2.2.6. The project’s
+  existing virtualenv then passed all three CLI, six experiment-worker, and six
+  survey/hybrid tests. No package or runtime was changed.
+- Committed exactly those two files on A as `265e545` and pushed
+  `codex/admin-control-a-deploy`. A's local and remote heads matched and its
+  working tree was clean. Post-deployment hashes of `.env`, operational DBs,
+  VLM key, and C11/C12/C13 research DBs matched the baselines.
+
+No E2 job, inference request, model/profile transition, controller mutation,
+web process restart, key/environment/DB/user-data change, or medical-quality
+evaluation occurred during this deployment. B was not changed.

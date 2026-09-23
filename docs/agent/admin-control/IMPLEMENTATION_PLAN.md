@@ -75,4 +75,7 @@ The first C13 CLI invocation exposed a local tooling gap: A's system Python
 lacks `python-dotenv`, so the CLI exited before claiming the queued job. The
 existing worker ran exactly once through a direct invocation. Local source now
 supports an explicit process-environment-only CLI mode and verifies it with
-mock tests. This change is not deployed to A; deployed A remains `f53a1c6`.
+mock tests. The exact two-file CLI/test patch was deployed to A as `265e545`.
+Its existing project virtualenv passed all 15 focused tests; A's system Python
+has a pre-existing NumPy/OpenCV ABI mismatch in the E0 worker test. The change
+did not start a worker or inference request and did not touch B.
