@@ -25,9 +25,10 @@ controller, model processes, receipt, generation, or operation history.
 
 ## Final verified device state
 
-- B controller is exact-owned PID 69967 from release `86bebb6`, loopback-only on
-  8090. Capabilities report drafts false, mutations false, managed ingress true,
-  and no operations.
+- B controller is observed as PID 69967 from release `86bebb6`, loopback-only
+  on 8090. Its separate restart identity file is stale, so exact-owned
+  stop/restart is **not** established for a new maintenance action. Capabilities
+  report drafts false, mutations false, and managed ingress true.
 - B managed ingress remains on network port 8080. Its journal is at generation
   3 with zero active and zero unknown leases, and admission is open. From A,
   only B:8080 is

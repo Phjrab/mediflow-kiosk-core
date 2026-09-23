@@ -917,7 +917,7 @@ evaluation occurred during this deployment. B was not changed.
   importable tests ran with 194 passing and one skip; the two unavailable Mac
   dependency modules remain excluded. Admin page JavaScript syntax and
   `git diff --check` passed. No package was installed.
-- B was audited read-only: exact controller PID 69967 in release `86bebb6`,
+- B was audited read-only: live controller PID 69967 in release `86bebb6`,
   revision/generation 3:3 chat-only, HTTP 200 chat health, open admission,
   raw bypass closed, zero active/unknown leases, seven-field receipt match,
   no active operation, and all 13 operation rows preserved. B's drafts and
