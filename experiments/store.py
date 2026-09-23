@@ -721,10 +721,14 @@ class ExperimentStore:
             return dict(row), True
 
     def claim_next(self, arm_ids: tuple[str, ...] | None = None) -> dict[str, Any] | None:
-        now = utc_now()
-        lease = uuid.uuid4().hex
         if arm_ids is not None and (not arm_ids or any(arm not in ARMS for arm in arm_ids)):
             raise ValueError('invalid arm filter')
+        from utils.research_switch_guard import guarded_claim
+        return guarded_claim(self.db_path, lambda: self._claim_next_unlocked(arm_ids))
+
+    def _claim_next_unlocked(self, arm_ids: tuple[str, ...] | None) -> dict[str, Any] | None:
+        now = utc_now()
+        lease = uuid.uuid4().hex
         with self._connection() as connection:
             connection.execute('BEGIN IMMEDIATE')
             if arm_ids is None:

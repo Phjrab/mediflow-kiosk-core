@@ -2,6 +2,7 @@ import ast
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest import mock
 
 from utils.ai_config import AIError
 
@@ -23,6 +24,7 @@ class AdminAIControlSurfaceTest(unittest.TestCase):
             ),
         )
         store = SimpleNamespace(submit=lambda body, send: send(body, "b" * 32))
+        guard = SimpleNamespace(pause_for=lambda plan_id, root: None)
         namespace = {
             "require_admin_csrf": lambda: None,
             "get_ai_control_bootstrap_status": lambda: {
@@ -34,6 +36,8 @@ class AdminAIControlSurfaceTest(unittest.TestCase):
             "request": SimpleNamespace(get_json=lambda silent: {"plan_id": "c" * 32}),
             "os": SimpleNamespace(getenv=lambda key, default: "0", environ={}),
             "_experiment_store": lambda: SimpleNamespace(active_job_summary=lambda: {"total": 0}),
+            "_research_switch_guard": lambda: guard,
+            "_admin_research_root": lambda: Path("/private/research"),
             "client_from_env": lambda env: client,
             "validate_operation_gate": lambda overview, body: body,
             "_ai_control_submission_store": lambda: store,
@@ -56,16 +60,29 @@ class AdminAIControlSurfaceTest(unittest.TestCase):
         self.assertEqual(calls, [])
 
         route, calls = self.operation_route(
-            os=SimpleNamespace(getenv=lambda key, default: "1", environ={}),
-            _experiment_store=lambda: SimpleNamespace(active_job_summary=lambda: {"total": 1}),
+            _research_switch_guard=lambda: SimpleNamespace(
+                pause_for=lambda plan_id, root: (_ for _ in ()).throw(AIError("active_experiment"))
+            ),
         )
         self.assertEqual(route("jetson-b")[0]["error_code"], "active_experiment")
         self.assertEqual(calls, [])
 
-        route, calls = self.operation_route()
+        route, calls = self.operation_route(
+            _research_switch_guard=lambda: SimpleNamespace(
+                pause_for=lambda plan_id, root: (_ for _ in ()).throw(AIError("research_guard_unavailable"))
+            ),
+        )
+        self.assertEqual(route("jetson-b")[0]["error_code"], "research_guard_unavailable")
+        self.assertEqual(calls, [])
+
+        paused = []
+        route, calls = self.operation_route(_research_switch_guard=lambda: SimpleNamespace(
+            pause_for=lambda plan_id, root: paused.append(plan_id)
+        ))
         response, status = route("jetson-b")
         self.assertEqual(status, 202)
         self.assertEqual(response["operation"]["operation_id"], "a" * 32)
+        self.assertEqual(paused, ["c" * 32])
         self.assertEqual(calls, [("POST", "/operations", {"plan_id": "c" * 32}, "b" * 32)])
 
     def test_admin_routes_preserve_auth_csrf_and_gate_apply(self):
@@ -82,7 +99,7 @@ class AdminAIControlSurfaceTest(unittest.TestCase):
         operation_start = server.index("def api_admin_ai_control_operations")
         operation_body = server[operation_start:server.index("def api_admin_ai_control_operation_latest", operation_start)]
         self.assertIn("mutations_enabled", operation_body)
-        self.assertIn("active_job_summary()", operation_body)
+        self.assertIn("pause_for", operation_body)
         self.assertIn("_ai_control_submission_store", operation_body)
         self.assertIn("validate_operation_gate", operation_body)
         self.assertIn("idempotency_key=key", operation_body)
@@ -95,6 +112,35 @@ class AdminAIControlSurfaceTest(unittest.TestCase):
         self.assertIn("textContent", page)
         self.assertNotIn("AI_CONTROL_API_KEY", page)
         self.assertNotIn("192.168.50.11", page)
+
+    def test_research_pause_releases_only_after_matching_safe_terminal_operation(self):
+        tree = ast.parse(Path("eye_server.py").read_text(encoding="utf-8"))
+        function = next(node for node in tree.body if isinstance(node, ast.FunctionDef)
+                        and node.name == "_resume_research_after_verified_operation")
+        releases = []
+        namespace = {
+            "_research_switch_guard": lambda: SimpleNamespace(
+                resume_for=lambda plan_id, root: releases.append(plan_id) or True
+            ),
+            "_admin_research_root": lambda: Path("/private/research"),
+        }
+        exec(compile(ast.Module(body=[function], type_ignores=[]), "eye_server.py", "exec"), namespace)
+        resume = namespace["_resume_research_after_verified_operation"]
+        submission = {"plan_id": "a" * 32, "operation_id": "b" * 32}
+        client = SimpleNamespace(overview=lambda force: {"fresh": force})
+        with mock.patch("utils.research_switch_guard.safe_to_resume", return_value=True):
+            self.assertFalse(resume(submission, {"operation_id": "b" * 32,
+                                                 "state": "manual_intervention_required"}, client))
+            self.assertFalse(resume(submission, {"operation_id": "c" * 32,
+                                                 "state": "succeeded"}, client))
+            self.assertEqual(releases, [])
+            self.assertTrue(resume(submission, {"operation_id": "b" * 32,
+                                                "state": "succeeded"}, client))
+            self.assertEqual(releases, ["a" * 32])
+        with mock.patch("utils.research_switch_guard.safe_to_resume", return_value=False):
+            self.assertFalse(resume(submission, {"operation_id": "b" * 32,
+                                                 "state": "rolled_back"}, client))
+        self.assertEqual(releases, ["a" * 32])
 
     def test_management_routes_skip_vision_model_initialization(self):
         server = Path("eye_server.py").read_text(encoding="utf-8")
