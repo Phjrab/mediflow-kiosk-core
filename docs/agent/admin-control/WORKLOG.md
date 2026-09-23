@@ -984,3 +984,62 @@ evaluation occurred during this deployment. B was not changed.
   operation rows remain. Env, key, applied-state, receipt and operation DB
   hashes are unchanged. No A change, model switch, inference request, model
   file, CUDA/PyTorch, application DB, user data or medical-quality evaluation.
+
+### 2026-09-23 — A research guard and permanent Admin activation
+
+- Began on clean local `codex/admin-control` at `326c1fe`, A's clean
+  `codex/admin-control-a-deploy` at `e78003d`, and B's clean pinned
+  `86bebb6` release. A web/Kakao were stopped. B was exact-owned read-only PID
+  94394, healthy chat PID 69924, ingress PID 37550, `3:3:chat_only`, open
+  admission, zero active/unknown leases, matching seven-field receipt, stopped
+  VLM, and 13 terminal operation rows. The unrelated A port-8000 benchmark
+  worker was left untouched.
+- Closed the A-side G5 gap: `utils/research_switch_guard.py` supplies an
+  owner-only, durable research claim pause under a shared file lock. The A
+  admin operation route pauses claims and checks all known research DBs before
+  submitting; it resumes only after a terminal operation and fresh, idle,
+  receipt-consistent B state. `ExperimentStore.claim_next` uses the same lock.
+  The admin page requires `research_guard_ready` before enabling Apply.
+  Local focused tests passed 9 guard and 4 admin-route cases; the executable
+  local suite passed 213 tests with one skip. The two remaining Mac imports
+  require the existing `pytorch_grad_cam` and `qrcode` dependencies.
+- Applied the exact six-file guard patch to A without overwriting its older
+  E3-specific source, tested 189 A virtualenv tests, and committed/pushed it
+  as `cc8a822` on `codex/admin-control-a-deploy`. A's operational `.env`, DB,
+  four research DBs, management/VLM keys and read-only Admin config were
+  unchanged. All four research stores had zero queued/running/cancel-requested
+  jobs. Installed a separate owner-only guard directory and a new mode-0600
+  `admin-control-enabled.env`; the original read-only file was retained.
+- Before starting A web, in-memory SQLite schema simulation showed no schema
+  change, and all 263 legacy diagnoses plus 73 surveys had migration records.
+  Started only exact-owned A web PID 3450880 using its existing process manager
+  functions; Kakao remained stopped. `/status` returned 200, the operational
+  DB and `.env` hashes stayed unchanged, and the live process read the separate
+  Admin settings. The A-to-B owner-key tunnel authenticated successfully.
+- Added `scripts/activate_admin_controller.py` with exact PID/boot/argv/cwd/
+  port, chat/ingress/receipt, audit and private-file gates; shared lifecycle
+  lock; pidfd stop; atomic identity backup/update; read-only rollback; and
+  closed admission if rollback fails. Its six local mock tests passed,
+  including no-write preflight and rollback failures. B's 32 Admin Control and
+  19 MedGemma tests passed immediately before the live window. No-write B
+  preflight passed under the shared lock.
+- Restarted only B's exact-owned controller with drafts/mutations enabled as
+  PID 94605/start tick 18127859, still from clean release `86bebb6`. The
+  previous owner record is preserved in mode-0600
+  `controller.pid.before-mutation-94394`; separate enabled config and all keys
+  are mode 0600. Original read-only config, applied state, receipt and operation
+  DB hashes stayed unchanged. B remained `3:3:chat_only` with healthy chat PID
+  69924, ingress PID 37550, open admission, raw bypass closed, zero leases,
+  stopped VLM and the same 13 operation rows (11 succeeded, one rolled back,
+  one reconciled).
+- Live A admin login, `/admin/config`, same-origin authenticated overview, and
+  unchanged-chat draft→plan returned HTTP 200/201/201. The plan had zero
+  blockers and `restart_required=false`. **No operation was submitted**, no
+  profile/model switch or inference request ran, and the A research guard is
+  unpaused. A operational DB, `.env` and all four research DB hashes remain
+  unchanged. No medical-quality evaluation was performed. B has no new boot
+  autostart registration; persistent flags are in the private enabled config
+  and current controller process.
+- Final local discovery ran 221 tests with two pre-existing import errors on
+  this Mac (`pytorch_grad_cam`, `qrcode`). Excluding only those modules, all
+  219 locally importable tests passed with one skip. `git diff --check` passed.

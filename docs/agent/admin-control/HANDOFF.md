@@ -285,3 +285,47 @@ ingress generation, or the receipt.
 - Next: any permanent draft/mutation activation remains separate from this
   repair and requires its own runtime and operational gates. This window made
   no model or profile transition, inference request, A change, or DB edit.
+
+## Current live state after 2026-09-23 Admin activation
+
+- The previous paragraph describes the completed PID-repair window. Permanent
+  activation was done in a later, separate window after installing the A-side
+  research guard. Local work branch `codex/admin-control` contains the guard
+  commit `e5561bd` plus the activation wrapper and evidence recorded in the
+  latest WORKLOG entry. A's deployed, clean branch is
+  `codex/admin-control-a-deploy` at `cc8a822`; B's deployed, clean source
+  release remains `86bebb6`.
+- A web is exact-owned PID **3450880** and healthy on port 5000. The separate
+  mode-0600 `admin-control-enabled.env` enables the Admin surface and points
+  to the owner-only research guard. Kakao on 5001 remains stopped. The A-to-B
+  loopback SSH tunnel and management-key file are intact. A operational `.env`,
+  DB and four research DB hashes remained unchanged; all research stores were
+  idle and the guard pause marker was absent after validation.
+- B controller is exact-owned PID **94605**, start tick **18127859**, from
+  `86bebb6`; both draft and mutation flags are enabled. Its owner record and
+  loopback 8090 socket agree. The earlier read-only record is backed up as
+  owner-only `controller.pid.before-mutation-94394`. B remains controller-
+  authoritative `3:3:chat_only`: healthy chat PID **69924**, ingress PID
+  **37550**, open admission, raw bypass closed, zero active/unknown leases,
+  stopped MedGemma, matching seven-field receipt and **13 preserved operation
+  rows** (11 succeeded, one rolled back, one reconciled). Original owner-only
+  key/read-only environment, applied state, receipt and operation DB file
+  hashes matched their pre-activation values.
+- A live admin login, `/admin/config`, authenticated B overview, and a
+  same-config draft→plan passed with no blockers and no required restart.
+  There was **no operation submission, model transition, E2 rerun or inference
+  request** in this activation. The real Apply path has source/mock coverage
+  and prior B synthetic lifecycle evidence; a new live Apply was deliberately
+  not performed because the approved one-time synthetic transition had already
+  been used. No medical-quality evaluation is claimed.
+- Checks: local activation wrapper 6/6, research guard 9/9, A admin route
+  4/4, local Admin Control 37/37, B Admin Control 32/32, B MedGemma 19/19,
+  A full virtualenv 189/189. Final local discovery ran 221 tests with only
+  the pre-existing Mac-only `pytorch_grad_cam` and `qrcode` import errors;
+  excluding those two modules, 219 tests passed with one skip.
+- Next operational step, if wanted: separately register safe boot autostart
+  for A web/B controller and the tunnel, with exact-owner recovery gates.
+  No autostart registration was changed here. Before any future real Admin
+  Apply, recheck A guard idle/ownership and B exact owner, admission, lease,
+  receipt, audit, and sequential single-model gates. Do not reuse the
+  one-window activation script after its PID/backup preconditions change.
