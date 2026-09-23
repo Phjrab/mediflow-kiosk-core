@@ -12,9 +12,11 @@ class AdminAIControlSurfaceTest(unittest.TestCase):
     def operation_route(**overrides):
         source = Path("eye_server.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
-        function = next(node for node in tree.body if isinstance(node, ast.FunctionDef)
-                        and node.name == "api_admin_ai_control_operations")
-        function.decorator_list = []
+        functions = [node for node in tree.body if isinstance(node, ast.FunctionDef)
+                     and node.name in {"_resume_research_after_rejected_submission",
+                                       "api_admin_ai_control_operations"}]
+        for function in functions:
+            function.decorator_list = []
         calls = []
         client = SimpleNamespace(
             overview=lambda force: {"fresh": force},
@@ -44,7 +46,7 @@ class AdminAIControlSurfaceTest(unittest.TestCase):
             "_ai_control_error": lambda exc, status=503: ({"error_code": exc.code}, status),
         }
         namespace.update(overrides)
-        exec(compile(ast.Module(body=[function], type_ignores=[]), "eye_server.py", "exec"), namespace)
+        exec(compile(ast.Module(body=functions, type_ignores=[]), "eye_server.py", "exec"), namespace)
         return namespace["api_admin_ai_control_operations"], calls
 
     def test_operation_route_fails_closed_before_proxy_and_sends_saved_key(self):
@@ -141,6 +143,46 @@ class AdminAIControlSurfaceTest(unittest.TestCase):
             self.assertFalse(resume(submission, {"operation_id": "b" * 32,
                                                  "state": "rolled_back"}, client))
         self.assertEqual(releases, ["a" * 32])
+
+    def test_definite_rejection_releases_pause_only_with_safe_idle_controller(self):
+        plan_id = "c" * 32
+        resumed = []
+        guard = SimpleNamespace(
+            pause_for=lambda plan, root: None,
+            resume_for=lambda plan, root: resumed.append(plan) or True,
+        )
+        rejected = {"plan_id": plan_id, "operation_id": None,
+                    "submission_rejected": True}
+        store = SimpleNamespace(
+            submit=lambda body, send: (_ for _ in ()).throw(AIError("stale_plan")),
+            latest=lambda: rejected,
+        )
+        client = SimpleNamespace(overview=lambda force: {"fresh": force})
+        route, calls = self.operation_route(
+            _research_switch_guard=lambda: guard,
+            _ai_control_submission_store=lambda: store,
+            client_from_env=lambda env: client,
+        )
+        with mock.patch("utils.research_switch_guard.safe_to_resume", return_value=True):
+            self.assertEqual(route("jetson-b")[0]["error_code"], "stale_plan")
+        self.assertEqual(resumed, [plan_id])
+        self.assertEqual(calls, [])
+
+        resumed.clear()
+        with mock.patch("utils.research_switch_guard.safe_to_resume", return_value=False):
+            self.assertEqual(route("jetson-b")[0]["error_code"], "stale_plan")
+        self.assertEqual(resumed, [])
+
+        for uncertain in (
+            {**rejected, "submission_rejected": False},
+            {**rejected, "operation_id": "d" * 32},
+            {**rejected, "plan_id": "e" * 32},
+        ):
+            store.latest = lambda value=uncertain: value
+            with mock.patch("utils.research_switch_guard.safe_to_resume", return_value=True) as safe:
+                self.assertEqual(route("jetson-b")[0]["error_code"], "stale_plan")
+                safe.assert_not_called()
+            self.assertEqual(resumed, [])
 
     def test_management_routes_skip_vision_model_initialization(self):
         server = Path("eye_server.py").read_text(encoding="utf-8")

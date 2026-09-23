@@ -4232,6 +4232,19 @@ def _resume_research_after_verified_operation(submission, operation, client):
     return _research_switch_guard().resume_for(submission['plan_id'], _admin_research_root())
 
 
+def _resume_research_after_rejected_submission(plan_id, store, client):
+    """Release a pause only after an explicit rejection and fresh idle B state."""
+    submission = store.latest()
+    if (not submission or submission['plan_id'] != plan_id
+            or not submission['submission_rejected']
+            or submission['operation_id'] is not None):
+        return False
+    from utils.research_switch_guard import safe_to_resume
+    if not safe_to_resume(client.overview(force=True)):
+        return False
+    return _research_switch_guard().resume_for(plan_id, _admin_research_root())
+
+
 @app.route('/api/admin/ai-control/nodes/<node_id>/operations', methods=['POST'])
 def api_admin_ai_control_operations(node_id):
     csrf_error = require_admin_csrf()
@@ -4242,18 +4255,29 @@ def api_admin_ai_control_operations(node_id):
         return jsonify({'status': 'error', 'error_code': 'node_not_allowed'}), 404
     if not bootstrap['enabled'] or not bootstrap['drafts_enabled'] or not bootstrap['mutations_enabled']:
         return _ai_control_error(AIError('mutations_disabled'), 403)
+    paused_plan_id = None
+    store = None
+    client = None
     try:
         body = request.get_json(silent=True)
         client = client_from_env(dict(os.environ))
         overview = client.overview(force=True)
         body = validate_operation_gate(overview, body)
         _research_switch_guard().pause_for(body['plan_id'], _admin_research_root())
+        paused_plan_id = body['plan_id']
         store = _ai_control_submission_store()
         result = store.submit(body, lambda payload, key: client.request(
             'POST', '/operations', payload, idempotency_key=key
         ))
         return jsonify({'status': 'ok', 'operation': result}), 202
     except AIError as exc:
+        if paused_plan_id is not None and store is not None and client is not None:
+            try:
+                _resume_research_after_rejected_submission(paused_plan_id, store, client)
+            except Exception:
+                # An uncertain response or failed verification must leave the
+                # durable pause in place; preserve the original request error.
+                pass
         status = 409 if exc.code in ('active_experiment', 'activity_unknown',
                                      'state_changed', 'idempotency_conflict',
                                      'submission_unknown', 'operation_rejected') else (
