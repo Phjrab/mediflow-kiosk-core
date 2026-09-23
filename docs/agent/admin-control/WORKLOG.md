@@ -953,3 +953,34 @@ evaluation occurred during this deployment. B was not changed.
   draft/mutation flags. Hashes of B's controller env, management key, and both
   applied-state files matched the preflight baselines. No model, key, port,
   application DB, user data, or medical-quality state changed.
+
+### 2026-09-23 — separate B controller identity maintenance
+
+- Began with clean local `codex/admin-control` at `da31eb0`. The approved
+  scope was PID ownership repair and a controller-only read-only restart; no
+  draft/mutation enablement or model transition was authorized in this window.
+- B's clean `86bebb6` release, live PID 69967 and stale-record PID 47037 were
+  checked independently. UID 1000, executable `/usr/bin/python3.10`, exact
+  argv/cwd, boot ID, `/proc` start tick 9144933, `ps` start time and socket
+  inode ownership of loopback 8090 matched. The stale PID was absent. Protected
+  file permissions were 0600 and hashes matched baseline.
+- Added the one-window fail-closed recovery tool and eight synthetic mock
+  tests. Local tests passed 8/8; 37 local Admin Control tests passed after the
+  loopback test server was allowed to bind, and `git diff --check` passed.
+  B's existing
+  Admin Control 32/32 and MedGemma 19/19 mock tests passed. A shared-lock,
+  no-write preflight verified authenticated `3:3:chat_only`, healthy chat PID
+  69924, open admission, raw bypass closed, zero active/unknown leases, exact
+  receipt, drafts/mutations false and all 13 operation rows.
+- Under the same shared lock, backed up the old identity bytes to mode-0600
+  `controller.pid.before-recovery-69967`, stopped only exact PID 69967 via
+  pidfd, and restarted the same release read-only as PID 94394. The atomically
+  written identity matches start tick 17692634 and the new process's UID,
+  executable, argv, cwd and boot ID.
+- Independent postcheck: PID 94394 owns loopback 8090 and authenticated state
+  remains healthy `3:3:chat_only`. Ingress is open at generation 3 with zero
+  active/unknown leases; drafts/mutations are false. Chat PID 69924 and ingress
+  PID 37550 are unchanged, MedGemma is stopped, 18081 is closed, and all 13
+  operation rows remain. Env, key, applied-state, receipt and operation DB
+  hashes are unchanged. No A change, model switch, inference request, model
+  file, CUDA/PyTorch, application DB, user data or medical-quality evaluation.
