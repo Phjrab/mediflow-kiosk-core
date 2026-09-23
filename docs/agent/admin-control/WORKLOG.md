@@ -1043,3 +1043,34 @@ evaluation occurred during this deployment. B was not changed.
 - Final local discovery ran 221 tests with two pre-existing import errors on
   this Mac (`pytorch_grad_cam`, `qrcode`). Excluding only those modules, all
   219 locally importable tests passed with one skip. `git diff --check` passed.
+
+### 2026-09-23 — manual-operation policy and rejected submission recovery
+
+- The user chose not to register boot autostart because both Jetsons also host
+  other projects. This is now the intentional manual-operation policy, not a
+  pending activation task. No boot service or scheduler was changed.
+- Source audit found that A paused research claims before an Admin operation,
+  but a definite B rejection could leave the pause marker behind without an
+  operation ID. Added a narrow release path: the owner-only submission record
+  must show the same plan as explicitly rejected, and a fresh B overview must
+  pass the existing idle/receipt gate. Timeout, pending, mismatch, accepted
+  operation and drift paths remain fail-closed. Added route regression cases.
+- Started from local clean `codex/admin-control` at `6ff739a` and A clean
+  `codex/admin-control-a-deploy` at `cc8a822`. Local focused admin surface
+  5/5, research guard 9/9, client 7/7 and `git diff --check` passed. An exact
+  two-file patch (`eye_server.py`, `tests/test_admin_ai_control_surface.py`)
+  passed `git apply --check` against A without overwriting A-specific code.
+- A preflight verified exact-owned web PID 3450880, idle guard and four research
+  stores, healthy B `3:3:chat_only` with open admission/zero leases and enabled
+  mutations, plus unchanged A `.env`/operational DB hashes and mode-0600 Admin
+  files. After applying only the two-file patch, A's focused 5+9+7 tests and
+  complete **190-test virtualenv suite** passed.
+- Restarted only exact-owned A web as PID **3510110**. Health and authenticated
+  Admin overview passed HTTP 200; the A DB hash remained unchanged, research
+  pause stayed clear, Kakao remained stopped, and B was neither restarted nor
+  sent an inference or operation request. Committed/pushed A as **`9cc410a`**.
+  All four A research DB hashes were reconfirmed unchanged. The complete
+  locally importable suite passed **220 tests** with one skip; the same two
+  pre-existing Mac import gaps remain. `git diff --check` passed. No model,
+  key, environment file, operational/research DB or user data was modified,
+  and no medical-quality evaluation was performed.

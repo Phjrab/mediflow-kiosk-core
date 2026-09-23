@@ -3,12 +3,17 @@
 | Phase | Scope | Status |
 |---|---|---|
 | C0 | Current source/device baseline, authority and trust boundary, gate list | DONE / DEVICE_READ_ONLY |
-| C1 | Authenticated B state/capabilities/models/current/events, pure process observation, cached telemetry | DEVICE_READ_ONLY |
-| C2 | Separate A management client, same-origin admin proxy, existing `/admin/config` read UI | DEVICE_READ_ONLY; kiosk process remains stopped |
-| C3 | Versioned local-chat sampling, runtime draft and validation plan, apply disabled | CODE + MOCK |
+| C1 | Authenticated B state/capabilities/models/current/events, pure process observation, cached telemetry | DEVICE_VERIFIED |
+| C2 | Separate A management client, same-origin admin proxy, existing `/admin/config` UI | DEVICE_VERIFIED; A web running |
+| C3 | Versioned local-chat sampling, runtime draft and validation plan | DEVICE_VERIFIED; live A draft→plan passed |
 | C4 | Managed ingress, shared device lock, durable operation, drain/switch/rollback | DEVICE_INGRESS VERIFIED; exact chat recovery verified |
 | C5 | Research queue/run lock and effective B receipt | DONE; C13 E2 worker succeeded with frozen survey and matching receipt |
-| C6 | Read-only deployment then approved device mutation verification | `86bebb6` controller read-only; safe `3:3:chat_only`; admission open at generation 3; permanent mutation activation blocked by stale controller identity record |
+| C6 | Read-only deployment then approved device mutation verification | DEVICE_VERIFIED; B controller drafts/mutations enabled, `3:3:chat_only`, 13 audit rows preserved |
+
+The table above reflects the current 2026-09-23 device state. The chronology
+below records earlier gates and stop conditions; consult `HANDOFF.md` for the
+current exact PIDs and source revisions. Boot autostart is intentionally out of
+scope because the Jetsons are shared with other projects.
 
 The approved C1/C2 bootstrap, C4 managed inference ingress, `ee7e03e`
 MedGemma output/lifecycle release, and `86bebb6` read-only controller are

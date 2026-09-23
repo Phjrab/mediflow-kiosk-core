@@ -295,7 +295,9 @@ ingress generation, or the receipt.
   latest WORKLOG entry. A's deployed, clean branch is
   `codex/admin-control-a-deploy` at `cc8a822`; B's deployed, clean source
   release remains `86bebb6`.
-- A web is exact-owned PID **3450880** and healthy on port 5000. The separate
+- A web was exact-owned PID 3450880 during initial activation. After the
+  verified rejection-recovery patch, it was restarted as exact-owned PID
+  **3510110** and is healthy on port 5000. The separate
   mode-0600 `admin-control-enabled.env` enables the Admin surface and points
   to the owner-only research guard. Kakao on 5001 remains stopped. The A-to-B
   loopback SSH tunnel and management-key file are intact. A operational `.env`,
@@ -320,12 +322,31 @@ ingress generation, or the receipt.
   been used. No medical-quality evaluation is claimed.
 - Checks: local activation wrapper 6/6, research guard 9/9, A admin route
   4/4, local Admin Control 37/37, B Admin Control 32/32, B MedGemma 19/19,
-  A full virtualenv 189/189. Final local discovery ran 221 tests with only
+  A full virtualenv 189/189 at activation. Final local discovery ran 221 tests with only
   the pre-existing Mac-only `pytorch_grad_cam` and `qrcode` import errors;
   excluding those two modules, 219 tests passed with one skip.
-- Next operational step, if wanted: separately register safe boot autostart
-  for A web/B controller and the tunnel, with exact-owner recovery gates.
-  No autostart registration was changed here. Before any future real Admin
-  Apply, recheck A guard idle/ownership and B exact owner, admission, lease,
-  receipt, audit, and sequential single-model gates. Do not reuse the
-  one-window activation script after its PID/backup preconditions change.
+- **Manual operation policy:** the user declined boot autostart because both
+  Jetsons host other projects. No autostart registration is pending or desired.
+  Before any future real Admin Apply, recheck A guard idle/ownership and B
+  exact owner, admission, lease, receipt, audit, and sequential single-model
+  gates. Do not reuse the one-window activation script after its PID/backup
+  preconditions change.
+
+## Rejected operation submission recovery (later 2026-09-23)
+
+- An explicit B rejection could leave A's durable research pause set even
+  though no operation had been accepted. A now removes that pause only when its
+  owner-only submission journal records the **same plan** as rejected with no
+  operation ID, and a fresh B overview is idle, healthy and receipt-consistent.
+  Timeouts, pending/uncertain submissions, a different plan, an operation ID,
+  or controller drift keep the pause in place. No live operation was submitted
+  to test this; the route and guard behavior were covered by mock tests.
+- A's clean deployed branch is now `codex/admin-control-a-deploy` at
+  **`9cc410a`**. Its virtualenv passed all **190** tests after the two-file
+  patch. Only exact-owned A web was restarted to PID **3510110**; authenticated
+  Admin overview returned HTTP 200, B still reported `3:3:chat_only` and
+  mutations enabled, the guard remained unpaused, and A's operational DB and
+  `.env` and four research DB hashes were unchanged. The local executable suite
+  passed **220 tests** with one skip (same two Mac import gaps). B
+  controller/model/ingress were not restarted or mutated. Boot autostart
+  remains intentionally disabled.
