@@ -9,6 +9,7 @@ import ipaddress
 import json
 import os
 from pathlib import Path
+import re
 import ssl
 import threading
 import time
@@ -109,9 +110,16 @@ class AIControlClient:
             timeout=min(self.config.connect_timeout, self.config.deadline),
         )
 
-    def request(self, method: str, suffix: str, payload: Any = None) -> dict[str, Any]:
+    def request(self, method: str, suffix: str, payload: Any = None,
+                *, idempotency_key: str | None = None) -> dict[str, Any]:
         if method not in {"GET", "POST"} or not suffix.startswith("/") or "//" in suffix:
             raise AIError("misconfigured")
+        if (idempotency_key is not None and (
+                method != "POST" or suffix != "/operations"
+                or not re.fullmatch(r"[0-9a-f]{32}", idempotency_key))):
+            raise AIError("invalid_idempotency_key")
+        if method == "POST" and suffix == "/operations" and idempotency_key is None:
+            raise AIError("invalid_idempotency_key")
         body = None
         if payload is not None:
             try:
@@ -129,11 +137,14 @@ class AIControlClient:
                 raise AIError("controller_unreachable")
             if connection.sock:
                 connection.sock.settimeout(min(self.config.read_timeout, remaining))
-            connection.request(method, self.config.path + suffix, body=body, headers={
+            headers = {
                 "Authorization": "Bearer " + self.config.token,
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-            })
+            }
+            if idempotency_key is not None:
+                headers["Idempotency-Key"] = idempotency_key
+            connection.request(method, self.config.path + suffix, body=body, headers=headers)
             response = connection.getresponse()
             raw = response.read(1024 * 1024 + 1)
             if len(raw) > 1024 * 1024:

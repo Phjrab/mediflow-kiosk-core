@@ -225,7 +225,21 @@ ingress generation, or the receipt.
   tests pass. E3/E4 and experiment-store tests also pass. Of 189 locally
   importable tests, 188 pass and one is skipped. The other two test modules
   cannot import because this Mac Python lacks `pytorch_grad_cam` and `qrcode`.
-- This commit has **not** been deployed to A or B. It changed no research DB,
-  operational DB, `.env`, model, controller, inference process, or device state.
-  Existing stored evaluation reports are not silently rewritten. A separate
-  deployment/re-evaluation scope is needed if this fix must be used on A.
+- The exact two-file fix is deployed on A as `a8257f9`, with 173 virtualenv
+  tests passing and protected file/DB hashes unchanged. It is not deployed to
+  B, which does not run the evaluator. Existing stored evaluation reports were
+  not rewritten. See `A_F1_EVALUATOR_MIGRATION.md` for the gate and result.
+
+## A admin apply source under review
+
+- A's `/admin/config` source now has a gated apply action and an owner-only
+  client submission journal. A records the plan and idempotency key before
+  forwarding; an uncertain response blocks a new plan. Browser refresh can
+  resume known operation status without starting another model transition.
+- This code is local to the work branch pending full review and A deployment.
+  Its focused route/client tests and 195 locally importable tests passed (one
+  skipped); the admin page's inline JavaScript passed syntax check. A and B
+  remain read-only for Admin Control; B drafts/mutations remain off.
+- A read-only B audit still showed `3:3:chat_only`, open admission, no active or
+  unknown leases, healthy chat, stopped VLM, a matching seven-field receipt,
+  and all 13 existing operation rows. No model or controller transition ran.

@@ -889,3 +889,36 @@ evaluation occurred during this deployment. B was not changed.
   DB or `.env` edit, model execution, inference request, or medical-quality
   evaluation accompanied this fix. A remains at deployed `265e545` and B at
   last verified release `86bebb6`; the F1 commit is source-only.
+
+### F1 evaluator deployment on A
+
+- With separate authorization, deployed the reviewed two-file patch to clean
+  A `265e545`. Patch SHA-256 was
+  `857f8b1174412884d49f145f00feeb016bfe48a56bb87bb37c061c4ddb977e80`.
+  Source and test hashes matched the local branch after application.
+- A's existing virtualenv passed 10 evaluation, five focused F1, 12 store,
+  five E3, six survey/hybrid, and all 173 discovered tests. Protected `.env`,
+  operational DB, VLM key, and four research DB hashes were unchanged, and the
+  VLM key remained mode 0600.
+- Committed and pushed only `experiments/evaluate.py` and
+  `tests/test_experiment_evaluate.py` on A as `a8257f9`. No existing report,
+  inference request, job, web process, B service, model, or user data changed.
+
+### Admin apply path preparation
+
+- Added a local A-side operation submission journal and bounded client
+  idempotency header. The new route requires admin CSRF, both A/B capability
+  flags, fresh authenticated B state, no active experiment, zero active/unknown
+  ingress leases, open admission, and matching runtime receipt/revisions.
+- The existing `/admin/config` now presents explicit plan confirmation and
+  operation polling only when the server gates allow it. Unknown submission
+  outcomes are retained and block new plans instead of silently retrying.
+- Focused client, submission, and route tests passed. All 195 locally
+  importable tests ran with 194 passing and one skip; the two unavailable Mac
+  dependency modules remain excluded. Admin page JavaScript syntax and
+  `git diff --check` passed. No package was installed.
+- B was audited read-only: exact controller PID 69967 in release `86bebb6`,
+  revision/generation 3:3 chat-only, HTTP 200 chat health, open admission,
+  raw bypass closed, zero active/unknown leases, seven-field receipt match,
+  no active operation, and all 13 operation rows preserved. B's drafts and
+  mutations remained false. No B write was performed in this preparation.
