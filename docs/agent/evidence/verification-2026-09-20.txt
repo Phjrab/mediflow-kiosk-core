@@ -1,0 +1,235 @@
+Verification date: 2026-09-20 Asia/Seoul
+Repository: /Users/hajoonpark/자율설계/mediflow-kiosk-core
+Branch: codex/local-ai-shadow-experiments
+
+PASS 19 tests: tests/test_ai_clients.py (loopback HTTP mock)
+PASS 21 tests: tests/test_experiment_*.py
+PASS 5 tests: tests/test_operational_import.py
+PASS 3 tests: tests/test_medgemma_service.py
+PASS 4 tests: tests/test_gradcam_policy.py
+PASS 5 tests: tests/test_chat_prompt.py
+PASS 4 tests: tests/test_jetson_deployment_scripts.py
+PASS 5 tests: tests/test_jetson_ai_compat.py
+PASS 5 tests: tests/test_result_explanation.py
+PASS 4 tests: tests/test_retention_purge.py
+PASS AST parse: 65 Python files
+PASS JSON parse: 3 JSON files
+PASS git diff --check
+PASS credential literal scan for supplied device login/password strings
+
+FULL DISCOVERY: 101 attempted; 98 passed; 1 skipped (Linux /proc); 2 errors from
+development-host dependencies that were already absent at baseline:
+pytorch_grad_cam and qrcode.
+
+LOCAL PREFLIGHT: OVERALL NOT READY on macOS arm64 because CUDA is unavailable.
+No cloud request was made. This is host evidence, not a deployment result.
+
+EARLIER HARDWARE READ-ONLY RECHECK: L4T R36.5.2, cuda-toolkit-12-6 12.6.11, PyTorch
+2.11.0+cu130, torch CUDA 13.0, CUDA unavailable (driver level 12060). NVIDIA's
+official JetPack 6.2.2 and PyTorch compatibility material confirms the stack
+families do not match. B remains BLOCKED_COMPATIBILITY. No remote change was
+made during that earlier check. The later independent llama.cpp verification is
+recorded below. Medical evaluation remains BLOCKED_DATA.
+
+RETENTION PURGE: four temporary-store tests deleted only expired research copies,
+including ROI, Grad-CAM, jobs, predictions, E3 explanations, labels, and the
+operational_import audit link. They verified shared runs, nonexpired samples,
+unrelated audits, the mock operational DB/source, and active jobs were preserved
+or blocked as specified; SQLite VACUUM completed. No device or real-data purge ran.
+
+IMMUTABLE CANDIDATE METADATA
+- config/ai_artifact_candidates.json: JSON parse PASS
+- NVIDIA PyTorch 25.05-py3-igpu registry manifest digest pinned; NOT_PULLED
+- llama.cpp v0.4.1 commit pinned; later BUILT_AND_VERIFIED_ON_B
+- Qwen2.5 3B Q4_K_M revision/size/SHA-256 pinned; later VERIFIED_ON_B
+- MedGemma 1.5 4B revision/two weight sizes/SHA-256 pinned; gated files
+  NOT_DOWNLOADED; BF16 path BLOCKED_MEMORY pending device proof
+- artifact verifier/launcher unit tests: 5 passed
+- full discovery after this addition: 106 attempted, 103 passed, 1 Linux-only
+  skip, 2 unchanged dependency import errors (pytorch_grad_cam, qrcode)
+- AST parse: 68 Python files; pinned JSON parse: 3; git diff --check: PASS
+- .env diff: empty
+- Ollama 0.32.15 arm64 and medgemma1.5:4b Q4_K_M registry digests pinned as
+  NOT_PULLED/BLOCKED_PROVENANCE; no inference claim
+
+GENERAL LLM DEVICE VERIFICATION (2026-09-20 22:49 KST)
+- B source: llama.cpp commit 391fac16460f15233a7740550d858ac96df3419d
+- B build: Linux aarch64, CUDA 12.6, CMAKE_CUDA_ARCHITECTURES=87,
+  GGML_CUDA_FA=OFF; CUDA0 Orin 7607 MiB detected
+- Model: Qwen2.5 3B Instruct GGUF Q4_K_M, 2,104,932,768 bytes,
+  SHA-256 626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d
+- Offline repository verifier on B: VERIFIED
+- API: health 200; unauthenticated models 401; authenticated models 200
+- B local chat: exact MEDIFLOW_LOCAL_OK, 0.699027 seconds, 14.20 output tokens/s
+- A-to-B direct chat: exact MEDIFLOW_A_TO_B_OK, 0.552613 seconds
+- A repository client: PASS, 469.4 ms; after verified-launcher restart: PASS,
+  699.9 ms
+- A isolated staging route: status 200 configured/local; chat 200 local with
+  exact MEDIFLOW_API_ROUTE_OK; baseline models_initialized remained False
+- B after restart: server RSS 2,887,312 KiB; 2.9 GiB memory available; 443 MiB
+  swap used
+- A operational checkout: clean main; `.env`, DB, model files and user data not
+  modified. Staging lives outside the operational checkout.
+- Limits at this stage: manual nohup process only; no boot persistence,
+  concurrency/soak/OOM recovery, real-data experiment, medical quality
+  assessment, or actual retention purge. The later synthetic probe below
+  supersedes only the MedGemma/image NOT_RUN items.
+
+FINAL LOCAL VERIFICATION AFTER DEVICE-INTEGRATION CHANGES
+- PASS 21 tests: tests/test_ai_clients.py locally
+- PASS 21 tests: tests/test_ai_clients.py on A staging
+- PASS 5 tests: tests/test_artifact_manifest.py locally and on A staging
+- FULL DISCOVERY: 108 attempted; 105 passed; 1 Linux-only skip; 2 unchanged
+  development-host import errors (`pytorch_grad_cam`, `qrcode`)
+- PASS AST parse: 68 Python files
+- PASS JSON parse: 3 pinned JSON files
+- PASS bash syntax: scripts/run_local_llm_candidate.sh
+- PASS git diff --check
+- PASS `.env` diff empty
+
+
+MEDGEMMA SYNTHETIC HARDWARE PROBE (2026-09-20 23:14 KST)
+- General llama.cpp server stopped before VLM start; port 8080 confirmed closed.
+- Ollama image pulled by pinned multiarch digest; selected os=linux, arch=arm64;
+  API version 0.32.15.
+- CUDA discovery: Orin, CUDA driver 12.6, compute 8.7, 7.4 GiB total.
+- medgemma1.5:4b API details: GGUF, Gemma 3 family, 4.3B, Q4_K_M,
+  capabilities completion+vision, image size 896.
+- Model layer: 3,338,928,384 bytes; SHA-256
+  a051c2bd4ab8d5b7f4df8eec344f2fdd603efb2d098da799dc16c95e9e8bc838 PASS.
+- Serving manifest: SHA-256
+  433252621ab154668b5d8be6aff6c1b771bacba045e46e6193da8d6ad1630f2c PASS.
+- Synthetic fixtures only: solid-red.png -> exact `red`; solid-blue.png -> exact
+  `blue`. Cold elapsed 20.605 s (load 14.946 s); warm elapsed 5.456 s.
+- Runtime log: 34/35 model layers offloaded to CUDA; CUDA model buffer
+  2309.91 MiB; image batches decoded on both requests.
+- Container memory after requests: 4.897 GiB / 7.429 GiB; host available memory
+  about 1.1 GiB; swap used 911 MiB. No concurrency, soak, or OOM test.
+- Probe container stopped and removed. Pinned general LLM restarted; B health OK;
+  A repository client PASS in 906.5 ms; subsequent direct assertion confirmed exact MEDIFLOW_POST_VLM_EXACT_OK.
+- Status: HARDWARE_PROBE_VERIFIED_BLOCKED_PROVENANCE. This is not an E1 model
+  approval or medical-quality result. No real image/data and no purge operation.
+
+FAILURE-BOUNDARY DEVICE TESTS
+- Invalid A key: `/api/chat` HTTP 503 with unauthorized; baseline models stayed
+  uninitialized.
+- B local LLM stopped: A client failed with connection_failed even when dummy
+  OpenAI and Gemini keys were present; exit status 1; no cloud fallback.
+- Verified launcher restart and post-VLM restart both restored A-to-B generation.
+
+
+JETSON A OPERATIONAL LOCAL-LLM PROMOTION (2026-09-20 23:40 KST)
+- Before: clean main at f5368550230e37238c7a7930e6b39c4e0ec11cde; no matching
+  running kiosk process/service.
+- Scope: minimal P1/P2 chat overlay only; no research/VLM service or experiment
+  routes copied to the operational checkout.
+- Recovery: branch backup/pre-local-llm-20260920-2335 and private backup directory
+  with mode-0600 env.before, env SHA-256, base commit, tracked-file archive.
+- Candidate: 15 tests PASS on macOS and A operational virtualenv; exact
+  MEDIFLOW_OPERATIONAL_CANDIDATE_OK; invalid key -> HTTP 503 unauthorized;
+  models_initialized=False.
+- Operational tree: 15 tests PASS; Python compile PASS; git diff --check PASS;
+  status configured/local; exact MEDIFLOW_OPERATIONAL_DEPLOY_OK;
+  models_initialized=False. Test DB path was outside the operational DB.
+- .env remains owned by the service user and mode 0600. Only AI selector,
+  endpoint/model/key-file path, bounds, allowlist and chat-only profile were
+  atomically updated. Existing cloud settings were not removed.
+- Outage boundary: with B LLM stopped and dummy OpenAI/Gemini keys present, A
+  operational smoke failed connection_failed, exit 1; no cloud fallback.
+- Recovery: exact pinned B launcher restarted, health OK; A direct assertion
+  exact MEDIFLOW_OPERATIONAL_RECOVERY_OK.
+- No kiosk daemon was running before the change, so none was started. Operational
+  DB, models, user assets, HASH_PEPPER, CUDA/PyTorch, real data and purge state
+  were not modified.
+
+- Deployment tracking: A branch codex/local-llm-operational, commit
+  dd3afd7b0a4297a918a1d346d29f397173528d7e, clean working tree, not pushed.
+
+
+APPROVED TEMPORARY DEPLOYMENT CLEANUP
+- Removed only the task-created local deployment clone/archive and A staging
+  operational-candidate directory/archive.
+- Verified the four approved targets are absent.
+- Verified local source repository, A existing staging/kiosk-core, operational
+  branch, recovery branch, and private recovery backup are preserved.
+- No operational data, model, configuration, credential, B artifact or service
+  process was deleted.
+
+
+JETSON A UPSTREAM RECONCILIATION (2026-09-21 KST)
+- origin/main fetched: f536855 -> 2877e65.
+- Pre-rebase deployment preserved at backup/local-llm-pre-rebase-20260920.
+- codex/local-llm-operational rebased without conflict; new commit
+  f4f0972c9a565ca49bfb5b11f44792f8f962c75f; clean tree; not pushed.
+- origin/main ancestor check: PASS.
+- PASS 15 local-LLM deployment tests.
+- Initial Naver pytest collection was blocked by auto-loaded ROS launch_testing
+  requiring absent lark. With PYTEST_DISABLE_PLUGIN_AUTOLOAD=1: PASS 1 test.
+- PASS bash syntax for start_services.sh.
+- Operational route: configured/local, HTTP 200, exact MEDIFLOW_REBASE_OK,
+  models_initialized=False.
+- mediflow-kiosk status remained stopped; no service, data or runtime mutation.
+
+
+
+JETSON B MANUAL LIFECYCLE HARDENING (2026-09-21 KST)
+- Added manual-only local_llm_service.py; no systemd, cron, desktop autostart,
+  artifact acquisition, broad PID matching, or GPU/runtime modification.
+- PASS 6 lifecycle safety mock tests.
+- PASS existing AI client 21, artifact manifest 5, Jetson deployment 4.
+- PASS Python compile, launcher bash syntax, git diff --check.
+- Deployed manager only to B private control tree; remote Python compile PASS;
+  file mode 0755, state lock mode 0600.
+- Non-disruptive status: existing port-8080 PID 2686054 classified as unmanaged;
+  manager PID JSON absent; no signal/restart/cutover performed.
+- Pending: explicit approval for brief interruption, then verified one-time
+  legacy-process stop, managed start, B health and A-to-B exact recovery check.
+
+
+
+JETSON B MANAGED-MANUAL CUTOVER (2026-09-21 KST)
+- Legacy identity exact match: PID 2686054, uid 1000, pinned llama-server,
+  reviewed full argv, control-repository cwd. SIGTERM exit PASS; port closed;
+  legacy PID record preserved mode 0600; no SIGKILL/broad match.
+- Managed start PASS. Initial PID 2734375, health ready, PID JSON/log mode 0600.
+- Authentication boundary: unauthenticated /v1/models HTTP 401; protected-key
+  request HTTP 200. A-to-B exact generation: MEDIFLOW_MANAGED_OK PASS.
+- Managed stop/status PASS; port 8080 closed.
+- A outage boundary with dummy cloud keys: connection_failed, exit 1,
+  NO_CLOUD_FALLBACK_BOUNDARY_OK.
+- Managed recovery PASS under PID 2738092; health ready; A-to-B exact generation
+  MEDIFLOW_MANAGED_OK PASS.
+- A kiosk status after recovery: eye_server stopped, kakao_app stopped (unchanged).
+- No autostart, data/config/runtime-stack mutation, real-data purge, or medical
+  quality evaluation.
+
+
+
+POST-LIFECYCLE FULL VERIFICATION (2026-09-21 KST)
+- unittest discovery: 114 attempted; 111 pass; 1 Linux-only skip; 2 unchanged
+  macOS dependency import errors (pytorch_grad_cam, qrcode).
+- AST parse: 70 Python files PASS. JSON parse: 3 pinned files PASS.
+- git diff --check PASS. `.env` diff empty.
+- Credential-pattern scan: supplied device passwords and common API token
+  prefixes absent; numeric 1234 matches are existing example phone numbers.
+- PROJECT_CONTEXT patch-marker cleanup and managed-state reconciliation PASS.
+
+
+
+OFFICIAL MEDGEMMA ACCESS PROBE (2026-09-21 KST)
+- B protected Hugging Face token: present, owner jetson2, mode 0600; value not read
+  into logs. huggingface_hub installed; official MedGemma local cache absent.
+- Authenticated revision API HTTP 200; exact pinned SHA match PASS.
+- Metadata: gated=auto, userAccessRequestStatus absent.
+- Pinned config HEAD HTTP 403; no-body one-byte range GET HTTP 403.
+- Decision: BLOCKED_ACCESS_TERMS. No response body/model file persisted and no
+  package/runtime/service mutation; managed general LLM stayed ready.
+
+
+
+B CAPACITY / NVIDIA CONTAINER PREFLIGHT (2026-09-21 KST)
+- Root filesystem: 227 GiB total, 73 GiB used, 143 GiB available, 34% use.
+- /home/jetson2/mediflow-ai: 5.7 GiB; Hugging Face cache: 25 MiB.
+- Pinned NVIDIA 25.05 arm64 digest manifest: 63 layers, 4,975,299,603
+  compressed bytes (4.634 GiB). Manifest-only inspection; image NOT pulled.
+- Managed general LLM remained ready; no package/model/runtime mutation.

@@ -1,0 +1,12 @@
+{
+  "origin_model": "Qwen/Qwen2.5-3B-Instruct-GGUF",
+  "revision": "7dabda4d13d513e3e842b20f0d435c732f172cbe",
+  "runtime": "llama.cpp-v0.4.1-391fac16460f15233a7740550d858ac96df3419d",
+  "serving_alias": "qwen2.5-3b-instruct-q4-k-m",
+  "dtype": "quantized",
+  "quantization": "Q4_K_M",
+  "weights_sha256": {
+    "qwen2.5-3b-instruct-q4_k_m.gguf": "626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d"
+  },
+  "verification_status": "METADATA_PINNED_FILE_NOT_PRESENT"
+}

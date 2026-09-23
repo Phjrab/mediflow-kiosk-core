@@ -1,0 +1,12 @@
+{
+  "origin_model": "google/medgemma-1.5-4b-it",
+  "revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+  "runtime": "nvcr.io/nvidia/pytorch:25.05-py3-igpu@sha256:774bbc5cbedfd5d432129e2ae79a7f6de6f267afa8e1f4b3b44dead00f790c79",
+  "dtype": "bfloat16",
+  "quantization": "none",
+  "weights_sha256": {
+    "model-00001-of-00002.safetensors": "5e4c75b0ef1fb009caee567ab244f9e354e915fda748d1b76179cc453a39b4b5",
+    "model-00002-of-00002.safetensors": "958e39df78c35ddb812fbcb8b5e7f46e07f1b153c1589f2d3f0b41c3b0748d30"
+  },
+  "verification_status": "SOURCE_FILES_VERIFIED_BF16_FULL_CUDA_BLOCKED_MEMORY_JETSON_B_2026-09-21"
+}

@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "status": "PASSED_SYNTHETIC_E0_E1_E2_E3_E4_DEVICE_INTEGRATION",
+  "medical_or_user_data": false,
+  "sample_id": "db499b44bf3641b7996d0d150eeb556a",
+  "fixture_sha256": "c452c48c7fa7008353f2813458c625ea62780856ece758c756829545504c7e04",
+  "jobs": {
+    "e0": "succeeded",
+    "e1": "succeeded",
+    "e2": "succeeded",
+    "e3": "succeeded",
+    "e4": "succeeded"
+  },
+  "evaluations": {
+    "e0": {
+      "run_id": "85e55a87340a435d9595dcdd66bfe9d1",
+      "arm_id": "E0_baseline",
+      "N_attempted": 1,
+      "job_states": {
+        "succeeded": 1
+      },
+      "analysis_states": {
+        "assessed": 1
+      },
+      "technical_failures": 0,
+      "engineering_fixture": true,
+      "clinical_metrics": null,
+      "N_labelled": 0,
+      "evaluation_status": "NO_REFERENCE_LABELS"
+    },
+    "e1": {
+      "run_id": "dba9376f4dfa440cb56fc34d4ac02594",
+      "arm_id": "E1_vlm_image",
+      "N_attempted": 1,
+      "job_states": {
+        "succeeded": 1
+      },
+      "analysis_states": {
+        "abstain": 1
+      },
+      "technical_failures": 0,
+      "engineering_fixture": true,
+      "clinical_metrics": null,
+      "N_labelled": 0,
+      "evaluation_status": "NO_REFERENCE_LABELS"
+    },
+    "e2": {
+      "run_id": "dd10e9b5af2d45aa9fc21f1918883547",
+      "arm_id": "E2_vlm_survey",
+      "N_attempted": 1,
+      "job_states": {
+        "succeeded": 1
+      },
+      "analysis_states": {
+        "abstain": 1
+      },
+      "technical_failures": 0,
+      "engineering_fixture": true,
+      "clinical_metrics": null,
+      "N_labelled": 0,
+      "evaluation_status": "NO_REFERENCE_LABELS"
+    },
+    "e3": {
+      "run_id": "7f16d593c4f44ff29fa9a347a17a7f8c",
+      "arm_id": "E3_result_explanation",
+      "N_attempted": 1,
+      "job_states": {
+        "succeeded": 1
+      },
+      "analysis_states": {},
+      "technical_failures": 0,
+      "engineering_fixture": true,
+      "clinical_metrics": null,
+      "N_labelled": 0,
+      "N_explanations": 1,
+      "evaluation_status": "EXPLANATION_REVIEW_REQUIRED",
+      "explanation_is_classification_metric": false
+    },
+    "e4": {
+      "run_id": "3d3bfb5b91ef42cba6bc2b7122b0b751",
+      "arm_id": "E4_hybrid_review",
+      "N_attempted": 1,
+      "job_states": {
+        "succeeded": 1
+      },
+      "analysis_states": {},
+      "technical_failures": 0,
+      "engineering_fixture": true,
+      "clinical_metrics": null,
+      "N_labelled": 0,
+      "N_reviews": 1,
+      "review_outcomes": {
+        "not_comparable": 1
+      },
+      "N_manual_review_required": 1,
+      "evaluation_status": "HYBRID_REVIEW_ONLY",
+      "hybrid_review_is_classification_metric": false,
+      "agreement_is_accuracy": false
+    }
+  },
+  "comparison": {
+    "left_run_id": "85e55a87340a435d9595dcdd66bfe9d1",
+    "right_run_id": "dba9376f4dfa440cb56fc34d4ac02594",
+    "N_left_attempted": 1,
+    "N_right_attempted": 1,
+    "N_paired_attempted": 1,
+    "N_paired_assessed": 0,
+    "agreement_rate_paired_assessed": null,
+    "agreement_is_accuracy": false
+  },
+  "gradcam_saved": true,
+  "limitations": [
+    "single generated engineering fixture",
+    "no operational or user data",
+    "no medical quality evaluation",
+    "models scheduled sequentially on Jetson B"
+  ]
+}

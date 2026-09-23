@@ -1,0 +1,19 @@
+{
+  "cuda_available": false,
+  "device_count": 0,
+  "device_name": null,
+  "elapsed_seconds": 13.202,
+  "full_cuda_placement": false,
+  "inspection": "offline_local_files_only_synthetic_no_user_data",
+  "model_loaded": false,
+  "platform": "aarch64",
+  "processor_loaded": true,
+  "processor_only": true,
+  "schema_version": 1,
+  "stage": "processor_load",
+  "status": "READY_PROCESSOR",
+  "torch": "2.8.0a0+5228986c39.nv25.05",
+  "torch_cuda": "12.9",
+  "transformers": "4.57.6",
+  "vision_processor_present": true
+}

@@ -1,0 +1,263 @@
+import base64
+import hashlib
+import io
+import json
+import os
+import subprocess
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+
+from PIL import Image
+
+from services.medgemma import app as service
+
+
+def fixture_image() -> str:
+    output = io.BytesIO()
+    Image.new('RGB', (16, 16), (30, 60, 90)).save(output, format='PNG')
+    return base64.b64encode(output.getvalue()).decode('ascii')
+
+
+class MedGemmaServiceContractTest(unittest.TestCase):
+    def setUp(self):
+        self.environment = patch.dict(os.environ, {'MEDGEMMA_API_KEY': 'fixture-token'})
+        self.environment.start()
+        service.runtime.update(
+            backend=None, model=None, processor=None, manifest=None,
+            device_map=None, cli=None,
+        )
+        self.client = service.app.test_client()
+
+    def tearDown(self):
+        service.runtime.update(
+            backend=None, model=None, processor=None, manifest=None,
+            device_map=None, cli=None,
+        )
+        self.environment.stop()
+
+    def headers(self):
+        return {'Authorization': 'Bearer fixture-token'}
+
+    def payload(self, **context):
+        role = service.ROLE_PATH.read_text(encoding='utf-8').strip()
+        return {
+            'model': service.EXPECTED_MODEL_ID,
+            'max_new_tokens': service.MIN_ANALYSIS_NEW_TOKENS,
+            'prompt_digest': hashlib.sha256(role.encode('utf-8')).hexdigest(),
+            'class_mapping': {'3': 'normal'},
+            'context': context,
+            'image': {'mime_type': 'image/png', 'data_base64': fixture_image()},
+        }
+
+    def runtime_expectation(self, **overrides):
+        value = {
+            'node_id': 'jetson-b',
+            'artifact_id': 'fixture-vlm',
+            'artifact_manifest_digest': 'a' * 64,
+            'runtime_revision': 'fixture-runtime',
+            'config_revision': 2,
+            'deployment_generation': 3,
+            'effective_config_digest': 'b' * 64,
+        }
+        value.update(overrides)
+        return value
+
+    def test_readiness_requires_auth_and_loaded_vision_runtime(self):
+        self.assertEqual(self.client.get('/readyz').status_code, 401)
+        response = self.client.get('/readyz', headers=self.headers())
+        self.assertEqual(response.status_code, 503)
+        self.assertFalse(response.get_json()['vision_ready'])
+        self.assertEqual(
+            self.client.post('/v1/analyze-eye', headers=self.headers(), json=self.payload()).status_code,
+            503,
+        )
+
+    def test_prompt_digest_and_forbidden_context_fail_before_generation(self):
+        service.runtime.update(model=object(), processor=object(), device_map=['cuda:0'])
+        wrong_prompt = self.payload()
+        wrong_prompt['prompt_digest'] = '0' * 64
+        self.assertEqual(
+            self.client.post('/v1/analyze-eye', headers=self.headers(), json=wrong_prompt).status_code,
+            400,
+        )
+        self.assertEqual(
+            self.client.post(
+                '/v1/analyze-eye', headers=self.headers(), json=self.payload(prediction='normal')
+            ).status_code,
+            400,
+        )
+
+    def test_runtime_source_requires_local_files_and_cuda(self):
+        source = Path('services/medgemma/app.py').read_text(encoding='utf-8')
+        self.assertGreaterEqual(source.count('local_files_only=True'), 2)
+        self.assertIn("if not torch.cuda.is_available()", source)
+        self.assertIn("non-CUDA model placement rejected", source)
+        self.assertNotIn('force_download=True', source)
+
+    def test_llama_cpp_backend_preserves_custom_api_contract(self):
+        analysis = {
+            'schema_version': '1.0',
+            'analysis_status': 'abstain',
+            'image_quality': {'assessable': False, 'reasons': ['synthetic fixture']},
+            'visual_observations': ['blue square'],
+            'suggested_label': None,
+            'limitations': ['not medical data'],
+            'brief_explanation': 'Synthetic fixture only.',
+        }
+        service.runtime.update(
+            backend='llama_cpp_cli', model='/private/model.gguf',
+            processor='/private/mmproj.gguf', manifest={},
+            device_map=['cuda:0:text', 'cpu:mmproj'], cli='/private/llama-mtmd-cli',
+        )
+        with patch.object(service, '_llama_cpp_generate', return_value=analysis) as generate:
+            response = self.client.post(
+                '/v1/analyze-eye', headers=self.headers(), json=self.payload(source='fixture')
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.get_json()['vision_ingested'])
+        self.assertEqual(response.get_json()['analysis'], analysis)
+        self.assertEqual(generate.call_count, 1)
+
+    def test_runtime_generation_mismatch_is_rejected_before_generation(self):
+        service.runtime.update(
+            backend='llama_cpp_cli', model='/private/model.gguf',
+            processor='/private/mmproj.gguf', manifest={},
+            device_map=['cuda:0:text', 'cpu:mmproj'], cli='/private/llama-mtmd-cli',
+        )
+        payload = self.payload()
+        payload['expected_runtime'] = self.runtime_expectation(deployment_generation=4)
+        runtime_env = {
+            'AI_CONTROL_NODE_ID': 'jetson-b',
+            'AI_CONTROL_ARTIFACT_ID': 'fixture-vlm',
+            'AI_CONTROL_ARTIFACT_MANIFEST_DIGEST': 'a' * 64,
+            'AI_CONTROL_RUNTIME_REVISION': 'fixture-runtime',
+            'AI_CONTROL_CONFIG_REVISION': '2',
+            'AI_CONTROL_DEPLOYMENT_GENERATION': '3',
+            'AI_CONTROL_EFFECTIVE_CONFIG_DIGEST': 'b' * 64,
+        }
+        with patch.dict(os.environ, runtime_env), patch.object(service, '_llama_cpp_generate') as generate:
+            response = self.client.post('/v1/analyze-eye', headers=self.headers(), json=payload)
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.get_json()['status'], 'configuration_drift')
+        generate.assert_not_called()
+
+    def test_generation_budget_below_contract_minimum_is_rejected_before_generation(self):
+        service.runtime.update(
+            backend='llama_cpp_cli', model='/private/model.gguf',
+            processor='/private/mmproj.gguf', manifest={},
+            device_map=['cuda:0:text', 'cpu:mmproj'], cli='/private/llama-mtmd-cli',
+        )
+        payload = self.payload()
+        payload['max_new_tokens'] = service.MIN_ANALYSIS_NEW_TOKENS - 1
+        with patch.object(service, '_llama_cpp_generate') as generate:
+            response = self.client.post('/v1/analyze-eye', headers=self.headers(), json=payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.get_json()['status'], 'invalid_request')
+        generate.assert_not_called()
+
+    def test_llama_cpp_generation_is_offline_bounded_and_removes_temp_image(self):
+        analysis = {'schema_version': '1.0'}
+        observed = {}
+
+        def fake_run(command, **kwargs):
+            image_path = Path(command[command.index('--image') + 1])
+            observed['image_path'] = image_path
+            observed['mode'] = image_path.stat().st_mode & 0o777
+            observed['command'] = command
+            observed['kwargs'] = kwargs
+            return subprocess.CompletedProcess(
+                command, 0, stdout=json.dumps(analysis), stderr=''
+            )
+
+        service.runtime.update(
+            backend='llama_cpp_cli', model='/private/model.gguf',
+            processor='/private/mmproj.gguf', cli='/private/llama-mtmd-cli',
+        )
+        image = Image.new('RGB', (16, 16), (30, 60, 90))
+        with patch.object(service.subprocess, 'run', side_effect=fake_run):
+            result = service._llama_cpp_generate(image, 'fixture prompt', 64)
+        self.assertEqual(result, analysis)
+        self.assertEqual(observed['mode'], 0o600)
+        self.assertFalse(observed['image_path'].exists())
+        self.assertIn('--offline', observed['command'])
+        self.assertIn('--no-mmproj-offload', observed['command'])
+        self.assertIn('--json-schema', observed['command'])
+        self.assertNotIn('--log-disable', observed['command'])
+        self.assertEqual(
+            observed['command'][observed['command'].index('--verbosity') + 1],
+            '0',
+        )
+        self.assertEqual(
+            observed['command'][observed['command'].index('--log-colors') + 1],
+            'off',
+        )
+        self.assertIn('--no-log-prefix', observed['command'])
+        self.assertIn('--no-log-timestamps', observed['command'])
+        self.assertEqual(observed['kwargs']['timeout'], 180)
+        self.assertIs(observed['kwargs']['stdin'], subprocess.DEVNULL)
+
+    def test_llama_cpp_accepts_strict_json_emitted_on_stderr(self):
+        analysis = {'schema_version': '1.0'}
+
+        def fake_run(command, **kwargs):
+            return subprocess.CompletedProcess(
+                command, 0, stdout='', stderr=json.dumps(analysis)
+            )
+
+        service.runtime.update(
+            backend='llama_cpp_cli', model='/private/model.gguf',
+            processor='/private/mmproj.gguf', cli='/private/llama-mtmd-cli',
+        )
+        image = Image.new('RGB', (16, 16), (30, 60, 90))
+        with patch.object(service.subprocess, 'run', side_effect=fake_run):
+            result = service._llama_cpp_generate(image, 'fixture prompt', 64)
+        self.assertEqual(result, analysis)
+
+    def test_process_output_failure_reports_only_bounded_structure(self):
+        secret_text = 'private generated explanation'
+        with self.assertRaises(service.ModelOutputError) as raised:
+            service.runtime.update(
+                backend='llama_cpp_cli', model='/private/model.gguf',
+                processor='/private/mmproj.gguf', cli='/private/llama-mtmd-cli',
+            )
+            image = Image.new('RGB', (16, 16), (30, 60, 90))
+            completed = subprocess.CompletedProcess(
+                [], 0,
+                stdout='prefix {"schema_version":"1.0"} ' + secret_text,
+                stderr=secret_text,
+            )
+            with patch.object(service.subprocess, 'run', return_value=completed):
+                service._llama_cpp_generate(image, 'fixture prompt', 512)
+        self.assertEqual(
+            str(raised.exception),
+            'stdout=trailing_data,stderr=no_object_start',
+        )
+        self.assertNotIn(secret_text, str(raised.exception))
+
+    def test_process_output_structure_accepts_preamble_before_one_object(self):
+        value = {'schema_version': '1.0'}
+        self.assertEqual(
+            service._parse_process_json_output('diagnostic preamble\n' + json.dumps(value), ''),
+            value,
+        )
+
+    def test_invalid_runtime_output_is_not_reported_as_a_client_request_error(self):
+        service.runtime.update(
+            backend='llama_cpp_cli', model='/private/model.gguf',
+            processor='/private/mmproj.gguf', manifest={},
+            device_map=['cuda:0:text', 'cpu:mmproj'], cli='/private/llama-mtmd-cli',
+        )
+        with patch.object(
+            service, '_llama_cpp_generate',
+            side_effect=service.ModelOutputError('invalid_model_output'),
+        ):
+            response = self.client.post(
+                '/v1/analyze-eye', headers=self.headers(), json=self.payload(source='fixture')
+            )
+        self.assertEqual(response.status_code, 502)
+        self.assertEqual(response.get_json()['status'], 'invalid_model_output')
+
+
+if __name__ == '__main__':
+    unittest.main()

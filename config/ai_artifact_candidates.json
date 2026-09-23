@@ -1,0 +1,241 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-21T07:40:00Z",
+  "target": {
+    "host_role": "B_general_llm_or_research_vlm",
+    "architecture": "aarch64",
+    "jetpack": "6.2.2",
+    "l4t": "36.5.2",
+    "cuda": "12.6",
+    "memory_class_gib": 8
+  },
+  "runtime_candidates": {
+    "medgemma_pytorch": {
+      "status": "DEVICE_PULLED_PROCESSOR_VERIFIED_BF16_BLOCKED_MEMORY",
+      "image": "nvcr.io/nvidia/pytorch:25.05-py3-igpu",
+      "manifest_digest": "sha256:774bbc5cbedfd5d432129e2ae79a7f6de6f267afa8e1f4b3b44dead00f790c79",
+      "linux_arm64_digest": "sha256:c7a797978bfcdd5b9046b448c5defa290e7662be0f4c63497599c8428d3d6efb",
+      "pytorch": "2.8.0a0+5228986c39",
+      "nvidia_framework_release": "25.05",
+      "compatibility_basis": "NVIDIA Jetson PyTorch matrix explicitly lists framework container 25.05 for JetPack 6.2",
+      "verification_status": "PROCESSOR_READY_BF16_FULL_CUDA_FAILED_MEMORY_JETSON_B_2026-09-21",
+      "pulled_reference": "nvcr.io/nvidia/pytorch@sha256:c7a797978bfcdd5b9046b448c5defa290e7662be0f4c63497599c8428d3d6efb",
+      "device_report": {
+        "path": "docs/agent/evidence/jetson-b-pytorch-25.05-compat-2026-09-21.json",
+        "sha256": "8bfd31a3ab78bebd56c2afe035bb41fbfbf32fda2ca0bd4ef7795b92a7fa48c2",
+        "inspection": "read_only_no_network_no_model_load",
+        "l4t": "36.5.2",
+        "architecture": "aarch64",
+        "python": "3.12.3",
+        "torch": "2.8.0a0+5228986c39.nv25.05",
+        "torch_cuda": "12.9",
+        "cuda_available": true,
+        "device_count": 1,
+        "device_name": "Orin",
+        "state": "READY_CORE",
+        "model_loaded": false
+      },
+      "model_probe_reports": {
+        "processor": "docs/agent/evidence/medgemma-processor-probe-2026-09-21.json",
+        "bf16_full_cuda": "docs/agent/evidence/medgemma-bf16-model-load-probe-2026-09-21.json"
+      }
+    },
+    "general_llm": {
+      "status": "DEVICE_BUILT",
+      "name": "llama.cpp",
+      "release": "v0.4.1",
+      "revision": "391fac16460f15233a7740550d858ac96df3419d",
+      "build_backend": "CUDA",
+      "verification_status": "DEVICE_VERIFIED_JETSON_B_2026-09-20"
+    },
+    "medgemma_ollama_probe": {
+      "status": "DEVICE_PULLED_HARDWARE_PROBE_VERIFIED_BLOCKED_PROVENANCE",
+      "image": "ollama/ollama:0.32.15",
+      "manifest_digest": "sha256:57d60e686821ea81a7748a3ec8141308c8b8f95b27105713954abf7a6529e700",
+      "linux_arm64_digest": "sha256:d2f17e1e889533c439fac18fc479743d7983cf1dbeac796979d8d9c63b89873b",
+      "jetson_selector": "JETSON_JETPACK=6",
+      "verification_status": "SYNTHETIC_IMAGE_GPU_PROBE_VERIFIED_JETSON_B_2026-09-20"
+    },
+    "medgemma_llama_cpp": {
+      "status": "SOURCE_ATTESTED_CUSTOM_API_SYNTHETIC_DEVICE_VERIFIED_EXPERIMENTAL",
+      "name": "llama.cpp mtmd",
+      "release": "v0.4.1",
+      "revision": "391fac16460f15233a7740550d858ac96df3419d",
+      "build_backend": "CUDA architecture 87",
+      "text_device": "cuda:0",
+      "vision_projector_device": "cpu",
+      "reason_for_mixed_placement": "GPU projector offload exhausted the 8 GiB unified-memory budget",
+      "verification_status": "CUSTOM_API_SYNTHETIC_IMAGE_INGESTION_VERIFIED_JETSON_B_2026-09-21",
+      "evidence": "docs/agent/evidence/jetson-b-medgemma-official-q4-2026-09-21.json",
+      "api_evidence": "docs/agent/evidence/medgemma-custom-api-synthetic-probe-2026-09-21.json",
+      "api_evidence_sha256": "36b45ac2f66c5dc232bc9233e46f416c980087a42514da9db357f5fb543fa893"
+    }
+  },
+  "registry_artifacts": {
+    "medgemma_ollama_probe": {
+      "status": "HARDWARE_PROBE_VERIFIED_BLOCKED_PROVENANCE",
+      "serving_name": "medgemma1.5:4b",
+      "serving_manifest_digest": "sha256:433252621ab154668b5d8be6aff6c1b771bacba045e46e6193da8d6ad1630f2c",
+      "model_layer_digest": "sha256:a051c2bd4ab8d5b7f4df8eec344f2fdd603efb2d098da799dc16c95e9e8bc838",
+      "model_layer_size": 3338928384,
+      "quantization": "Q4_K_M",
+      "capabilities": [
+        "text",
+        "image"
+      ],
+      "origin_model": "google/medgemma-1.5-4b-it",
+      "origin_revision": "UNATTESTED_BY_SERVING_MANIFEST",
+      "decision": "hardware_probe_only_until_origin_revision_and_conversion_provenance_are_attested",
+      "verification_status": "SIZE_AND_SHA256_VERIFIED_JETSON_B_2026-09-20"
+    }
+  },
+  "artifacts": {
+    "general_llm": {
+      "status": "DEVICE_VERIFIED",
+      "origin_model": "Qwen/Qwen2.5-3B-Instruct-GGUF",
+      "revision": "7dabda4d13d513e3e842b20f0d435c732f172cbe",
+      "serving_alias": "qwen2.5-3b-instruct-q4-k-m",
+      "format": "GGUF",
+      "quantization": "Q4_K_M",
+      "runtime": "llama.cpp-v0.4.1",
+      "files": [
+        {
+          "path": "qwen2.5-3b-instruct-q4_k_m.gguf",
+          "size": 2104932768,
+          "sha256": "626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d"
+        }
+      ],
+      "verification_status": "DEVICE_VERIFIED_JETSON_B_2026-09-20"
+    },
+    "medgemma_source": {
+      "status": "SOURCE_PINNED_ACCESS_200_FILES_DEVICE_VERIFIED",
+      "origin_model": "google/medgemma-1.5-4b-it",
+      "revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+      "format": "safetensors",
+      "dtype": "bfloat16",
+      "quantization": "none",
+      "runtime": "source_for_pinned_transformers_and_llama_cpp_conversion",
+      "files": [
+        {
+          "path": "model-00001-of-00002.safetensors",
+          "size": 4961251752,
+          "sha256": "5e4c75b0ef1fb009caee567ab244f9e354e915fda748d1b76179cc453a39b4b5"
+        },
+        {
+          "path": "model-00002-of-00002.safetensors",
+          "size": 3639026128,
+          "sha256": "958e39df78c35ddb812fbcb8b5e7f46e07f1b153c1589f2d3f0b41c3b0748d30"
+        }
+      ],
+      "weight_file_bytes": 8600277880,
+      "published_static_weight_estimate_gb": 6.4,
+      "deployment_decision": "BF16_TRANSFORMERS_BLOCKED_MEMORY_Q4_LLAMA_CPP_CUSTOM_API_SYNTHETIC_VERIFIED",
+      "verification_status": "SOURCE_FILES_SIZE_AND_SHA256_VERIFIED_JETSON_B_2026-09-21",
+      "access_probe": {
+        "observed_at_utc": "2026-09-20T15:20:00Z",
+        "host_role": "B_general_llm_or_research_vlm",
+        "token_file_present_private": true,
+        "revision_api_http": 200,
+        "revision_sha_match": true,
+        "gated": "auto",
+        "user_access_request_status": null,
+        "pinned_config_head_http": 403,
+        "pinned_config_range_get_http": 403,
+        "response_body_persisted": false,
+        "weight_download_attempted": true,
+        "decision": "BLOCKED_ACCESS_UNVERIFIED",
+        "post_terms_pinned_config_range_get_http": 403,
+        "post_terms_decision": "BLOCKED_ACCESS_UNVERIFIED",
+        "post_terms_recheck_date_utc": "2026-09-21",
+        "authenticated_account": "therabbit0302",
+        "latest_recheck_at_utc": "2026-09-21T04:16:03Z",
+        "latest_pinned_config_head_http": 403,
+        "previous_authenticated_account": "Supermassive111",
+        "latest_revision_sha_match": true,
+        "latest_decision": "BLOCKED_ACCESS_ACCOUNT_TERMS_UNVERIFIED",
+        "access_verified_by_utc": "2026-09-21T05:59:12Z",
+        "current_pinned_config_head_http": 200,
+        "current_decision": "ACCESS_VERIFIED",
+        "weight_download_completed": true,
+        "local_weight_verification": "VERIFIED"
+      }
+    },
+    "medgemma_gguf": {
+      "status": "SOURCE_ATTESTED_CUSTOM_API_SYNTHETIC_DEVICE_VERIFIED_EXPERIMENTAL",
+      "origin_model": "google/medgemma-1.5-4b-it",
+      "revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+      "format": "GGUF",
+      "dtype": "mixed",
+      "quantization": "Q4_K_M_text_F16_projector",
+      "runtime": "llama.cpp-v0.4.1-mtmd-experimental",
+      "runtime_revision": "391fac16460f15233a7740550d858ac96df3419d",
+      "files": [
+        {
+          "path": "medgemma-1.5-4b-it-bf16.gguf",
+          "size": 7767803392,
+          "sha256": "25d13265bee94884d9ad8db94134afeae30adfd9268f8e514fd1ba66375bbe16"
+        },
+        {
+          "path": "medgemma-1.5-4b-it-q4_k_m.gguf",
+          "size": 2489893632,
+          "sha256": "c39d76e3cb4678bec663cab92b39ac45ad86378c26c978c023b4f6d81ce0f45c"
+        },
+        {
+          "path": "medgemma-1.5-4b-it-mmproj-f16.gguf",
+          "size": 851251232,
+          "sha256": "77bcbe7f2847d5f6c098c02ca99aeb4defadd3482469928fbf5e5924acb78733"
+        }
+      ],
+      "device_placement": {
+        "text_model": "cuda:0",
+        "vision_projector": "cpu"
+      },
+      "verification_status": "SOURCE_ATTESTED_CUSTOM_API_SYNTHETIC_IMAGE_DEVICE_VERIFIED_JETSON_B_2026-09-21",
+      "evidence": "docs/agent/evidence/jetson-b-medgemma-official-q4-2026-09-21.json",
+      "api_evidence": "docs/agent/evidence/medgemma-custom-api-synthetic-probe-2026-09-21.json",
+      "api_evidence_sha256": "36b45ac2f66c5dc232bc9233e46f416c980087a42514da9db357f5fb543fa893"
+    }
+  },
+  "constraints": {
+    "preserve_existing_user_torch": true,
+    "no_cpu_fallback_for_vlm": true,
+    "no_cloud_fallback": true,
+    "max_gpu_heavy_services": 1,
+    "general_llm_model_download_performed": true,
+    "general_llm_device_runtime_verification_performed": true,
+    "medgemma_model_download_performed": true,
+    "medgemma_device_runtime_verification_performed": true,
+    "medical_quality_evaluation_performed": false,
+    "medgemma_e1_provenance_approved": true,
+    "medgemma_real_data_verification_performed": false,
+    "medgemma_pytorch_core_compatibility_verified": true,
+    "medgemma_official_source_access_verified": true,
+    "medgemma_official_source_files_verified": true,
+    "medgemma_official_q4_synthetic_probe_verified": true,
+    "medgemma_e1_api_device_verification_performed": true,
+    "medgemma_bf16_full_cuda_load_verified": false,
+    "medgemma_mixed_cpu_gpu_placement_explicit": true,
+    "synthetic_e0_e4_device_integration_performed": true,
+    "medgemma_e2_api_device_verification_performed": true,
+    "local_llm_e3_device_verification_performed": true,
+    "hybrid_e4_device_verification_performed": true
+  },
+  "sources": [
+    "https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform-release-notes/pytorch-jetson-rel.html",
+    "https://catalog.ngc.nvidia.com/orgs/nvidia/-/containers/pytorch/25.05-py3-igpu",
+    "https://github.com/ggml-org/llama.cpp/releases/tag/v0.4.1",
+    "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF",
+    "https://huggingface.co/google/medgemma-1.5-4b-it",
+    "https://developers.google.com/health-ai-developer-foundations/faqs",
+    "https://docs.ollama.com/docker",
+    "https://ollama.com/library/medgemma1.5:4b"
+  ],
+  "device_integration_evidence": {
+    "status": "PASSED_SYNTHETIC_E0_E1_E2_E3_E4_DEVICE_INTEGRATION",
+    "path": "docs/agent/evidence/jetson-a-synthetic-e0-e4-2026-09-21.json",
+    "sha256": "0471a186621128da0595daca2eb94d3f9f27512ba6e892bcc29d740d4c85b07b",
+    "sample_count": 1,
+    "synthetic": true,
+    "medical_or_user_data": false
+  }
+}

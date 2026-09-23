@@ -1,0 +1,6 @@
+# B/C-only environment. Resolve and pin only after matching the target JetPack/L4T.
+# Do not install torch from PyPI; use an NVIDIA Jetson-compatible build.
+Flask>=3.1,<4
+Pillow>=12,<13
+transformers>=4.50,<5
+accelerate>=1,<2
