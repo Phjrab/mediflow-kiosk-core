@@ -47,6 +47,13 @@ Initialize the schema:
 python3 scripts/run_ai_experiments.py init
 ```
 
+The CLI normally reads the project `.env` using `python-dotenv`. When every
+required setting is supplied in the process environment, use
+`python3 scripts/run_ai_experiments.py --explicit-env <command>` to skip that
+file and the `python-dotenv` dependency. Missing settings still fail through the
+normal worker and client checks; this option does not enable research flags.
+Use it with a new isolated `EXPERIMENT_DATA_DIR` for manual runs.
+
 Directories and files are created with private permissions. Images, SQLite data,
 reports, and Grad-CAM artifacts are ignored by Git. Raw model text is not stored.
 Retention deletion is restricted to explicitly selected expired research copies

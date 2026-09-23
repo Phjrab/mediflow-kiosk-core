@@ -824,3 +824,25 @@ No chat or VLM inference request, E2 worker, model start/stop/restart, profile
 transition, controller restart, or mutation enablement occurred in this action.
 No model, key, environment file, port, database, user data, CUDA/PyTorch, cloud
 fallback, or medical-quality status changed.
+
+## 2026-09-23 — explicit environment mode for the research CLI
+
+- C13 showed that A's system Python lacks `python-dotenv`: the standard
+  `run_ai_experiments.py` entrypoint exited before claiming the queued job even
+  though its settings were supplied in the process environment. The worker
+  itself then completed exactly one direct invocation.
+- Added `--explicit-env` to the research CLI. This opt-in mode uses the supplied
+  process environment and does not import `python-dotenv` or read the project
+  `.env`. The default mode still loads `.env`; if `python-dotenv` is missing,
+  it returns bounded `missing_dotenv` before opening an experiment store.
+- Added focused tests for isolated-store initialization and an empty E2 worker
+  queue without `python-dotenv`, plus default-mode fail-closed behavior. The new
+  three tests, six experiment-worker tests, and six survey/hybrid tests pass.
+  `git diff --check` and source compilation without writing bytecode pass.
+- Updated the research protocol and Admin Control handoff to reflect the
+  completed C13 E2 gate and current open `3:3:chat_only` admission. This source
+  change remains local to `codex/admin-control`; A's deployed commit is still
+  `f53a1c6` and B's deployed release is still `86bebb6`.
+
+No device command, worker, inference request, process change, research data
+change, or medical-quality evaluation was performed for this source update.

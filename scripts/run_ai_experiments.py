@@ -8,12 +8,8 @@ import os
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
-
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
-load_dotenv(PROJECT_ROOT / '.env')
 
 from experiments.worker import process_one, run_forever, store_from_env  # noqa: E402
 from experiments.store import PURGE_CONFIRMATION  # noqa: E402
@@ -25,6 +21,10 @@ from utils.ai_config import AIError  # noqa: E402
 
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
+    result.add_argument(
+        '--explicit-env', action='store_true',
+        help='use only the current process environment; do not load the project .env',
+    )
     commands = result.add_subparsers(dest='command', required=True)
     commands.add_parser('init')
     fixture = commands.add_parser('register-fixture')
@@ -67,6 +67,14 @@ def parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = parser().parse_args()
     try:
+        if not args.explicit_env:
+            try:
+                from dotenv import load_dotenv
+            except ModuleNotFoundError as exc:
+                if exc.name != 'dotenv':
+                    raise
+                raise AIError('missing_dotenv') from None
+            load_dotenv(PROJECT_ROOT / '.env')
         store = store_from_env()
         if args.command == 'init':
             print(json.dumps({'status': 'ok', 'db': str(store.db_path)}))

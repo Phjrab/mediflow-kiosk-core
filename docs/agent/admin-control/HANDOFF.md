@@ -142,9 +142,9 @@ Post-apply protected-file hashes and key mode 0600 were unchanged.
   files, and all rollback material. Stop at the first drift, ownership, lease,
   port, receipt, output-contract, or rollback failure.
 - The direct managed VLM contract gate needs no additional synthetic retry. The
-  E2 survey-worker gate is incomplete. The minimal A client deployment is now
-  complete at `f53a1c6`; any later E2 rerun requires separately reviewed scope,
-  a new isolated store and identifiers, and the failed job must remain immutable.
+  E2 survey-worker gate completed in C13. The minimal A client deployment is at
+  `f53a1c6`; the existing failed C11 job remains immutable. Do not repeat E2
+  without a new, separately reviewed objective.
 - A future device mutation, sustained load/thermal evaluation, or real-data
   protocol requires its own reviewed scope.
 - Real-user-data validation and medical-quality evaluation remain `NOT_RUN`.
@@ -174,7 +174,7 @@ The readiness deployment, C13 E2 worker gate, and safe admission recovery are
 complete. Do not run another E2 request or directly rewrite applied metadata,
 ingress generation, or the receipt.
 
-## C13 successful E2 evidence and current fail-closed state
+## C13 successful E2 evidence and admission recovery
 
 - C13 sample/run/job:
   `6c68ba3fc1f441c0a93d4b7ccf3a455e` /
@@ -196,3 +196,12 @@ ingress generation, or the receipt.
   lock at unchanged generation 3. Controller PID 69967, chat PID 69924, stopped
   VLM, zero leases, seven-field receipt, disabled drafts/mutations, and all 13
   operation rows remained unchanged. No inference request ran.
+
+## Next local source step
+
+- On A, the first C13 CLI launch stopped before job claim because the system
+  Python lacks `python-dotenv`. The existing worker function then processed the
+  queued job exactly once. Local source now offers an explicit `--explicit-env`
+  CLI mode for already supplied process settings, with tests for missing
+  `python-dotenv`, an isolated store, and an empty E2 queue. This source change
+  is not deployed to A; the current A deployment remains `f53a1c6`.
