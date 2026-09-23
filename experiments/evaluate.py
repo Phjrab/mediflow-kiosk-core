@@ -116,7 +116,8 @@ def evaluate_run(store: ExperimentStore, run_id: str) -> dict[str, Any]:
         precision = _ratio(tp, tp + fp)
         recall = _ratio(tp, tp + fn)
         specificity = _ratio(tn, tn + fp)
-        f1 = None if precision is None or recall is None or precision + recall == 0 else 2 * precision * recall / (precision + recall)
+        f1_denominator = 2 * tp + fp + fn
+        f1 = (2 * tp) / f1_denominator if f1_denominator else None
         if f1 is not None:
             f1_values.append(f1)
         per_class[label] = {

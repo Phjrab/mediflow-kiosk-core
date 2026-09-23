@@ -77,6 +77,56 @@ class ExperimentEvaluationTest(unittest.TestCase):
                 job['job_id'], job['lease_token'], result(sample['roi_digest'], status, label)
             )
 
+    def assessed_metrics(self, actual_and_predicted):
+        run = self.create_run()
+        for index, (actual, predicted) in enumerate(actual_and_predicted):
+            sample = self.store.register_sample(image_bytes('white'), metadata(index))
+            self.store.add_reference_label(sample['sample_id'], actual, 'manual-fixture')
+            self.execute(sample, run, label=predicted)
+        return evaluate_run(self.store, run['run_id'])['clinical_metrics']
+
+    def test_macro_f1_all_classes_correct(self):
+        metrics = self.assessed_metrics([(label, label) for label in '01234'])
+        self.assertEqual(metrics['answered_accuracy'], 1.0)
+        self.assertEqual(metrics['macro_f1_answered_subset'], 1.0)
+        self.assertTrue(all(value['f1'] == 1.0 for value in metrics['per_class'].values()))
+
+    def test_macro_f1_includes_class_with_no_correct_predictions(self):
+        metrics = self.assessed_metrics([('0', '0'), ('0', '0'), ('1', '0'), ('1', '0')])
+        self.assertEqual(metrics['per_class']['1']['support'], 2)
+        self.assertIsNone(metrics['per_class']['1']['precision'])
+        self.assertEqual(metrics['per_class']['1']['recall_answered_subset'], 0.0)
+        self.assertEqual(metrics['per_class']['1']['f1'], 0.0)
+        self.assertAlmostEqual(metrics['macro_f1_answered_subset'], 1 / 3)
+
+    def test_macro_f1_five_class_complete_misclassification(self):
+        predicted_by_actual = {'0': '0', '1': '2', '2': '1', '3': '4', '4': '3'}
+        metrics = self.assessed_metrics([
+            (actual, predicted_by_actual[actual])
+            for actual in '01234' for _ in range(10)
+        ])
+        self.assertEqual(metrics['N_assessed'], 50)
+        self.assertEqual(metrics['answered_accuracy'], 0.2)
+        for label in '01234':
+            self.assertEqual(metrics['per_class'][label]['support'], 10)
+            self.assertEqual(metrics['per_class'][label]['f1'], 1.0 if label == '0' else 0.0)
+        # Hand calculation: (1 + 0 + 0 + 0 + 0) / 5 = 0.2.
+        self.assertAlmostEqual(metrics['macro_f1_answered_subset'], 0.2)
+
+    def test_macro_f1_excludes_only_absent_classes(self):
+        metrics = self.assessed_metrics([('0', '0'), ('1', '1')])
+        for label in '234':
+            self.assertEqual(metrics['per_class'][label]['support'], 0)
+            self.assertIsNone(metrics['per_class'][label]['f1'])
+        self.assertEqual(metrics['macro_f1_answered_subset'], 1.0)
+
+    def test_macro_f1_all_predictions_wrong_is_zero(self):
+        metrics = self.assessed_metrics([('0', '1'), ('1', '0')])
+        self.assertEqual(metrics['answered_accuracy'], 0.0)
+        self.assertEqual(metrics['per_class']['0']['f1'], 0.0)
+        self.assertEqual(metrics['per_class']['1']['f1'], 0.0)
+        self.assertEqual(metrics['macro_f1_answered_subset'], 0.0)
+
     def test_denominators_include_abstain_and_technical_failure(self):
         run = self.create_run()
         samples = [
