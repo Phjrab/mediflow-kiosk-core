@@ -8,7 +8,7 @@
 | C3 | Versioned local-chat sampling, runtime draft and validation plan, apply disabled | CODE + MOCK |
 | C4 | Managed ingress, shared device lock, durable operation, drain/switch/rollback | DEVICE_INGRESS VERIFIED; exact chat recovery verified |
 | C5 | Research queue/run lock and effective B receipt | DONE; C13 E2 worker succeeded with frozen survey and matching receipt |
-| C6 | Read-only deployment then approved device mutation verification | `86bebb6` controller read-only; safe `3:3:chat_only`; admission open at generation 3 |
+| C6 | Read-only deployment then approved device mutation verification | `86bebb6` controller read-only; safe `3:3:chat_only`; admission open at generation 3; permanent mutation activation blocked by stale controller identity record |
 
 The approved C1/C2 bootstrap, C4 managed inference ingress, `ee7e03e`
 MedGemma output/lifecycle release, and `86bebb6` read-only controller are
