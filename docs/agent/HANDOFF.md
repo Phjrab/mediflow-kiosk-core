@@ -1,5 +1,10 @@
 # Handoff — local AI and shadow research
 
+This document preserves the original P0-P8 research handoff. For the current
+merged Admin Control branch, A deployment, Macro-F1 fix, and device gate, use
+`docs/agent/admin-control/HANDOFF.md`. PR #5 merged that source into `main` as
+`1da439b` on 2026-09-23; the original branch/SHA below are historical.
+
 ## Repository state
 
 - Path: `/Users/hajoonpark/자율설계/mediflow-kiosk-core`

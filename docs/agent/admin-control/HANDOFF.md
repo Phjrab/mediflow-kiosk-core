@@ -1,5 +1,11 @@
 # Admin Control Handoff
 
+Latest repository integration: PR #5 merged into `main` as `1da439b` on
+2026-09-23. A's latest deployment branch is `e78003d` with the F1 fix and
+gated admin apply code, but its web process remains stopped and A's Admin
+Control mutation flags have not been enabled. B's latest verified controller
+release remains `86bebb6` in read-only mode.
+
 Current phase: C0-C6 and the direct managed VLM contract gate are complete.
 Authenticated readiness hardening is deployed on Jetson B as clean detached
 release `86bebb6`; `ee7e03e` remains preserved as rollback material. The subsequent
@@ -236,10 +242,27 @@ ingress generation, or the receipt.
   client submission journal. A records the plan and idempotency key before
   forwarding; an uncertain response blocks a new plan. Browser refresh can
   resume known operation status without starting another model transition.
-- This code is local to the work branch pending full review and A deployment.
-  Its focused route/client tests and 195 locally importable tests passed (one
-  skipped); the admin page's inline JavaScript passed syntax check. A and B
-  remain read-only for Admin Control; B drafts/mutations remain off.
+- The code is merged through PR #5 and deployed to A as `e78003d` with all
+  179 A virtualenv tests passing. A's `admin-client` submission directory is
+  owner-only mode 0700. Its web process remained stopped and no A mutation
+  flag, `.env`, DB, or key changed. A and B remain read-only for Admin Control.
+- The local route/client tests and 195 locally importable tests passed (one
+  skipped); the admin page's inline JavaScript passed syntax check.
 - A read-only B audit still showed `3:3:chat_only`, open admission, no active or
   unknown leases, healthy chat, stopped VLM, a matching seven-field receipt,
   and all 13 existing operation rows. No model or controller transition ran.
+
+## Permanent activation blocked by controller identity
+
+- B's running controller is PID 69967 from release `86bebb6`, UID 1000,
+  `/usr/bin/python3.10`, expected argv and cwd, start tick 9144933. The
+  owner-only controller identity file instead records PID 47037, start tick
+  8757518; that PID no longer exists. This mismatch was independently read
+  from `/proc` and the identity file without signalling either process.
+- Activation stopped before touching B's environment or restarting its
+  controller. Repeated authenticated status showed `3:3:chat_only`, admission
+  open, zero active/unknown leases, seven-field receipt match, no active
+  operation, healthy chat, stopped VLM, 13 preserved operation rows, and both
+  draft/mutation flags false. Protected B env, key, and applied-state hashes
+  remained unchanged. B mock suites passed 32 Admin Control and 19 MedGemma
+  tests. See `CONTROLLER_IDENTITY_RECOVERY.md` before any new write attempt.

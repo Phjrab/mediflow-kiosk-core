@@ -922,3 +922,34 @@ evaluation occurred during this deployment. B was not changed.
   raw bypass closed, zero active/unknown leases, seven-field receipt match,
   no active operation, and all 13 operation rows preserved. B's drafts and
   mutations remained false. No B write was performed in this preparation.
+
+### A deployment, main merge, and B activation stop
+
+- PR #5 was marked ready and merged into `main` as `1da439b` after 195 locally
+  importable tests passed (one skipped). The main branch had not diverged from
+  this work branch; no force update occurred.
+- A began clean at `a8257f9`. The exact six-file Admin UI/client patch had
+  SHA-256 `5742609f39611692daf005abd50df72ac7f93782ea9bd57ea16b4f0cfd467a25`,
+  passed `git apply --check`, and changed only `eye_server.py`, the existing
+  admin template and client, one new submission module, and their two tests.
+  A's focused client/route tests and full 179-test virtualenv suite passed.
+  Protected `.env`, operational and research DB, and VLM key hashes matched
+  the pre-apply values. Committed and pushed A as `e78003d` on
+  `codex/admin-control-a-deploy`; its worktree was clean. The owner-only A
+  submission directory was created mode 0700. No web process was running or
+  started; no A feature flag was enabled.
+- B's read-only preflight passed authenticated state, 3:3 chat-only receipt,
+  open admission, raw-bypass closure, zero active/unknown leases, 13 operation
+  rows, and chat HTTP 200. Its 32 Admin Control and 19 MedGemma tests passed.
+- **Stop gate:** B's `admin-control-runtime/controller.pid` records old PID
+  47037/start tick 8757518, whereas the running PID 69967 has start tick
+  9144933. The recorded PID is absent. The owner-only record, live `/proc`,
+  executable, UID, argv digest, and cwd were inspected read-only. Because an
+  exact-owned controller stop/restart cannot be proven from this record,
+  B draft/mutation activation was not attempted. No record was overwritten,
+  process signalled, or controller restarted.
+- Post-stop B status still had healthy `3:3:chat_only`, open admission, zero
+  active/unknown leases, unchanged 13 operation rows and receipt, and disabled
+  draft/mutation flags. Hashes of B's controller env, management key, and both
+  applied-state files matched the preflight baselines. No model, key, port,
+  application DB, user data, or medical-quality state changed.
