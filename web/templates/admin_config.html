@@ -422,7 +422,7 @@
                 <button id="ai-save-generation" class="btn btn-primary" type="button" onclick="saveGeneration()" disabled>생성 설정 저장</button>
                 <button id="ai-save-draft" class="btn btn-secondary" type="button" onclick="saveRuntimeDraft()" disabled>실행 설정 초안 저장</button>
                 <button id="ai-plan" class="btn btn-secondary" type="button" onclick="validateRuntimeDraft()" disabled>변경 검증</button>
-                <button id="ai-apply" class="btn btn-warning" type="button" disabled title="C4 안전 게이트 전에는 실제 적용할 수 없습니다.">실제 적용 비활성</button>
+                <button id="ai-apply" class="btn btn-warning" type="button" onclick="applyRuntimePlan()" disabled>실제 적용 비활성</button>
             </div>
             <div id="ai-plan-result" class="ai-warning" aria-live="polite"></div>
         </div>
@@ -447,7 +447,7 @@
 
 <script>
     const configState = { values: {}, keys: [], llmSettings: {}, aiControl: {} };
-    const aiControlState = { overview: null, generation: null, draft: null, plan: null, poller: null };
+    const aiControlState = { overview: null, generation: null, draft: null, plan: null, poller: null, operationPoller: null, operationId: null };
     let adminCsrfToken = '';
     function escapeHtml(value) {
         return String(value == null ? '' : value).replace(/[&<>"']/g, (character) => ({
@@ -832,6 +832,7 @@
         }
         document.getElementById('ai-runtime-fields').hidden = false;
         document.getElementById('ai-save-draft').disabled = !configState.aiControl.drafts_enabled;
+        updateRuntimeApplyButton();
         const stateMessage = unreachable
             ? '관리 서비스에 연결할 수 없어 마지막 snapshot을 표시합니다. 모델 서비스 상태는 별도 확인이 필요합니다.'
             : (stale ? '오래된 상태입니다. 변경 검증을 진행하지 마세요.' : 'Jetson B 읽기 전용 상태를 확인했습니다.');
@@ -856,6 +857,8 @@
         try {
             await loadGeneration();
             if (!configState.aiControl.enabled) {
+                aiControlState.overview = null;
+                updateRuntimeApplyButton();
                 setAiText('ai-control-status', '원격 관리 기능이 꺼져 있습니다. 기존 채팅·검사 동작은 유지됩니다.');
                 return;
             }
@@ -866,6 +869,8 @@
             aiControlState.overview = data.overview;
             renderAiOverview(data);
         } catch (error) {
+            aiControlState.overview = null;
+            updateRuntimeApplyButton();
             setAiText('ai-control-status', `관리 상태 조회 실패: ${error.message || error}. 기존 검사와 채팅 설정은 별도로 유지됩니다.`, true);
         }
     }
@@ -914,6 +919,8 @@
 
     async function saveRuntimeDraft() {
         try {
+            aiControlState.plan = null;
+            updateRuntimeApplyButton();
             const current = aiControlState.overview.current_config;
             const node = encodeURIComponent(configState.aiControl.node_id);
             const response = await fetch(`/api/admin/ai-control/nodes/${node}/drafts`, {
@@ -949,12 +956,125 @@
             if (!response.ok || data.status !== 'ok') throw new Error(data.message || '검증 실패');
             aiControlState.plan = data.plan;
             const blockers = data.plan.blocking_reasons || [];
+            updateRuntimeApplyButton();
             setAiText('ai-plan-result', blockers.length
                 ? `검증 완료. 실제 적용 차단 사유: ${blockers.join(', ')}`
                 : `검증 완료. 재시작 필요: ${data.plan.restart_required}`);
         } catch (error) {
+            aiControlState.plan = null;
+            updateRuntimeApplyButton();
             setAiText('ai-plan-result', `변경 검증 실패: ${error.message || error}`, true);
         }
+    }
+
+    function updateRuntimeApplyButton() {
+        const button = document.getElementById('ai-apply');
+        const overview = aiControlState.overview || {};
+        const state = overview.state || {};
+        const current = overview.current_config || {};
+        const capabilities = overview.capabilities || {};
+        const activity = state.activity || {};
+        const plan = aiControlState.plan;
+        const connected = ['state', 'capabilities', 'current_config'].every((name) => {
+            const cache = (overview[name] || {}).cache || {};
+            return cache.connection_state === 'connected' && !cache.stale;
+        });
+        const ready = !!(configState.aiControl.enabled && configState.aiControl.drafts_enabled
+            && configState.aiControl.mutations_enabled && capabilities.drafts_enabled
+            && capabilities.mutations_enabled && capabilities.managed_ingress_verified
+            && connected && plan && !(plan.blocking_reasons || []).length
+            && Date.parse(plan.expires_at) > Date.now()
+            && plan.expected_config_revision === current.config_revision
+            && plan.expected_deployment_generation === current.deployment_generation
+            && state.active_operation_id == null && activity.source === 'managed_ingress'
+            && activity.admission === 'open' && activity.inflight === 0
+            && activity.unknown_inflight === 0 && !aiControlState.operationId);
+        button.disabled = !ready;
+        button.textContent = ready ? '실제 적용' : '실제 적용 비활성';
+    }
+
+    async function refreshRuntimeOperation() {
+        if (!aiControlState.operationId) return;
+        const node = encodeURIComponent(configState.aiControl.node_id);
+        try {
+            const response = await fetch(`/api/admin/ai-control/nodes/${node}/operations/${aiControlState.operationId}`);
+            const data = await response.json();
+            if (!response.ok || data.status !== 'ok') throw new Error(data.message || '작업 상태 조회 실패');
+            const operation = data.operation;
+            setAiText('ai-plan-result', `작업 ${operation.state || 'unknown'} · 단계 ${operation.stage || 'unknown'}`,
+                operation.state === 'rolled_back' || operation.state === 'manual_intervention_required');
+            if (operation.completed) {
+                clearInterval(aiControlState.operationPoller);
+                aiControlState.operationPoller = null;
+                aiControlState.operationId = null;
+                aiControlState.plan = null;
+                await loadAiControl(true);
+            }
+        } catch (error) {
+            setAiText('ai-plan-result', '작업 결과를 확인할 수 없습니다. 새 적용을 시작하지 말고 상태를 다시 확인하세요.', true);
+        }
+        updateRuntimeApplyButton();
+    }
+
+    function trackRuntimeOperation(operationId) {
+        if (!/^[0-9a-f]{32}$/.test(operationId)) return;
+        aiControlState.operationId = operationId;
+        if (aiControlState.operationPoller) clearInterval(aiControlState.operationPoller);
+        aiControlState.operationPoller = setInterval(refreshRuntimeOperation, 2000);
+        updateRuntimeApplyButton();
+        refreshRuntimeOperation();
+    }
+
+    async function loadLatestRuntimeOperation() {
+        const node = encodeURIComponent(configState.aiControl.node_id);
+        try {
+            const response = await fetch(`/api/admin/ai-control/nodes/${node}/operations/latest`);
+            const data = await response.json();
+            if (!response.ok || data.status !== 'ok') throw new Error(data.message || '작업 기록 조회 실패');
+            if (data.submission && data.submission.submission_unknown) {
+                setAiText('ai-plan-result', '이전 적용 요청의 접수 여부를 확인할 수 없습니다. 자동 재시도하지 않습니다.', true);
+            } else if (data.submission && data.submission.submission_rejected) {
+                setAiText('ai-plan-result', '마지막 적용 요청은 거절됐습니다. 새 계획을 검증해야 합니다.', true);
+            } else if (data.submission && data.submission.operation_id && data.operation && !data.operation.completed) {
+                trackRuntimeOperation(data.submission.operation_id);
+            } else if (data.operation) {
+                setAiText('ai-plan-result', `마지막 작업: ${data.operation.state || 'unknown'}`,
+                    data.operation.state === 'rolled_back' || data.operation.state === 'manual_intervention_required');
+            }
+        } catch (error) {
+            setAiText('ai-plan-result', '관리 작업 기록을 확인할 수 없습니다.', true);
+        }
+    }
+
+    async function applyRuntimePlan() {
+        updateRuntimeApplyButton();
+        if (document.getElementById('ai-apply').disabled) return;
+        const plan = aiControlState.plan;
+        const change = (plan.changes || [])[0] || {};
+        const before = (change.before || {}).active_profile || aiControlState.overview.current_config.applied_profile;
+        const after = (change.after || {}).active_profile || before;
+        const confirmation = `대상: ${configState.aiControl.node_id}\n변경: ${before} → ${after}\n계획 만료: ${plan.expires_at}\n확인 항목: ${(plan.required_acknowledgements || []).join(', ') || '없음'}\n진행 중 요청이 있으면 완료를 기다립니다. 실패하면 이전 상태로 복구를 시도합니다.`;
+        if (!await showConfirm(confirmation, '실제 적용')) return;
+        document.getElementById('ai-apply').disabled = true;
+        const node = encodeURIComponent(configState.aiControl.node_id);
+        try {
+            const response = await fetch(`/api/admin/ai-control/nodes/${node}/operations`, {
+                method: 'POST', headers: buildAdminHeaders(), body: JSON.stringify({
+                    plan_id: plan.plan_id, plan_digest: plan.plan_digest,
+                    expected_config_revision: plan.expected_config_revision,
+                    expected_deployment_generation: plan.expected_deployment_generation,
+                    acknowledgements: plan.required_acknowledgements || []
+                })
+            });
+            const data = await response.json();
+            if (!response.ok || data.status !== 'ok') throw new Error(data.message || '작업 접수 확인 실패');
+            setAiText('ai-plan-result', '작업이 접수됐습니다. 실제 적용 상태를 확인하는 중입니다.');
+            trackRuntimeOperation(data.operation.operation_id);
+        } catch (error) {
+            aiControlState.plan = null;
+            setAiText('ai-plan-result', `적용 접수 결과를 확인할 수 없습니다: ${error.message || error}. 자동 재시도하지 않습니다.`, true);
+        }
+        updateRuntimeApplyButton();
     }
 
     async function loadConfig() {
@@ -978,6 +1098,9 @@
             renderConfigFields();
             renderLLMFields();
             await loadAiControl(false);
+            if (configState.aiControl.enabled && configState.aiControl.mutations_enabled) {
+                await loadLatestRuntimeOperation();
+            }
             if (aiControlState.poller) clearInterval(aiControlState.poller);
             if (configState.aiControl.enabled) {
                 aiControlState.poller = setInterval(() => loadAiControl(false), 5000);
@@ -1055,6 +1178,7 @@
             cancelBtn.style.display = hideCancel ? 'none' : 'inline-block';
 
             toast.classList.add('show');
+            if (!hideCancel) cancelBtn.focus();
 
             const cleanup = (result) => {
                 toast.classList.remove('show');

@@ -130,6 +130,7 @@ import hmac
 import hashlib
 import shutil
 import tempfile
+import pwd
 from datetime import datetime
 from PIL import Image, ImageOps
 
@@ -137,6 +138,7 @@ import config as config
 from model_loader import initialize_models, get_models
 from utils.ai_config import AIError, LocalConfig, provider_from, validate_llm_settings
 from utils.ai_control_client import client_from_env
+from utils.ai_control_submission import OperationSubmissionStore, validate_operation_gate
 from utils.ai_generation import settings_from_env, store_from_env
 from utils.llm_client import generate_chat
 from utils.chat_context import summarize_result
@@ -500,10 +502,7 @@ def apply_admin_config_updates(updates):
         if key == 'SERVER_IP':
             normalized_updates['SERVER_HOST'] = env_value
 
-    apply_env_updates_atomic({
-        key: _env_serialize_value(value)
-        for key, value in normalized_updates.items()
-    })
+    apply_env_updates_atomic({key: _env_serialize_value(value) for key, value in normalized_updates.items()})
     return normalized_updates
 
 
@@ -583,6 +582,13 @@ def _ai_control_error(exc, status=503):
         'controller_unreachable': '관리 서비스에 연결할 수 없습니다.',
         'mutations_disabled': '실제 모델 변경은 현재 비활성화되어 있습니다.',
         'drafts_disabled': '설정 초안 기능이 비활성화되어 있습니다.',
+        'active_experiment': '대기 또는 실행 중인 연구 작업이 있어 모델 변경을 막았습니다.',
+        'activity_unknown': '추론 또는 관리 작업의 종료를 확인할 수 없어 모델 변경을 막았습니다.',
+        'state_changed': '검증 뒤 실제 상태가 바뀌었습니다. 새 계획을 검증해 주세요.',
+        'idempotency_conflict': '같은 계획에 다른 적용 요청이 기록돼 있습니다.',
+        'submission_unknown': '이전 적용 요청의 접수 여부가 불명확합니다. 새 계획은 시작하지 않습니다.',
+        'operation_rejected': '이 계획의 이전 적용 요청이 거절됐습니다. 새 계획을 검증해 주세요.',
+        'invalid_operation': '적용 요청 형식이 유효하지 않습니다.',
         'stale_generation_revision': '생성 설정이 다른 관리자에 의해 변경되었습니다.',
         'invalid_generation_config': '생성 설정 값이 유효하지 않습니다.',
     }
@@ -3579,7 +3585,6 @@ def _call_gemini_chat(system_prompt, user_message, env=None):
 
 
 def generate_llm_chat_reply(user_message, diagnosis_result):
-    """Dispatch exactly once to the explicitly selected provider."""
     env = dict(os.environ)
     system_prompt = build_chat_system_prompt(summarize_result(diagnosis_result))
     return generate_chat(
@@ -3652,7 +3657,7 @@ def api_chat():
             'error_code': e.code if isinstance(e, AIError) else 'backend_unavailable'
         }), 503
     except Exception as e:
-        app.logger.warning('chat request failed')
+        app.logger.warning("chat request failed")
         return jsonify({
             'status': 'error',
             'message': '채팅 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.',
@@ -4191,14 +4196,79 @@ def api_admin_ai_control_plans(node_id):
         return _ai_control_error(exc, 400)
 
 
+def _ai_control_submission_store():
+    home = pwd.getpwuid(os.getuid()).pw_dir
+    default_dir = os.path.join(home, '.local', 'state', 'mediflow-ai', 'admin-client')
+    return OperationSubmissionStore(os.getenv('AI_CONTROL_CLIENT_STATE_DIR', '').strip() or default_dir)
+
+
 @app.route('/api/admin/ai-control/nodes/<node_id>/operations', methods=['POST'])
-def api_admin_ai_control_operations_disabled(node_id):
+def api_admin_ai_control_operations(node_id):
     csrf_error = require_admin_csrf()
     if csrf_error:
         return csrf_error
+    bootstrap = get_ai_control_bootstrap_status()
+    if node_id != bootstrap['node_id']:
+        return jsonify({'status': 'error', 'error_code': 'node_not_allowed'}), 404
+    if not bootstrap['enabled'] or not bootstrap['drafts_enabled'] or not bootstrap['mutations_enabled']:
+        return _ai_control_error(AIError('mutations_disabled'), 403)
+    try:
+        body = request.get_json(silent=True)
+        if os.getenv('AI_EXPERIMENTS_ENABLED', '0') == '1':
+            active = _experiment_store().active_job_summary()
+            if active['total']:
+                return _ai_control_error(AIError('active_experiment'), 409)
+        client = client_from_env(dict(os.environ))
+        overview = client.overview(force=True)
+        body = validate_operation_gate(overview, body)
+        store = _ai_control_submission_store()
+        result = store.submit(body, lambda payload, key: client.request(
+            'POST', '/operations', payload, idempotency_key=key
+        ))
+        return jsonify({'status': 'ok', 'operation': result}), 202
+    except AIError as exc:
+        status = 409 if exc.code in ('active_experiment', 'activity_unknown',
+                                     'state_changed', 'idempotency_conflict',
+                                     'submission_unknown', 'operation_rejected') else (
+            400 if exc.code == 'invalid_operation' else 503
+        )
+        return _ai_control_error(exc, status)
+
+
+@app.route('/api/admin/ai-control/nodes/<node_id>/operations/latest', methods=['GET'])
+def api_admin_ai_control_operation_latest(node_id):
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
+    bootstrap = get_ai_control_bootstrap_status()
+    if node_id != bootstrap['node_id']:
+        return jsonify({'status': 'error', 'error_code': 'node_not_allowed'}), 404
+    try:
+        submission = _ai_control_submission_store().latest()
+        if submission is None:
+            return jsonify({'status': 'ok', 'submission': None}), 200
+        if submission['operation_id'] is None:
+            return jsonify({'status': 'ok', 'submission': submission}), 200
+        operation = client_from_env(dict(os.environ)).request(
+            'GET', '/operations/' + submission['operation_id']
+        )
+        return jsonify({'status': 'ok', 'submission': submission, 'operation': operation}), 200
+    except AIError as exc:
+        return _ai_control_error(exc)
+
+
+@app.route('/api/admin/ai-control/nodes/<node_id>/operations/<operation_id>', methods=['GET'])
+def api_admin_ai_control_operation_get(node_id, operation_id):
+    if not is_admin_session():
+        return jsonify({'status': 'error', 'message': '관리자 권한이 필요합니다.'}), 403
     if node_id != get_ai_control_bootstrap_status()['node_id']:
         return jsonify({'status': 'error', 'error_code': 'node_not_allowed'}), 404
-    return _ai_control_error(AIError('mutations_disabled'), 403)
+    if not re.fullmatch(r'[0-9a-f]{32}', operation_id):
+        return jsonify({'status': 'error', 'error_code': 'operation_not_found'}), 404
+    try:
+        result = client_from_env(dict(os.environ)).request('GET', '/operations/' + operation_id)
+        return jsonify({'status': 'ok', 'operation': result}), 200
+    except AIError as exc:
+        return _ai_control_error(exc)
 
 
 @app.route('/api/admin/config', methods=['POST'])
@@ -4716,13 +4786,12 @@ if __name__ == '__main__':
 
     # 서버 시작 전에 모델만 초기화
     if not models_initialized:
+        models_initialized = True
         init_history_db()
         print("\n" + "="*50)
         print("[Eye Disease Detection Server]")
         print("="*50)
-        loaded_model_manager = initialize_models()
-        model_manager = loaded_model_manager
-        models_initialized = True
+        model_manager = initialize_models()
 
         print("\n✓ 서버 준비 완료! http://0.0.0.0:5000 에서 접속하세요\n")
     
