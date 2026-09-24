@@ -1,5 +1,23 @@
 # Admin Control Handoff
 
+## Latest recorded state (documentation review 2026-09-24)
+
+This is a timeline, not a fresh device probe. The latest recorded A deployment
+is `9cc410a` after the rejected-submission recovery patch; A web was healthy
+and B remained at release `86bebb6` with drafts/mutations enabled and
+`3:3:chat_only`. The 2026-09-23 activation checked login, overview and a
+same-config draft→plan. It did **not** submit a new operation, transition a
+model, run inference, or perform a new live Apply. The earlier stopped A web
+and read-only B descriptions below are dated prior checkpoints. Repository
+`main` is source state, not proof that either device runs the same commit.
+
+The recovery patch clears a research pause only for an explicitly rejected
+same-plan submission with no operation ID and a fresh healthy, idle,
+receipt-consistent B overview. Timeout, unknown acceptance and drift remain
+fail-closed. See the later 2026-09-23 sections below for the exact observations.
+
+## Earlier handoff checkpoint
+
 Latest repository integration before this maintenance: PR #7 merged into `main` as `9c1b8e0` on
 2026-09-23. A's latest deployment branch is `e78003d` with the F1 fix and
 gated admin apply code, but its web process remains stopped and A's Admin

@@ -1,10 +1,20 @@
 # Local AI runbook
 
+> Current-reading note (2026-09-24): the table and direct B:8080 examples below
+> record the 2026-09-21 local-AI integration checkpoint. The later
+> [Admin Control handoff](agent/admin-control/HANDOFF.md) records A deployment
+> `9cc410a`, B controller release `86bebb6`, managed ingress on B:8080,
+> controller loopback 8090, and raw model runtime on B loopback 18080/18081.
+> On that later checkpoint, chat is active, MedGemma is stopped, and no new live
+> Apply/model transition was performed during Admin activation. Revalidate
+> exact deployed versions and ownership before using any historical command
+> below as a current operating procedure.
+
 This runbook separates the kiosk host (A) from the general LLM and research VLM
 host (B). A third VLM host (C) is optional. No step requires the LLM and VLM to
 remain resident on the same GPU.
 
-## Current verified state
+## 2026-09-21 integration checkpoint (historical)
 
 | Host | Intended role | Read-only observation | Status |
 | --- | --- | --- | --- |
