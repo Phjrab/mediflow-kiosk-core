@@ -129,12 +129,14 @@
         }
 
         body {
-            margin: 0;
+            margin: 0 auto;
             font-family: 'Pretendard', -apple-system, sans-serif;
             background: var(--bg);
             color: var(--text);
-            width: 1280px;
-            height: 800px;
+            width: 100%;
+            max-width: 1600px;
+            min-height: 100vh;
+            height: 100dvh;
             overflow: hidden;
             box-sizing: border-box;
             padding: 24px;
@@ -382,6 +384,10 @@
     </style>
 </head>
 <body>
+<button id="global-theme-toggle" class="theme-toggle-floating" type="button" aria-label="Toggle theme">
+    <span data-role="icon">🌙</span>
+    <span data-role="label">다크 모드</span>
+</button>
 <div class="layout">
     <div class="header">
         <div>
@@ -1334,6 +1340,12 @@
                 if (icon) icon.textContent = '🌙';
                 if (label) label.textContent = themeModeText('dark');
             }
+        }
+        const themeToggle = document.getElementById('global-theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function () {
+                applyTheme(currentTheme() === 'dark' ? 'light' : 'dark', true);
+            });
         }
         applyTheme(currentTheme(), false);
     })();

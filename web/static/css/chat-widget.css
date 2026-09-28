@@ -45,7 +45,8 @@
     right: 0;
     bottom: 76px;
     width: min(380px, calc(100vw - 24px));
-    height: min(520px, calc(100vh - 120px));
+    height: min(520px, calc(100dvh - 260px));
+    min-height: 320px;
     background: #ffffff;
     border: 1px solid #dbe4ef;
     border-radius: 16px;
@@ -267,6 +268,7 @@
         right: 0;
         width: min(96vw, 380px);
         height: min(72vh, 520px);
+        min-height: 280px;
         bottom: 70px;
     }
 }
