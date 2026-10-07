@@ -32,9 +32,9 @@
             border-radius: 999px;
             min-height: 44px;
             padding: 10px 14px;
-            font-size: 0.9rem;
-            font-weight: 800;
-            letter-spacing: -0.2px;
+            font-size: var(--mf-type-support);
+            font-weight: 700;
+            letter-spacing: 0;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -64,7 +64,7 @@
         .confirm-toast.show { display: block; }
 
         .confirm-toast-message {
-            font-size: 0.92rem;
+            font-size: var(--mf-type-support);
             line-height: 1.45;
             margin-bottom: 10px;
             word-break: keep-all;
@@ -80,7 +80,7 @@
             border: none;
             border-radius: 8px;
             padding: 7px 10px;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
         }
@@ -106,7 +106,7 @@
         [data-theme="dark"] .map-title { color: #cbd5e1; }
 
         body { 
-            font-family: 'Pretendard', sans-serif; 
+            font-family: var(--font-ui);
             background-color: var(--bg); 
             color: var(--text); 
             margin: 0 auto;
@@ -171,7 +171,7 @@
             top: 50%;
             transform: translate(-50%, -50%);
             color: #cbd5e1;
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             background: rgba(15, 23, 42, 0.45);
             border: 1px solid rgba(148, 163, 184, 0.35);
@@ -208,7 +208,7 @@
             border-radius: 12px;
             min-height: 44px;
             padding: 10px 12px;
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
             transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
@@ -289,7 +289,7 @@
             justify-content: space-between; 
             padding: 8px 0; 
             border-bottom: 1px solid #f2f2f7; 
-            font-size: 0.95rem; 
+            font-size: var(--mf-type-support);
         }
 
         .status-tag { font-weight: bold; }
@@ -299,7 +299,7 @@
         .red-level-normal { color: #16a34a; font-weight: 700; }
         .red-level-mild { color: #ca8a04; font-weight: 700; }
         .red-level-severe { color: #ea580c; font-weight: 700; }
-        .red-level-very-severe { color: #dc2626; font-weight: 800; }
+        .red-level-very-severe { color: #dc2626; font-weight: 700; }
 
         /* 하단 버튼 스타일 */
         .btn { border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: 0.2s; }
@@ -310,11 +310,11 @@
         .btn-main { width: 100%; padding: 20px; background: var(--primary); color: white; font-size: 1.1rem; }
 
         .update-notice {
-            font-size: 0.72rem;
+            font-size: var(--mf-type-support);
             color: #94a3b8;
             text-align: center;
             margin-bottom: 8px;
-            letter-spacing: -0.5px;
+            letter-spacing: 0;
         }
 
         .cam-toggle-btn {
@@ -325,7 +325,7 @@
             border: none;
             border-radius: 10px;
             padding: 10px 12px;
-            font-size: 0.9rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
         }
@@ -364,7 +364,7 @@
         }
 
         .map-title {
-            font-size: 0.98rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             color: #334155;
         }
@@ -374,7 +374,7 @@
             background: #e2e8f0;
             color: #1e293b;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: var(--mf-type-support);
             border-radius: 10px;
             padding: 8px 12px;
             cursor: pointer;
@@ -433,7 +433,7 @@
 
             .eye-select-btn {
                 min-height: 48px;
-                font-size: 0.9rem;
+                font-size: var(--mf-type-support);
             }
 
             .right-panel {
@@ -514,10 +514,10 @@
         <button class="btn" type="button" data-mf-finish>검사 종료</button>
         <div class="card">
             <h2>🔍 자동 측정 데이터</h2>
-            <div style="font-size:0.9rem; color:#475569;">
+            <div style="font-size: var(--mf-type-support); color:#475569;">
                 <div>좌안 충혈도: <b id="redness-left">-</b> <span id="redness-left-level"></span></div>
                 <div style="margin-top:4px;">우안 충혈도: <b id="redness-right">-</b> <span id="redness-right-level"></span></div>
-                <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">
+                <div style="margin-top:6px; font-size: var(--mf-type-support); color:#64748b;">
                     기준: 정상(&lt;0.08) · 경미(0.08~&lt;0.14) · 심함(0.14~&lt;0.22) · 매우심함(≥0.22)
                 </div>
             </div>

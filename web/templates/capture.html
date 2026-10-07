@@ -42,9 +42,9 @@
             border-radius: 999px;
             min-height: 44px;
             padding: 10px 14px;
-            font-size: 0.9rem;
-            font-weight: 800;
-            letter-spacing: -0.2px;
+            font-size: var(--mf-type-support);
+            font-weight: 700;
+            letter-spacing: 0;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -74,7 +74,7 @@
         .confirm-toast.show { display: block; }
 
         .confirm-toast-message {
-            font-size: 0.92rem;
+            font-size: var(--mf-type-support);
             line-height: 1.45;
             margin-bottom: 10px;
             word-break: keep-all;
@@ -90,7 +90,7 @@
             border: none;
             border-radius: 8px;
             padding: 7px 10px;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
         }
@@ -115,7 +115,7 @@
         [data-theme="dark"] .confidence-text { color: #94a3b8 !important; }
 
         body { 
-            font-family: 'Pretendard', sans-serif; 
+            font-family: var(--font-ui);
             background-color: var(--bg); 
             color: var(--text); 
             margin: 0 auto;
@@ -172,7 +172,7 @@
             top: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
             color: #cbd5e1;
             background: rgba(15, 23, 42, 0.55);
             border: 1px solid rgba(148, 163, 184, 0.35);
@@ -215,13 +215,13 @@
         }
 
         .upload-progress-title {
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             margin-bottom: 6px;
         }
 
         .upload-progress-sub {
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             color: #cbd5e1;
         }
 
@@ -236,7 +236,7 @@
             border-radius: 999px;
             min-height: 42px;
             padding: 8px 12px;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
             display: none;
@@ -249,7 +249,7 @@
             background: #eef2ff;
             color: #334155;
             border: 1px dashed var(--border);
-            font-size: 0.9rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
             margin-top: 8px;
@@ -261,20 +261,20 @@
         .camera-bottom-btns { height: 18%; background: #ffffff; display: flex; align-items: center; justify-content: center; gap: 20px; border-top: 1px solid var(--border); padding: 0 20px; box-sizing: border-box; }
         .right-panel { flex: 1; padding: 30px; display: flex; flex-direction: column; justify-content: flex-start; background: var(--card); border-radius: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow-y: auto; box-sizing: border-box; }
         .card { background: var(--card); padding: 25px; border-radius: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .btn-capture { width: 100%; padding: 25px; border-radius: 15px; background: var(--primary); color: white; font-weight: 800; border: none; font-size: 1.3rem; cursor: pointer; }
+        .btn-capture { width: 100%; padding: 25px; border-radius: 15px; background: var(--primary); color: white; font-weight: 700; border: none; font-size: 1.3rem; cursor: pointer; }
         .btn-upload { width: 100%; padding: 16px; border-radius: 12px; background: #eef2ff; color: #334155; font-weight: 700; border: 1px solid var(--border); font-size: 1rem; cursor: pointer; margin-top: 10px; }
-        .btn-restore { width: 100%; padding: 14px; border-radius: 12px; background: #f8fafc; color: #475569; font-weight: 700; border: 1px solid var(--border); font-size: 0.95rem; cursor: pointer; margin-top: 8px; }
-        .btn-mesh-toggle { width: 100%; padding: 14px; border-radius: 12px; background: #eef2ff; color: #1e3a8a; font-weight: 700; border: 1px solid #c7d2fe; font-size: 0.95rem; cursor: pointer; margin-top: 8px; }
+        .btn-restore { width: 100%; padding: 14px; border-radius: 12px; background: #f8fafc; color: #475569; font-weight: 700; border: 1px solid var(--border); font-size: var(--mf-type-support); cursor: pointer; margin-top: 8px; }
+        .btn-mesh-toggle { width: 100%; padding: 14px; border-radius: 12px; background: #eef2ff; color: #1e3a8a; font-weight: 700; border: 1px solid #c7d2fe; font-size: var(--mf-type-support); cursor: pointer; margin-top: 8px; }
         .btn-mesh-toggle.active { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
         .btn-mesh-toggle:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn-go-result { width: 100%; padding: 18px; border-radius: 12px; background: #16a34a; color: #fff; font-weight: 800; border: none; font-size: 1.05rem; cursor: pointer; margin-top: 10px; }
+        .btn-go-result { width: 100%; padding: 18px; border-radius: 12px; background: #16a34a; color: #fff; font-weight: 700; border: none; font-size: 1.05rem; cursor: pointer; margin-top: 10px; }
         .btn-go-result:disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
         .eye-select-wrap { display:flex; gap:10px; }
         .btn-eye { flex:1; padding:14px; border:1px solid var(--border); border-radius:10px; background:#fff; font-weight:700; cursor:pointer; }
         .btn-eye.active { background:var(--primary); color:#fff; border-color:var(--primary); }
         .thumb-wrap { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
         .thumb-box { border:1px solid var(--border); border-radius:10px; padding:8px; background:#f8fafc; cursor:pointer; }
-        .thumb-title { font-size:0.8rem; color:#64748b; margin-bottom:6px; font-weight:700; }
+        .thumb-title { font-size: var(--mf-type-support); color:#64748b; margin-bottom:6px; font-weight:700; }
         .thumb-img { width:100%; height:70px; object-fit:cover; border-radius:8px; background:#e2e8f0; }
 
         .detection-status-box {
@@ -287,12 +287,12 @@
         }
 
         .status-message {
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
             color: #64748b;
         }
 
         .confidence-text {
-            font-size: 0.85rem;
+            font-size: var(--mf-type-support);
             color: #999;
             margin-top: 3px;
         }
@@ -397,13 +397,13 @@
             }
 
             body.mobile-upload-only #capture-message {
-                font-size: 0.86rem;
+                font-size: var(--mf-type-support);
                 line-height: 1.45;
             }
 
             body.mobile-upload-only .mobile-preview-hint {
                 display: block;
-                font-size: 0.9rem;
+                font-size: var(--mf-type-support);
                 width: min(90%, 360px);
             }
 
@@ -446,7 +446,7 @@
         </div>
 
         <div class="camera-bottom-btns">
-            <div id="camera-guide-text" style="font-size: 0.9rem; color: #64748b;">
+            <div id="camera-guide-text" style="font-size: var(--mf-type-support); color: #64748b;">
                 <span data-i18n="capture_eye_align_hint">※ 고해상도 촬영을 위해 가이드 중앙에 눈을 정렬해 주세요.</span>
             </div>
         </div>
@@ -467,17 +467,17 @@
         <div id="step2-card" class="card">
             <h2 style="margin:0 0 15px 0; font-size: 1.2rem; color: var(--primary);" data-i18n="capture_step1">Step 1. 자동셔터 / 디지털 줌</h2>
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-                <span style="font-size:0.95rem; color:#334155;" data-i18n="auto_shutter_label">자동셔터</span>
-                <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#64748b;">
+                <span style="font-size: var(--mf-type-support); color:#334155;" data-i18n="auto_shutter_label">자동셔터</span>
+                <label style="display:flex; align-items:center; gap:8px; font-size: var(--mf-type-support); color:#64748b;">
                     <input type="checkbox" id="auto-shutter-toggle" onchange="toggleAutoShutter()">
                     <span data-i18n="use_label">사용</span>
                 </label>
             </div>
-            <div id="auto-shutter-status" style="font-size:0.85rem; color:#64748b; margin-bottom:14px;">자동셔터 꺼짐</div>
+            <div id="auto-shutter-status" style="font-size: var(--mf-type-support); color:#64748b; margin-bottom:14px;">자동셔터 꺼짐</div>
 
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                <span style="font-size:0.95rem; color:#334155;" data-i18n="digital_zoom_label">디지털 줌</span>
-                <span id="zoom-value" style="font-size:0.9rem; color:#64748b;">1.0x</span>
+                <span style="font-size: var(--mf-type-support); color:#334155;" data-i18n="digital_zoom_label">디지털 줌</span>
+                <span id="zoom-value" style="font-size: var(--mf-type-support); color:#64748b;">1.0x</span>
             </div>
             <input id="zoom-slider" type="range" min="1" max="2.5" step="0.1" value="1" oninput="setDigitalZoom(this.value)" style="width:100%;">
         </div>
@@ -491,7 +491,7 @@
             <button id="btn-face-mesh-toggle" class="btn-mesh-toggle active" onclick="toggleFaceMeshPreview()">👁️ Face Mesh 끄기</button>
             <button id="btn-go-result" class="btn-go-result" onclick="goToResult()" disabled data-i18n="btn_view_result">✅ 결과 보기</button>
             <input id="upload-image-input" type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleUploadedImage(event)">
-            <div id="capture-message" style="margin-top:10px; font-size:0.9rem; color:#64748b;" data-i18n="capture_guidance">안내: 얼굴 사진 한 장을 촬영하면 MediaPipe Face Mesh가 좌/우 눈을 자동으로 감지해 분석합니다.</div>
+            <div id="capture-message" style="margin-top:10px; font-size: var(--mf-type-support); color:#64748b;" data-i18n="capture_guidance">안내: 얼굴 사진 한 장을 촬영하면 MediaPipe Face Mesh가 좌/우 눈을 자동으로 감지해 분석합니다.</div>
         </div>
 
     </div>

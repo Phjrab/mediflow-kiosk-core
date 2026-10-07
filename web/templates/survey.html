@@ -24,7 +24,7 @@
 
         body {
             background-color: var(--bg) !important;
-            font-family: 'Pretendard', -apple-system, sans-serif;
+            font-family: var(--font-ui);
             color: var(--text);
         }
 
@@ -38,15 +38,15 @@
         }
 
         h2, h3 {
-            font-size: 1.2rem !important; /* 🎯 1.3 -> 1.2로 살짝 압축 */
-            font-weight: 700 !important;
+            font-size: var(--mf-type-section); /* 🎯 1.3 -> 1.2로 살짝 압축 */
+            font-weight: 700;
             color: var(--text) !important;
             margin-bottom: 16px !important; /* 🎯 30px -> 16px로 대폭 축소 */
         }
 
         label {
-            font-size: 0.9rem !important; /* 🎯 0.95 -> 0.9로 조절 */
-            font-weight: 600 !important;
+            font-size: var(--mf-type-support); /* 🎯 0.95 -> 0.9로 조절 */
+            font-weight: 600;
             color: var(--text-muted) !important;
             margin-bottom: 6px !important; /* 🎯 10px -> 6px로 축소 */
         }
@@ -58,7 +58,7 @@
             width: 100%;
             min-height: 48px !important; /* 🎯 56px -> 48px로 최적화 */
             padding: 0 16px !important;
-            font-size: 1rem !important; /* 🎯 1.05 -> 1rem으로 조절 */
+            font-size: var(--mf-type-body); /* 🎯 1.05 -> 1rem으로 조절 */
             color: var(--text);
             background-color: #f9fafb !important;
             border: 1px solid transparent !important;
@@ -93,8 +93,8 @@
             border: none !important;
             background-color: #f2f4f6 !important;
             color: #4e5968 !important;
-            font-size: 1.3rem !important;
-            font-weight: 600 !important;
+            font-size: 1.3rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -116,8 +116,8 @@
             color: #ffffff !important;
             border: none !important;
             border-radius: 14px !important;
-            font-size: 1.02rem !important;
-            font-weight: 600 !important;
+            font-size: var(--mf-type-action);
+            font-weight: 600;
             cursor: pointer;
             box-shadow: none !important;
             transition: all 0.18s ease;
@@ -140,7 +140,7 @@
             background: #e5e8eb !important;
             color: #4e5968 !important;
             border-radius: 14px !important;
-            font-weight: 600 !important;
+            font-weight: 600;
             border: none !important;
             flex: 0 0 auto;
         }
@@ -182,9 +182,9 @@
             border-radius: 999px;
             min-height: 44px;
             padding: 10px 14px;
-            font-size: 0.9rem;
-            font-weight: 800;
-            letter-spacing: -0.2px;
+            font-size: var(--mf-type-support);
+            font-weight: 700;
+            letter-spacing: 0;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -214,7 +214,7 @@
         .confirm-toast.show { display: block; }
 
         .confirm-toast-message {
-            font-size: 0.92rem;
+            font-size: var(--mf-type-support);
             line-height: 1.45;
             margin-bottom: 10px;
             word-break: keep-all;
@@ -230,7 +230,7 @@
             border: none;
             border-radius: 8px;
             padding: 7px 10px;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
         }
@@ -246,7 +246,7 @@
         }
 
         body {
-            font-family: 'Pretendard', sans-serif;
+            font-family: var(--font-ui);
             background-color: var(--bg);
             color: var(--text);
             margin: 0 auto;
@@ -371,7 +371,7 @@
             justify-content: center;
             background: #ffffff;
             color: #64748b;
-            font-weight: 800;
+            font-weight: 700;
             transition: background 0.35s ease, border-color 0.35s ease, color 0.35s ease, box-shadow 0.35s ease;
         }
 
@@ -387,12 +387,12 @@
             flex-direction: column;
             gap: 4px;
             color: #475569;
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
         }
 
         .progress-label strong {
             color: var(--text);
-            font-size: 0.98rem;
+            font-size: var(--mf-type-support);
         }
 
         @media screen and (max-width: 768px) {
@@ -413,12 +413,12 @@
         /* 입력 폼 스타일 */
         .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .field { display: flex; flex-direction: column; gap: 5px; }
-        label { font-weight: 600; font-size: 0.9rem; }
+        label { font-weight: 600; font-size: var(--mf-type-support); }
         input, select, textarea {
             padding: 12px;
             border-radius: 10px;
             border: 1px solid var(--border);
-            font-size: 1rem;
+            font-size: var(--mf-type-body);
             background: #f9f9f9;
         }
 
@@ -540,7 +540,7 @@
             border-radius: 14px;
             background: linear-gradient(90deg, rgba(0,122,255,0.12), rgba(0,122,255,0.06));
             border: 1px solid rgba(0,122,255,0.18);
-            font-weight: 800;
+            font-weight: 700;
             color: var(--primary);
         }
 
@@ -570,7 +570,7 @@
             padding: 15px 50px;
             border-radius: 15px;
             border: none;
-            font-size: 1.2rem;
+            font-size: var(--mf-type-section);
             font-weight: 700;
             cursor: pointer;
             transition: transform 0.1s;
@@ -633,7 +633,7 @@
                 width: 100%;
                 min-height: 48px;
                 padding: 12px 16px;
-                font-size: 1rem;
+                font-size: var(--mf-type-body);
                 box-sizing: border-box;
             }
         }

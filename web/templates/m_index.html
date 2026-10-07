@@ -26,7 +26,7 @@
 
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "SF Pro Display", "Pretendard", sans-serif;
+            font-family: var(--font-ui);
             background-color: var(--bg);
             color: var(--text-dark);
             margin: 0;
@@ -58,7 +58,7 @@
             color: var(--text-dark);
             padding: 8px 12px;
             border-radius: 20px;
-            font-size: 0.9rem;
+            font-size: var(--mf-type-support);
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -77,8 +77,8 @@
 
         h1 {
             font-size: 2.2rem;
-            font-weight: 800;
-            letter-spacing: -0.05rem;
+            font-weight: 700;
+            letter-spacing: 0;
             margin: 0 0 16px 0;
             line-height: 1.2;
         }
@@ -106,7 +106,7 @@
             color: var(--primary);
             padding: 10px 4px;
             border-radius: 12px;
-            font-size: 0.85rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             border: 1px solid var(--border);
         }
@@ -158,7 +158,7 @@
 
         .helper-text {
             margin-top: 24px;
-            font-size: 0.8rem;
+            font-size: var(--mf-type-support);
             color: var(--helper);
             line-height: 1.4;
         }

@@ -46,9 +46,9 @@
             border-radius: 999px;
             min-height: 44px;
             padding: 10px 14px;
-            font-size: 0.9rem;
-            font-weight: 800;
-            letter-spacing: -0.2px;
+            font-size: var(--mf-type-support);
+            font-weight: 700;
+            letter-spacing: 0;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -78,7 +78,7 @@
         .confirm-toast.show { display: block; }
 
         .confirm-toast-message {
-            font-size: 0.92rem;
+            font-size: var(--mf-type-support);
             line-height: 1.45;
             margin-bottom: 10px;
             word-break: keep-all;
@@ -94,7 +94,7 @@
             border: none;
             border-radius: 8px;
             padding: 7px 10px;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
         }
@@ -110,7 +110,7 @@
         }
 
         body {
-            font-family: 'Pretendard', sans-serif;
+            font-family: var(--font-ui);
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
@@ -153,7 +153,7 @@
         /* 입력 폼 스타일 */
         .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .field { display: flex; flex-direction: column; gap: 5px; }
-        label { font-weight: 600; font-size: 0.9rem; }
+        label { font-weight: 600; font-size: var(--mf-type-support); }
         input, select, textarea {
             padding: 12px;
             border-radius: 10px;
@@ -333,7 +333,7 @@
             }
 
             label {
-                font-size: 0.88rem;
+                font-size: var(--mf-type-support);
             }
 
             input,
@@ -341,7 +341,7 @@
             textarea {
                 min-height: 44px;
                 padding: 12px;
-                font-size: 0.95rem;
+                font-size: var(--mf-type-support);
             }
 
             textarea {
@@ -350,7 +350,7 @@
 
             .check-item {
                 padding: 10px;
-                font-size: 0.95rem;
+                font-size: var(--mf-type-support);
             }
 
             .footer-btns {
@@ -360,7 +360,7 @@
 
             .btn {
                 padding: 12px 14px;
-                font-size: 0.98rem;
+                font-size: var(--mf-type-support);
             }
         }
 
@@ -375,13 +375,13 @@
             }
 
             .check-item {
-                font-size: 0.92rem;
+                font-size: var(--mf-type-support);
                 padding: 9px;
             }
 
             .btn {
                 padding: 11px 12px;
-                font-size: 0.95rem;
+                font-size: var(--mf-type-support);
             }
 
             .confirm-toast {

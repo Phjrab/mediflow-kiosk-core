@@ -20,7 +20,7 @@
             min-height: 800px;
             background: var(--bg);
             color: var(--text);
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: var(--font-ui);
         }
 
         .page {
@@ -38,8 +38,8 @@
             margin-bottom: 36px;
         }
 
-        .service-name { color: var(--primary); font-weight: 800; font-size: 1.05rem; }
-        .step { color: var(--sub); font-weight: 700; font-size: 0.95rem; }
+        .service-name { color: var(--primary); font-weight: 700; font-size: 1.05rem; }
+        .step { color: var(--sub); font-weight: 700; font-size: var(--mf-type-support); }
         h1 { margin: 0; font-size: 2.5rem; letter-spacing: 0; }
         .lead { margin: 12px 0 30px; color: var(--sub); font-size: 1.1rem; }
 
@@ -67,7 +67,7 @@
             border-radius: 8px;
             min-height: 42px;
             padding: 0 18px;
-            font-weight: 800;
+            font-weight: 700;
             white-space: nowrap;
             cursor: pointer;
         }
@@ -96,10 +96,10 @@
         .modality:hover { transform: translateY(-2px); }
         .modality.selected { border-color: var(--primary); box-shadow: 0 10px 26px rgba(0, 122, 255, 0.14); }
         .modality:focus-visible, button:focus-visible { outline: 3px solid rgba(0, 122, 255, 0.35); outline-offset: 2px; }
-        .number { color: var(--primary); font-size: 0.9rem; font-weight: 800; }
+        .number { color: var(--primary); font-size: var(--mf-type-support); font-weight: 700; }
         .modality h2 { margin: 16px 0 8px; font-size: 1.55rem; }
         .modality p { margin: 0; color: var(--sub); line-height: 1.5; }
-        .source { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.9rem; color: var(--sub); }
+        .source { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); font-size: var(--mf-type-support); color: var(--sub); }
 
         .status {
             position: absolute;
@@ -107,14 +107,14 @@
             top: 18px;
             border-radius: 999px;
             padding: 6px 10px;
-            font-size: 0.78rem;
-            font-weight: 800;
+            font-size: var(--mf-type-support);
+            font-weight: 700;
             background: var(--primary-soft);
             color: var(--primary);
         }
 
         .status.ready { color: var(--success); background: rgba(19, 138, 82, 0.12); }
-        .checkmark { position: absolute; right: 22px; bottom: 20px; font-weight: 900; color: var(--primary); opacity: 0; }
+        .checkmark { position: absolute; right: 22px; bottom: 20px; font-weight: 700; color: var(--primary); opacity: 0; }
         .selected .checkmark { opacity: 1; }
 
         .footer {
@@ -132,7 +132,7 @@
             border-radius: 8px;
             padding: 0 26px;
             font-size: 1rem;
-            font-weight: 800;
+            font-weight: 700;
             border: 1px solid var(--border);
             cursor: pointer;
         }
@@ -145,9 +145,9 @@
             .page { min-height: 100vh; padding: 24px 16px; }
             .topline { margin-bottom: 24px; }
             h1 { font-size: 1.9rem; }
-            .lead { font-size: 0.98rem; margin-bottom: 22px; }
+            .lead { font-size: var(--mf-type-support); margin-bottom: 22px; }
             .all-row { align-items: flex-start; gap: 12px; padding: 14px; }
-            .all-row span { display: block; margin: 4px 0 0; font-size: 0.86rem; }
+            .all-row span { display: block; margin: 4px 0 0; font-size: var(--mf-type-support); }
             .modality-grid { grid-template-columns: 1fr; }
             .modality { min-height: 168px; }
             .footer { align-items: stretch; flex-direction: column; gap: 14px; }

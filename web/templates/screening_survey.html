@@ -12,10 +12,10 @@
     </script>
     <style>
         * { box-sizing: border-box; }
-        body { margin: 0; width: 100%; min-height: 800px; background: var(--bg); color: var(--text); font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; width: 100%; min-height: 800px; background: var(--bg); color: var(--text); font-family: var(--font-ui); }
         .page { width: 100%; min-height: 800px; padding: 34px 64px 42px; }
         header { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
-        .eyebrow { color: var(--primary); font-size: 0.95rem; font-weight: 800; margin-bottom: 8px; }
+        .eyebrow { color: var(--primary); font-size: var(--mf-type-support); font-weight: 700; margin-bottom: 8px; }
         h1 { margin: 0; font-size: 2.25rem; letter-spacing: 0; }
         .selected-summary { color: var(--sub); font-weight: 700; text-align: right; }
         form { display: grid; gap: 16px; }
@@ -25,7 +25,7 @@
         .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         .field { display: flex; flex-direction: column; gap: 7px; }
         .field.full { grid-column: 1 / -1; }
-        label, legend { font-weight: 700; font-size: 0.9rem; }
+        label, legend { font-weight: 700; font-size: var(--mf-type-support); }
         input, select, textarea {
             width: 100%;
             border: 1px solid var(--border);
@@ -42,9 +42,9 @@
         .check-item { display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--field); font-weight: 600; }
         .check-item input { width: 18px; min-height: 18px; margin: 0; }
         .footer { position: sticky; bottom: 0; margin-top: 22px; padding: 16px 0 0; background: var(--bg); display: flex; justify-content: space-between; align-items: center; gap: 14px; }
-        .note { color: var(--sub); font-size: 0.88rem; line-height: 1.45; }
+        .note { color: var(--sub); font-size: var(--mf-type-support); line-height: 1.45; }
         .actions { display: flex; gap: 10px; }
-        .btn { min-height: 50px; border-radius: 8px; padding: 0 24px; font-size: 1rem; font-weight: 800; border: 1px solid var(--border); cursor: pointer; }
+        .btn { min-height: 50px; border-radius: 8px; padding: 0 24px; font-size: 1rem; font-weight: 700; border: 1px solid var(--border); cursor: pointer; }
         .btn-back { background: var(--surface); color: var(--text); }
         .btn-next { background: var(--primary); color: #fff; border-color: var(--primary); min-width: 210px; }
         .error { display: none; color: #b42318; font-weight: 700; margin-top: 10px; }

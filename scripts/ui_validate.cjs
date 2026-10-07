@@ -225,7 +225,7 @@ const go=(page,route)=>page.goto(base+route,{waitUntil:'load'});
    }
   }
  } finally {await browser.close();}
- const output=path.join(__dirname,'../docs/ui-redesign/logs',process.argv.includes('--stage2')?'stage2-browser.json':'validation-browser.json');
+ const output=process.env.MEDIFLOW_UI_VALIDATION_OUTPUT || path.join(__dirname,'../docs/ui-redesign/logs',process.argv.includes('--stage2')?'stage2-browser.json':'validation-browser.json');
  fs.writeFileSync(output,JSON.stringify(results,null,2));console.log(JSON.stringify(results,null,2));
  if(results.some(x=>x.status!=='PASS'))process.exitCode=1;
 })().catch(e=>{console.error(e);process.exit(1)});

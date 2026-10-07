@@ -30,7 +30,7 @@
                 radial-gradient(circle at top right, var(--page-bg-accent-2), transparent 24%),
                 linear-gradient(180deg, var(--page-bg-start) 0%, var(--page-bg-end) 100%);
             color: var(--text);
-            font-family: 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+            font-family: var(--font-ui);
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
             word-break: keep-all;
@@ -60,10 +60,10 @@
             padding: 10px 16px;
             border: none;
             border-radius: 12px;
-            font-size: 0.95rem;
-            font-weight: 800;
+            font-size: var(--mf-type-support);
+            font-weight: 700;
             cursor: pointer;
-            letter-spacing: -0.2px;
+            letter-spacing: 0;
         }
 
         .btn-back { background: var(--surface-strong); color: #1e293b; }
@@ -105,7 +105,7 @@
         .kicker {
             color: var(--navy);
             font-size: 9pt;
-            font-weight: 800;
+            font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
         }
@@ -129,7 +129,7 @@
             color: var(--navy);
             border-radius: 999px;
             font-size: 8.8pt;
-            font-weight: 800;
+            font-weight: 700;
             padding: 5px 10px;
             white-space: nowrap;
         }
@@ -161,7 +161,7 @@
 
         .meta-value {
             font-size: 11pt;
-            font-weight: 800;
+            font-weight: 700;
             color: var(--text);
         }
 
@@ -185,12 +185,12 @@
             border-bottom: 1px solid var(--border);
             color: var(--navy);
             font-size: 11pt;
-            font-weight: 900;
+            font-weight: 700;
         }
 
         .chip {
             font-size: 8.5pt;
-            font-weight: 800;
+            font-weight: 700;
             color: var(--navy);
             border: 1px solid var(--border-strong);
             background: var(--surface-elevated);
@@ -272,7 +272,7 @@
             background: var(--surface-soft);
             border-bottom: 1px solid var(--border);
             font-size: 9.6pt;
-            font-weight: 800;
+            font-weight: 700;
             color: var(--navy);
         }
 
@@ -334,7 +334,7 @@
             padding: 4px 9px;
             border-radius: 999px;
             font-size: 8.6pt;
-            font-weight: 800;
+            font-weight: 700;
             white-space: nowrap;
         }
 
@@ -380,7 +380,7 @@
             margin-bottom: 8px;
             color: var(--navy);
             font-size: 10pt;
-            font-weight: 900;
+            font-weight: 700;
         }
 
         .guide-summary {
@@ -415,7 +415,7 @@
             margin-bottom: 8px;
             color: var(--navy);
             font-size: 10pt;
-            font-weight: 900;
+            font-weight: 700;
         }
 
         .guide-bullets {

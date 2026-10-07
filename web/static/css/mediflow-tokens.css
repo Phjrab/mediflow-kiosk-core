@@ -1,5 +1,17 @@
-/* MediFlow's single colour/spacing layer. Legacy names are compatibility aliases. */
+/* Official SUIT v2.0.5 full Variable WOFF2; OFL and upstream CSS in ../fonts/suit. */
+@font-face {
+  font-family: 'SUIT Variable';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../fonts/suit/SUIT-Variable.woff2') format('woff2');
+}
+/* MediFlow's shared tokens. Legacy names are compatibility aliases. */
 :root {
+  --font-ui: 'SUIT Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: var(--font-ui);
+  --font-numeric: var(--font-ui);
+  --mf-weight-body: 400; --mf-weight-label: 500; --mf-weight-action: 600; --mf-weight-title: 700;
   --mf-bg: #f6f8f5; --mf-surface: #fff; --mf-ink: #173534;
   --mf-muted: #526764; --mf-teal: #146b65; --mf-soft: #e7f1ed;
   --mf-line: #a6bcb5; --mf-danger: #a12b22; --mf-warning: #795400;

@@ -37,9 +37,9 @@
             border-radius: 999px;
             min-height: 44px;
             padding: 10px 14px;
-            font-size: 0.9rem;
-            font-weight: 800;
-            letter-spacing: -0.2px;
+            font-size: var(--mf-type-support);
+            font-weight: 700;
+            letter-spacing: 0;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -69,7 +69,7 @@
         .confirm-toast.show { display: block; }
 
         .confirm-toast-message {
-            font-size: 0.92rem;
+            font-size: var(--mf-type-support);
             line-height: 1.45;
             margin-bottom: 10px;
             word-break: keep-all;
@@ -85,7 +85,7 @@
             border: none;
             border-radius: 8px;
             padding: 7px 10px;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
         }
@@ -101,7 +101,7 @@
         }
 
         body {
-            font-family: 'Pretendard', -apple-system, sans-serif;
+            font-family: var(--font-ui);
             background-color: var(--bg);
             color: var(--text-dark);
             margin: 0;
@@ -127,7 +127,7 @@
             margin: 20px auto;
         }
 
-        .auth-header h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 15px; }
+        .auth-header h2 { font-size: 2.5rem; font-weight: 700; margin-bottom: 15px; }
         .auth-header p { font-size: 1.2rem; color: var(--text-sub); margin-bottom: 50px; }
 
         .input-group { text-align: left; margin-bottom: 35px; }
@@ -231,7 +231,7 @@
             }
 
             .auth-header h2 { font-size: 1.8rem; margin-bottom: 10px; }
-            .auth-header p { font-size: 0.98rem; margin-bottom: 24px; }
+            .auth-header p { font-size: var(--mf-type-support); margin-bottom: 24px; }
             .input-group { margin-bottom: 18px; }
             .input-group input {
                 min-height: 48px;
@@ -246,7 +246,7 @@
                 margin-bottom: 12px;
             }
 
-            .btn-back { font-size: 0.96rem; }
+            .btn-back { font-size: var(--mf-type-support); }
         }
     </style>
     <link rel="stylesheet" href="/static/css/mediflow-tokens.css">

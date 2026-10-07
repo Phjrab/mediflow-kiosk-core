@@ -32,9 +32,9 @@
             border-radius: 999px;
             min-height: 44px;
             padding: 10px 14px;
-            font-size: 0.9rem;
-            font-weight: 800;
-            letter-spacing: -0.2px;
+            font-size: var(--mf-type-body);
+            font-weight: 600;
+            letter-spacing: 0;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -64,7 +64,7 @@
         .confirm-toast.show { display: block; }
 
         .confirm-toast-message {
-            font-size: 0.92rem;
+            font-size: var(--mf-type-body);
             line-height: 1.45;
             margin-bottom: 10px;
             word-break: keep-all;
@@ -80,8 +80,8 @@
             border: none;
             border-radius: 8px;
             padding: 7px 10px;
-            font-size: 0.82rem;
-            font-weight: 700;
+            font-size: var(--mf-type-support);
+            font-weight: 600;
             cursor: pointer;
         }
 
@@ -116,7 +116,7 @@
 
         body {
             margin: 0 auto;
-            font-family: 'Pretendard', -apple-system, sans-serif;
+            font-family: var(--font-ui);
             background: var(--bg);
             color: var(--text);
             width: 100%;
@@ -149,7 +149,7 @@
 
         .desc {
             color: var(--muted);
-            font-size: 0.92rem;
+            font-size: var(--mf-type-body);
             margin-top: 6px;
         }
 
@@ -170,12 +170,12 @@
         .section-title {
             margin: 16px 0 10px 0;
             font-size: 1rem;
-            font-weight: 800;
+            font-weight: 600;
             color: var(--primary);
         }
 
         .llm-note {
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             color: var(--muted);
             margin-bottom: 10px;
             line-height: 1.4;
@@ -197,8 +197,8 @@
         }
 
         .key-chip {
-            font-size: 0.72rem;
-            font-weight: 800;
+            font-size: var(--mf-type-meta);
+            font-weight: 600;
             color: var(--primary);
             background: rgba(0, 122, 255, 0.08);
             border: 1px solid rgba(0, 122, 255, 0.18);
@@ -208,14 +208,14 @@
         }
 
         .field-desc {
-            font-size: 0.8rem;
+            font-size: var(--mf-type-support);
             color: var(--muted);
             line-height: 1.45;
             margin-bottom: 8px;
         }
 
         .field-hint {
-            font-size: 0.77rem;
+            font-size: var(--mf-type-meta);
             color: #475569;
             background: #f8fafc;
             border: 1px dashed var(--border);
@@ -232,8 +232,8 @@
 
         .field label {
             display: block;
-            font-size: 0.82rem;
-            font-weight: 700;
+            font-size: var(--mf-type-support);
+            font-weight: 600;
             margin-bottom: 6px;
             color: #334155;
         }
@@ -245,7 +245,7 @@
             padding: 10px;
             border-radius: 8px;
             border: 1px solid var(--border);
-            font-size: 0.95rem;
+            font-size: var(--mf-type-body);
         }
 
         .actions {
@@ -258,8 +258,8 @@
             border: none;
             border-radius: 10px;
             padding: 11px 16px;
-            font-size: 0.95rem;
-            font-weight: 700;
+            font-size: var(--mf-type-body);
+            font-weight: 600;
             cursor: pointer;
         }
 
@@ -284,7 +284,7 @@
         }
 
         .status {
-            font-size: 0.88rem;
+            font-size: var(--mf-type-support);
             color: var(--muted);
             margin-right: auto;
             align-self: center;
@@ -308,12 +308,12 @@
             background: #f8fafc;
             border-radius: 8px;
             padding: 9px;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
         }
 
         [data-theme="dark"] .ai-status-item { background: #0f172a; }
 
-        .ai-warning { color: #b45309; font-size: 0.82rem; line-height: 1.45; }
+        .ai-warning { color: #b45309; font-size: var(--mf-type-support); line-height: 1.45; }
         .ai-error { color: #dc2626; }
         .ai-control-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
         .ai-control-actions .btn:disabled { opacity:0.55; cursor:not-allowed; }
@@ -743,7 +743,7 @@
                 <div class="field-desc">${LLM_HELP.OPENAI_API_KEY.description}</div>
                 <div class="field-hint">💡 ${LLM_HELP.OPENAI_API_KEY.hint}</div>
                 <input type="password" data-llm-key="OPENAI_API_KEY" placeholder="현재: ${escapeHtml(llm.OPENAI_API_KEY_MASKED || '미설정')}">
-                <div style="margin-top:6px; font-size:0.78rem; color:#64748b;">상태: ${llm.OPENAI_API_KEY_CONFIGURED ? '설정됨' : '미설정'}</div>
+                <div style="margin-top:6px; font-size: var(--mf-type-meta); color:#64748b;">상태: ${llm.OPENAI_API_KEY_CONFIGURED ? '설정됨' : '미설정'}</div>
                 <label><input type="checkbox" data-llm-key="OPENAI_API_KEY_DELETE"> 저장된 키 삭제</label>
             </div>
 
@@ -755,7 +755,7 @@
                 <div class="field-desc">${LLM_HELP.GEMINI_API_KEY.description}</div>
                 <div class="field-hint">💡 ${LLM_HELP.GEMINI_API_KEY.hint}</div>
                 <input type="password" data-llm-key="GEMINI_API_KEY" placeholder="현재: ${escapeHtml(llm.GEMINI_API_KEY_MASKED || '미설정')}">
-                <div style="margin-top:6px; font-size:0.78rem; color:#64748b;">상태: ${llm.GEMINI_API_KEY_CONFIGURED ? '설정됨' : '미설정'}</div>
+                <div style="margin-top:6px; font-size: var(--mf-type-meta); color:#64748b;">상태: ${llm.GEMINI_API_KEY_CONFIGURED ? '설정됨' : '미설정'}</div>
                 <label><input type="checkbox" data-llm-key="GEMINI_API_KEY_DELETE"> 저장된 키 삭제</label>
             </div>
 
@@ -778,7 +778,7 @@
                 <div class="field-desc">${LLM_HELP.LOCAL_LLM_API_KEY.description}</div>
                 <div class="field-hint">💡 ${LLM_HELP.LOCAL_LLM_API_KEY.hint}</div>
                 <input type="password" data-llm-key="LOCAL_LLM_API_KEY" placeholder="현재: ${escapeHtml(llm.LOCAL_LLM_API_KEY_MASKED || '미설정')}" ${localKeyManagedByFile ? 'disabled' : ''}>
-                <div style="margin-top:6px; font-size:0.78rem; color:#64748b;">상태: ${llm.LOCAL_LLM_API_KEY_CONFIGURED ? '설정됨' : '미설정'}${localKeyManagedByFile ? ' (보호된 파일)' : ''}</div>
+                <div style="margin-top:6px; font-size: var(--mf-type-meta); color:#64748b;">상태: ${llm.LOCAL_LLM_API_KEY_CONFIGURED ? '설정됨' : '미설정'}${localKeyManagedByFile ? ' (보호된 파일)' : ''}</div>
                 <label><input type="checkbox" data-llm-key="LOCAL_LLM_API_KEY_DELETE" ${localKeyManagedByFile ? 'disabled' : ''}> 저장된 토큰 삭제</label>
             </div>
 

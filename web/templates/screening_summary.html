@@ -14,21 +14,21 @@
 
 
         * { box-sizing: border-box; }
-        body { margin: 0; width: 100%; min-height: 800px; background: var(--bg); color: var(--text); font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; width: 100%; min-height: 800px; background: var(--bg); color: var(--text); font-family: var(--font-ui); }
         .page { width: 100%; min-height: 800px; padding: 46px 66px 40px; display: flex; flex-direction: column; }
-        .eyebrow { color: var(--primary); font-weight: 800; margin-bottom: 8px; }
+        .eyebrow { color: var(--primary); font-weight: 700; margin-bottom: 8px; }
         h1 { margin: 0; font-size: 2.45rem; letter-spacing: 0; }
         .lead { margin: 12px 0 30px; color: var(--sub); font-size: 1.05rem; }
         .summary-list { display: grid; gap: 12px; }
         .summary-row { min-height: 112px; display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; align-items: center; gap: 22px; padding: 20px 24px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
-        .modality { font-size: 1.25rem; font-weight: 900; }
+        .modality { font-size: 1.25rem; font-weight: 700; }
         .description { color: var(--sub); line-height: 1.55; }
-        .status { min-width: 104px; padding: 8px 12px; border-radius: 6px; text-align: center; font-size: 0.84rem; font-weight: 800; }
+        .status { min-width: 104px; padding: 8px 12px; border-radius: 6px; text-align: center; font-size: var(--mf-type-support); font-weight: 700; }
         .status.ready { color: var(--success); background: var(--success-soft); }
         .status.pending { color: var(--warning); background: var(--warning-soft); }
         .notice { margin-top: 20px; padding: 17px 20px; border-left: 4px solid var(--primary); background: var(--surface); color: var(--sub); line-height: 1.55; }
         footer { margin-top: auto; padding-top: 28px; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
-        .btn { min-height: 52px; padding: 0 24px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 1rem; font-weight: 800; cursor: pointer; }
+        .btn { min-height: 52px; padding: 0 24px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 1rem; font-weight: 700; cursor: pointer; }
         .btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; min-width: 190px; }
         @media (max-width: 768px) {
             body { width: 100%; min-height: 100vh; }

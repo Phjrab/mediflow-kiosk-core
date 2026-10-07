@@ -48,9 +48,9 @@
             border-radius: 999px;
             min-height: 44px;
             padding: 10px 14px;
-            font-size: 0.9rem;
-            font-weight: 800;
-            letter-spacing: -0.2px;
+            font-size: var(--mf-type-support);
+            font-weight: 700;
+            letter-spacing: 0;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -94,7 +94,7 @@
         }
 
         body {
-            font-family: 'Pretendard', sans-serif;
+            font-family: var(--font-ui);
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
@@ -183,7 +183,7 @@
             color: #fff;
             padding: 4px 8px;
             border-radius: 5px;
-            font-size: 0.8rem;
+            font-size: var(--mf-type-support);
         }
 
         /* 진단 및 관리 요약 */
@@ -199,7 +199,7 @@
             padding: 5px 12px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: var(--mf-type-support);
             margin-bottom: 10px;
         }
         .tag-danger { background: #ffe5e5; color: var(--danger); }
@@ -209,7 +209,7 @@
         .method-list {
             padding-left: 20px;
             margin: 10px 0;
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
             line-height: 1.6;
         }
 
@@ -224,7 +224,7 @@
             grid-template-columns: 90px 1fr 76px;
             gap: 10px;
             align-items: center;
-            font-size: 0.85rem;
+            font-size: var(--mf-type-support);
         }
 
         .bar-track {
@@ -243,7 +243,7 @@
         .red-level-normal { color: #16a34a; font-weight: 700; }
         .red-level-mild { color: #ca8a04; font-weight: 700; }
         .red-level-severe { color: #ea580c; font-weight: 700; }
-        .red-level-very-severe { color: #dc2626; font-weight: 800; }
+        .red-level-very-severe { color: #dc2626; font-weight: 700; }
 
         .all-history-list {
             margin-top: 10px;
@@ -285,7 +285,7 @@
             grid-template-columns: 92px 1fr auto auto auto;
             gap: 8px;
             align-items: center;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
         }
 
         .history-date {
@@ -305,7 +305,7 @@
             border: none;
             border-radius: 8px;
             padding: 6px 8px;
-            font-size: 0.76rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             color: #fff;
             background: var(--primary);
@@ -320,7 +320,7 @@
             border: none;
             border-radius: 8px;
             padding: 6px 8px;
-            font-size: 0.76rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             color: #fff;
             background: #ef4444;
@@ -354,13 +354,13 @@
         }
 
         .survey-meta {
-            font-size: 0.8rem;
+            font-size: var(--mf-type-support);
             color: #64748b;
             margin-bottom: 4px;
         }
 
         .survey-summary {
-            font-size: 0.85rem;
+            font-size: var(--mf-type-support);
             color: #334155;
             line-height: 1.4;
         }
@@ -369,7 +369,7 @@
             border: none;
             border-radius: 8px;
             padding: 6px 10px;
-            font-size: 0.76rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             color: #fff;
             background: #ef4444;
@@ -391,7 +391,7 @@
             grid-template-columns: 92px 1fr 1fr;
             gap: 8px;
             align-items: center;
-            font-size: 0.78rem;
+            font-size: var(--mf-type-support);
         }
 
         .trend-date {
@@ -450,7 +450,7 @@
         }
 
         .line-chart-title {
-            font-size: 0.8rem;
+            font-size: var(--mf-type-support);
             color: #64748b;
             margin-bottom: 6px;
         }
@@ -467,7 +467,7 @@
             margin-top: 6px;
             display: flex;
             gap: 10px;
-            font-size: 0.76rem;
+            font-size: var(--mf-type-support);
             color: #475569;
             flex-wrap: wrap;
         }
@@ -524,11 +524,11 @@
             padding: 13px 28px;
             border-radius: 12px;
             border: none;
-            font-size: 0.98rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
             white-space: nowrap;
-            letter-spacing: -0.2px;
+            letter-spacing: 0;
         }
         .btn-home { background: var(--primary); color: white; }
         .btn-print { background: #1d1d1f; color: white; }
@@ -568,7 +568,7 @@
         }
 
         .pdf-title {
-            font-size: 0.98rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             color: #334155;
         }
@@ -578,7 +578,7 @@
             background: #e2e8f0;
             color: #1e293b;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: var(--mf-type-support);
             border-radius: 10px;
             padding: 8px 12px;
             cursor: pointer;
@@ -634,7 +634,7 @@
         }
 
         .survey-title {
-            font-size: 0.98rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             color: #334155;
         }
@@ -644,7 +644,7 @@
             background: #e2e8f0;
             color: #1e293b;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: var(--mf-type-support);
             border-radius: 10px;
             padding: 8px 12px;
             cursor: pointer;
@@ -687,7 +687,7 @@
             gap: 6px;
             align-items: start;
             margin-bottom: 5px;
-            font-size: 0.86rem;
+            font-size: var(--mf-type-support);
         }
 
         .survey-label {
@@ -712,12 +712,12 @@
             border-radius: 10px;
             background: #f8fafc;
             padding: 8px 10px;
-            font-size: 0.86rem;
+            font-size: var(--mf-type-support);
             color: #334155;
         }
 
         .survey-empty {
-            font-size: 0.86rem;
+            font-size: var(--mf-type-support);
             color: #64748b;
             padding: 8px 9px;
             border: 1px dashed var(--border);
@@ -774,7 +774,7 @@
         }
 
         .confirm-toast-message {
-            font-size: 0.92rem;
+            font-size: var(--mf-type-support);
             line-height: 1.45;
             margin-bottom: 10px;
             word-break: keep-all;
@@ -790,7 +790,7 @@
             border: none;
             border-radius: 8px;
             padding: 7px 10px;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
         }
@@ -1180,7 +1180,7 @@
 
             .btn,
             h1, h2 {
-                font-weight: 900;
+                font-weight: 700;
             }
         }
 
@@ -1243,7 +1243,7 @@
     <div class="main-grid">
         <div class="card">
             <h2>📅 검사 이력 비교 (최근 2회)</h2>
-            <p style="font-size: 0.9rem; color: #666;">사진을 클릭하면 해당 시점의 정밀 사진을 볼 수 있습니다.</p>
+            <p style="font-size: var(--mf-type-support); color: #666;">사진을 클릭하면 해당 시점의 정밀 사진을 볼 수 있습니다.</p>
             
             <div class="history-section">
                 <div>
@@ -1277,7 +1277,7 @@
                 <div class="summary-box history-records-box" style="margin-top: 4px; margin-bottom: 0;">
                     <strong style="color:var(--primary)">🗂️ 전체 검사 기록</strong>
                     <div id="all-history-list" class="all-history-list">
-                        <div style="font-size:0.85rem; color:#64748b;">기록 불러오는 중...</div>
+                        <div style="font-size: var(--mf-type-support); color:#64748b;">기록 불러오는 중...</div>
                     </div>
                 </div>
             </div>
@@ -1319,17 +1319,17 @@
             <div class="summary-box">
                 <strong style="color:var(--primary)">📝 검사 시 작성한 설문</strong>
                 <div id="survey-history-list" class="survey-list">
-                    <div style="font-size:0.85rem; color:#64748b;">설문 기록 불러오는 중...</div>
+                    <div style="font-size: var(--mf-type-support); color:#64748b;">설문 기록 불러오는 중...</div>
                 </div>
             </div>
 
             <div class="summary-box">
                 <strong style="color:var(--primary)">📊 충혈도 비교 (현재 vs 과거)</strong>
-                <div style="font-size:0.8rem; color:#64748b; margin-top:6px;">
+                <div style="font-size: var(--mf-type-support); color:#64748b; margin-top:6px;">
                     기준: 정상(&lt;0.08) · 경미(0.08~&lt;0.14) · 심함(0.14~&lt;0.22) · 매우심함(≥0.22)
                 </div>
                 <div id="redness-graph" class="redness-graph">
-                    <div style="font-size:0.9rem; color:#64748b; margin-top:8px;">비교 데이터 준비 중...</div>
+                    <div style="font-size: var(--mf-type-support); color:#64748b; margin-top:8px;">비교 데이터 준비 중...</div>
                 </div>
             </div>
 
@@ -1339,11 +1339,11 @@
     <div class="trend-grid">
         <div class="trend-card">
             <strong style="color:var(--primary)">📈 충혈도 추이 (전체 기록)</strong>
-            <div style="font-size:0.8rem; color:#64748b; margin-top:6px;">
+            <div style="font-size: var(--mf-type-support); color:#64748b; margin-top:6px;">
                 각 검사 시점의 좌/우 충혈도 변화를 막대 그래프로 표시합니다.
             </div>
             <div id="redness-trend-rows" class="trend-rows">
-                <div style="font-size:0.9rem; color:#64748b; margin-top:8px;">추이 데이터 준비 중...</div>
+                <div style="font-size: var(--mf-type-support); color:#64748b; margin-top:8px;">추이 데이터 준비 중...</div>
             </div>
             <div class="line-chart-wrap">
                 <div class="line-chart-title">라인 차트 보기</div>
@@ -1357,11 +1357,11 @@
 
         <div class="trend-card">
             <strong style="color:var(--accent)">📉 눈건강 지표 추이 (확장 가능)</strong>
-            <div style="font-size:0.8rem; color:#64748b; margin-top:6px;">
+            <div style="font-size: var(--mf-type-support); color:#64748b; margin-top:6px;">
                 현재는 AI 위험도/평균 충혈도로 표시되며, 추후 지표 추가 시 자동 확장됩니다.
             </div>
             <div id="health-metric-trend-rows" class="trend-rows">
-                <div style="font-size:0.9rem; color:#64748b; margin-top:8px;">지표 데이터 준비 중...</div>
+                <div style="font-size: var(--mf-type-support); color:#64748b; margin-top:8px;">지표 데이터 준비 중...</div>
             </div>
             <div class="line-chart-wrap">
                 <div class="line-chart-title">라인 차트 보기</div>
@@ -1504,7 +1504,7 @@
             if (!target) return;
 
             if (!records || !records.length) {
-                target.innerHTML = '<div style="font-size:0.85rem; color:#64748b;">저장된 설문 기록이 없습니다.</div>';
+                target.innerHTML = '<div style="font-size: var(--mf-type-support); color:#64748b;">저장된 설문 기록이 없습니다.</div>';
                 return;
             }
 
@@ -1826,7 +1826,7 @@
         function renderAllHistoryList(sessions) {
             const target = document.getElementById('all-history-list');
             if (!sessions || !sessions.length) {
-                target.innerHTML = '<div style="font-size:0.85rem; color:#64748b;">저장된 과거 기록이 없습니다.</div>';
+                target.innerHTML = '<div style="font-size: var(--mf-type-support); color:#64748b;">저장된 과거 기록이 없습니다.</div>';
                 return;
             }
 
@@ -2126,7 +2126,7 @@
         function renderRednessTrend(records) {
             const target = document.getElementById('redness-trend-rows');
             if (!records || records.length < 2) {
-                target.innerHTML = '<div style="font-size:0.9rem; color:#64748b; margin-top:8px;">최소 2회 이상 기록이 있어야 추이를 볼 수 있습니다.</div>';
+                target.innerHTML = '<div style="font-size: var(--mf-type-support); color:#64748b; margin-top:8px;">최소 2회 이상 기록이 있어야 추이를 볼 수 있습니다.</div>';
                 renderLineChart('redness-line-chart', [], []);
                 return;
             }
@@ -2194,7 +2194,7 @@
         function renderHealthMetricTrend(records) {
             const target = document.getElementById('health-metric-trend-rows');
             if (!records || records.length < 2) {
-                target.innerHTML = '<div style="font-size:0.9rem; color:#64748b; margin-top:8px;">지표 추이를 만들기 위한 기록이 부족합니다.</div>';
+                target.innerHTML = '<div style="font-size: var(--mf-type-support); color:#64748b; margin-top:8px;">지표 추이를 만들기 위한 기록이 부족합니다.</div>';
                 renderLineChart('health-line-chart', [], []);
                 return;
             }
@@ -2334,7 +2334,7 @@
 
             graph.innerHTML = rows.length
                 ? rows.join('')
-                : '<div style="font-size:0.9rem; color:#64748b; margin-top:8px;">충혈도 비교 데이터가 부족합니다.</div>';
+                : '<div style="font-size: var(--mf-type-support); color:#64748b; margin-top:8px;">충혈도 비교 데이터가 부족합니다.</div>';
         }
 
         function renderGuide(analysis) {
