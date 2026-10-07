@@ -1,0 +1,30 @@
+[
+  {
+    "name": "remaining active routes / dormant mobile / not-configured direct path",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": [
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/stop",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/stop",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      }
+    ]
+  }
+]

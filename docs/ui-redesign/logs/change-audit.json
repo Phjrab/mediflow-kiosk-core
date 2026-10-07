@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "baseline": "bfab34c79381d1603a5ada1e8a96bee7babcc284",
+  "source_commit": "0c7fbf0f598ea65f952e8bd61dd61842cb8ef331",
+  "secret_pattern_matches": [],
+  "protected_files_changed": [],
+  "files_over_2MB": [],
+  "reviewed_files": 71,
+  "capture_rows": 18,
+  "same_fixture_viewport_route": "PASS",
+  "scope": "own source since baseline + docs/README; synthetic identities/images visually reviewed; explicitly included ignored evidence logs",
+  "evidence_logs_reviewed": 14
+}

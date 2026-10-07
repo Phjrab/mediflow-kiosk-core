@@ -1,0 +1,327 @@
+[
+  {
+    "name": "start",
+    "phase": "before",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "requests": [
+      {
+        "url": "/",
+        "method": "GET"
+      },
+      {
+        "url": "/static/css/chat-widget.css",
+        "method": "GET"
+      },
+      {
+        "url": "/static/css/i18n-common.css",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/translations.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/i18n.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/chat-widget.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/timeout.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/i18n-global.js",
+        "method": "GET"
+      }
+    ]
+  },
+  {
+    "name": "selection",
+    "phase": "before",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "errors": [],
+    "externalBlocked": [],
+    "requests": [
+      {
+        "url": "/screening",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/screening-flow.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/timeout.js",
+        "method": "GET"
+      },
+      {
+        "url": "/api/screening/config",
+        "method": "GET"
+      }
+    ]
+  },
+  {
+    "name": "survey",
+    "phase": "before",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "errors": [],
+    "externalBlocked": [],
+    "requests": [
+      {
+        "url": "/screening/survey",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/screening-flow.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/timeout.js",
+        "method": "GET"
+      }
+    ]
+  },
+  {
+    "name": "capture",
+    "phase": "before",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "errors": [],
+    "externalBlocked": [],
+    "requests": [
+      {
+        "url": "/capture",
+        "method": "GET"
+      },
+      {
+        "url": "/static/css/i18n-common.css",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/translations.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/i18n.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/timeout.js",
+        "method": "GET"
+      },
+      {
+        "url": "/camera/session/start",
+        "method": "POST"
+      },
+      {
+        "url": "/video_feed?mesh=1&t=1791356432146",
+        "method": "GET"
+      },
+      {
+        "url": "/detect_status",
+        "method": "GET"
+      },
+      {
+        "url": "/detect_status",
+        "method": "GET"
+      }
+    ]
+  },
+  {
+    "name": "result",
+    "phase": "before",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "errors": [],
+    "externalBlocked": [],
+    "requests": [
+      {
+        "url": "/result",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/screening-flow.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/timeout.js",
+        "method": "GET"
+      }
+    ]
+  },
+  {
+    "name": "operations",
+    "phase": "before",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "errors": [],
+    "externalBlocked": [],
+    "requests": [
+      {
+        "url": "/admin/config",
+        "method": "GET"
+      },
+      {
+        "url": "/static/css/i18n-common.css",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/translations.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/i18n.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/timeout.js",
+        "method": "GET"
+      },
+      {
+        "url": "/api/admin/config",
+        "method": "GET"
+      },
+      {
+        "url": "/api/admin/ai-control/generation",
+        "method": "GET"
+      },
+      {
+        "url": "/api/admin/ai-control/nodes/synthetic-node/overview",
+        "method": "GET"
+      }
+    ]
+  },
+  {
+    "name": "research",
+    "phase": "before",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "errors": [],
+    "externalBlocked": [],
+    "requests": [
+      {
+        "url": "/admin/ai-experiments",
+        "method": "GET"
+      },
+      {
+        "url": "/api/admin/ai-experiments/capabilities",
+        "method": "GET"
+      },
+      {
+        "url": "/api/admin/ai-experiments/jobs?limit=100",
+        "method": "GET"
+      }
+    ]
+  },
+  {
+    "name": "mobile",
+    "phase": "before",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "errors": [],
+    "externalBlocked": [],
+    "requests": [
+      {
+        "url": "/screening",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/screening-flow.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/timeout.js",
+        "method": "GET"
+      },
+      {
+        "url": "/api/screening/config",
+        "method": "GET"
+      }
+    ]
+  },
+  {
+    "name": "history",
+    "phase": "before",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "errors": [],
+    "externalBlocked": [
+      "https://via.placeholder.com/200x150/333/fff",
+      "https://via.placeholder.com/200x150/333/fff",
+      "https://via.placeholder.com/200x150/e2e8f0/64748b",
+      "https://via.placeholder.com/200x150/e2e8f0/64748b",
+      "https://via.placeholder.com/200x150/e2e8f0/64748b",
+      "https://via.placeholder.com/200x150/e2e8f0/64748b"
+    ],
+    "requests": [
+      {
+        "url": "/report",
+        "method": "GET"
+      },
+      {
+        "url": "/static/css/chat-widget.css",
+        "method": "GET"
+      },
+      {
+        "url": "/static/css/i18n-common.css",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/translations.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/i18n.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/chat-widget.js",
+        "method": "GET"
+      },
+      {
+        "url": "/static/js/timeout.js",
+        "method": "GET"
+      },
+      {
+        "url": "/api/history?user_id=synthetic%40example.invalid&limit=1000",
+        "method": "GET"
+      },
+      {
+        "url": "/__fixture/image.png",
+        "method": "GET"
+      },
+      {
+        "url": "/api/survey?user_id=synthetic%40example.invalid&limit=100",
+        "method": "GET"
+      }
+    ]
+  }
+]

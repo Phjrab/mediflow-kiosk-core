@@ -9,6 +9,23 @@ Grad-CAM → 결과 확인·이력/보고서가 기본 흐름입니다. 일반 L
 
 > 이 시스템은 의료 진단을 확정하는 장비가 아니라 이상 징후 선별과 설명을 돕는 연구용 보조 도구입니다. 최종 판단은 의료 전문가의 진료로 확인해야 합니다.
 
+## 2026-10-07 UI 리디자인
+
+환자 화면은 **Guided Screening**, 관리자 설정·운영·연구는 **Clinical Operations**로
+구분합니다. 기존 식별·동의·문진·촬영·결과·이력 경로를 유지하며 피부·두피
+`not_configured`는 검사 선택에서 비활성화합니다. 연구 VLM은 운영 결과와 분리합니다.
+
+[변경 보고서](docs/ui-redesign/FINAL_REPORT.md), [기능 보존표](docs/ui-redesign/INVENTORY.md),
+[검증 결과](docs/ui-redesign/VALIDATION.md), [rollback](docs/ui-redesign/ROLLBACK.md)에
+범위와 한계를 기록했습니다. 아래 새 화면은 실제 Jinja UI의 **합성 fixture** 캡처이며,
+운영 배포·성능·임상·실장비 검증 증거가 아닙니다.
+
+| Guided Screening | Clinical Operations |
+|---|---|
+| ![합성 시작 화면](docs/ui-redesign/captures/after-start.png) | ![합성 연구 화면](docs/ui-redesign/captures/after-research.png) |
+
+기존 배포 화면과 장비 관측 기록은 아래에 그대로 보존합니다.
+
 ## 키오스크 화면 예시
 
 2026-09-28 배포 웹 UI를 읽기 전용으로 촬영한 **시작 → 검사 선택 → 빈 문진**

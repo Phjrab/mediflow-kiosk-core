@@ -1,0 +1,98 @@
+{
+  "status": "PASS",
+  "rendered": [
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/login",
+      "status": 200
+    },
+    {
+      "route": "/screening",
+      "status": 200
+    },
+    {
+      "route": "/screening/survey",
+      "status": 200
+    },
+    {
+      "route": "/screening/capture",
+      "status": 200
+    },
+    {
+      "route": "/screening/result",
+      "status": 200
+    },
+    {
+      "route": "/screening/summary",
+      "status": 200
+    },
+    {
+      "route": "/capture",
+      "status": 200
+    },
+    {
+      "route": "/result",
+      "status": 200
+    },
+    {
+      "route": "/survey",
+      "status": 200
+    },
+    {
+      "route": "/report",
+      "status": 200
+    },
+    {
+      "route": "/report/pdf",
+      "status": 200
+    },
+    {
+      "route": "/training",
+      "status": 200
+    },
+    {
+      "route": "/m",
+      "status": 200
+    },
+    {
+      "route": "/m/dashboard",
+      "status": 200
+    },
+    {
+      "route": "/admin/config",
+      "status": 200
+    },
+    {
+      "route": "/admin/ai-experiments",
+      "status": 200
+    },
+    {
+      "route": "/__fixture/template/m_index",
+      "status": 200
+    },
+    {
+      "route": "/__fixture/template/m_login_start",
+      "status": 200
+    },
+    {
+      "route": "/__fixture/template/m_survey",
+      "status": 200
+    },
+    {
+      "route": "/__fixture/template/m_capture",
+      "status": 200
+    },
+    {
+      "route": "/__fixture/template/m_result",
+      "status": 200
+    },
+    {
+      "route": "/__fixture/template/m_report",
+      "status": 200
+    }
+  ],
+  "inline_js_syntax": "PASS"
+}

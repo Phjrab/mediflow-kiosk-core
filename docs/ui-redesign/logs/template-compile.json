@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "templates": [
+    "screening_capture.html",
+    "m_survey.html",
+    "_guided_header.html",
+    "index.html",
+    "test_i18n.html",
+    "admin_ai_experiments.html",
+    "admin_config.html",
+    "survey.html",
+    "screening_result.html",
+    "m_dashboard.html",
+    "m_capture.html",
+    "login.html",
+    "screening_summary.html",
+    "m_result.html",
+    "m_report.html",
+    "screening_select.html",
+    "capture.html",
+    "m_login.html",
+    "report_pdf.html",
+    "training.html",
+    "result.html",
+    "report.html",
+    "screening_survey.html",
+    "_clinical_header.html",
+    "m_index.html",
+    "m_login_start.html"
+  ]
+}

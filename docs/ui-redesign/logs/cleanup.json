@@ -1,0 +1,11 @@
+{
+  "preview_ports": [
+    5097,
+    5098
+  ],
+  "preview_sessions_ended": true,
+  "temporary_checkouts_removed": true,
+  "temporary_pdf_and_contact_sheets_removed": true,
+  "existing_services_touched": false,
+  "browser_contexts_closed": true
+}

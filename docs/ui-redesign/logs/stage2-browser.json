@@ -1,0 +1,23 @@
+[
+  {
+    "name": "capabilities / all / focus / state",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": []
+  },
+  {
+    "name": "capability failure ignores old ready cache / retry",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": []
+  },
+  {
+    "name": "identity / consent / dialog keyboard focus",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": []
+  }
+]

@@ -1,0 +1,372 @@
+PASS capabilities / all / focus / state
+PASS capability failure ignores old ready cache / retry
+PASS identity / consent / dialog keyboard focus
+PASS survey validation / exact payload / double submit / draft back
+PASS camera missing / alignment / stale / reconnect
+PASS invalid upload / synthetic analysis / result
+PASS permission denied / slow poll no overlap / navigation abort
+PASS mobile upload-only / touch controls / analysis
+PASS result empty / no invented score / finish privacy / provider unavailable
+PASS history / synthetic share / PDF template / no external send
+PASS admin authentication / CSRF / Research disabled boundary
+PASS draft / plan diff / deny / browser-only mock Apply
+PASS mobile PIN error / verification / dashboard access
+PASS remaining active routes / dormant mobile / not-configured direct path
+PASS theme / six languages / keyboard / doubled UI / contrast
+PASS capability text safety / no fabricated skin result
+PASS viewport 1920x1080 / long text / scroll / focus
+PASS viewport 1366x768 / long text / scroll / focus
+PASS viewport 1024x768 / long text / scroll / focus
+PASS viewport 390x844 / long text / scroll / focus
+PASS viewport 683x384 / long text / scroll / focus
+PASS viewport 390x420 / long text / scroll / focus
+[
+  {
+    "name": "capabilities / all / focus / state",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": []
+  },
+  {
+    "name": "capability failure ignores old ready cache / retry",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": []
+  },
+  {
+    "name": "identity / consent / dialog keyboard focus",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": []
+  },
+  {
+    "name": "survey validation / exact payload / double submit / draft back",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": [
+      {
+        "path": "/api/survey",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "camera missing / alignment / stale / reconnect",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": [
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "invalid upload / synthetic analysis / result",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": [
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      },
+      {
+        "path": "/analyze",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/stop",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "permission denied / slow poll no overlap / navigation abort",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": [
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/stop",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "mobile upload-only / touch controls / analysis",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": [
+      {
+        "path": "/analyze",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "result empty / no invented score / finish privacy / provider unavailable",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "writes": []
+  },
+  {
+    "name": "history / synthetic share / PDF template / no external send",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": [
+      {
+        "path": "/api/report/share",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "admin authentication / CSRF / Research disabled boundary",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": []
+  },
+  {
+    "name": "draft / plan diff / deny / browser-only mock Apply",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": [
+      {
+        "path": "/api/admin/ai-control/nodes/synthetic-node/drafts",
+        "method": "POST"
+      },
+      {
+        "path": "/api/admin/ai-control/nodes/synthetic-node/plans",
+        "method": "POST"
+      },
+      {
+        "path": "/api/admin/ai-control/nodes/synthetic-node/operations",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "mobile PIN error / verification / dashboard access",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": [
+      {
+        "path": "/api/mobile_connected",
+        "method": "POST"
+      },
+      {
+        "path": "/api/verify_pin",
+        "method": "POST"
+      },
+      {
+        "path": "/api/verify_pin",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "remaining active routes / dormant mobile / not-configured direct path",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": [
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/stop",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/stop",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "theme / six languages / keyboard / doubled UI / contrast",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js",
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js",
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js",
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js",
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js",
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js",
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js",
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "writes": []
+  },
+  {
+    "name": "capability text safety / no fabricated skin result",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [],
+    "writes": []
+  },
+  {
+    "name": "viewport 1920x1080 / long text / scroll / focus",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "writes": [
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/stop",
+        "method": "POST"
+      },
+      {
+        "path": "/api/mobile_connected",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "viewport 1366x768 / long text / scroll / focus",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "writes": [
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/stop",
+        "method": "POST"
+      },
+      {
+        "path": "/api/mobile_connected",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "viewport 1024x768 / long text / scroll / focus",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "writes": [
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/stop",
+        "method": "POST"
+      },
+      {
+        "path": "/api/mobile_connected",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "viewport 390x844 / long text / scroll / focus",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "writes": [
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/stop",
+        "method": "POST"
+      },
+      {
+        "path": "/api/mobile_connected",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "viewport 683x384 / long text / scroll / focus",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "writes": [
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/stop",
+        "method": "POST"
+      },
+      {
+        "path": "/api/mobile_connected",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "name": "viewport 390x420 / long text / scroll / focus",
+    "status": "PASS",
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "writes": [
+      {
+        "path": "/camera/session/start",
+        "method": "POST"
+      },
+      {
+        "path": "/camera/session/stop",
+        "method": "POST"
+      },
+      {
+        "path": "/api/mobile_connected",
+        "method": "POST"
+      }
+    ]
+  }
+]
