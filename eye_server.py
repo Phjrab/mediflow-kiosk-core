@@ -182,6 +182,8 @@ app.config['SESSION_COOKIE_SECURE'] = os.getenv('SESSION_COOKIE_SECURE', '0').st
 
 # 전역 변수
 current_frame = None  # 실시간 카메라 프레임
+current_frame_observed_at = None  # monotonic timestamp; UI freshness only
+last_camera_error = None
 model_manager = None  # 싱글톤 모델 매니저
 models_initialized = False  # 모델 초기화 완료 여부
 model_init_lock = threading.Lock()
@@ -2628,7 +2630,7 @@ def start_camera_thread(camera_role='webcam'):
     """
     카메라 프레임을 백그라운드에서 계속 읽고 current_frame 업데이트
     """
-    global current_frame, camera_running, camera_thread
+    global current_frame, camera_running, camera_thread, last_camera_error
     global active_camera_role, active_camera_device_index
 
     requested_role = normalize_camera_role(camera_role)
@@ -2644,9 +2646,10 @@ def start_camera_thread(camera_role='webcam'):
 
     active_camera_role = requested_role
     active_camera_device_index = requested_device_index
+    last_camera_error = None
     
     def camera_worker():
-        global current_frame, camera_running
+        global current_frame, current_frame_observed_at, camera_running, last_camera_error
         print(
             f"[카메라 스레드] 백그라운드 프레임 수집 시작... "
             f"role={requested_role}, device=/dev/video{requested_device_index}"
@@ -2662,9 +2665,11 @@ def start_camera_thread(camera_role='webcam'):
         except UvcCameraError as error:
             print(f"[카메라 스레드] 카메라 열기 실패: {error}")
             camera_running = False
+            last_camera_error = 'permission_denied' if 'permission_denied' in str(error) else 'missing'
             return
 
         current_frame = first_frame.copy()
+        current_frame_observed_at = time.monotonic()
         print(
             '[카메라 스레드] USB UVC 연결 성공: '
             f"role={requested_role}, path={camera_metadata['role_path']}, "
@@ -2684,6 +2689,7 @@ def start_camera_thread(camera_role='webcam'):
                 continue
             
             current_frame = frame.copy()
+            current_frame_observed_at = time.monotonic()
             frame_count += 1
             
             # 잘 돌아가는지 확인하기 위한 하트비트 로그 (일단 켜둡니다)
@@ -2703,7 +2709,7 @@ def start_camera_thread(camera_role='webcam'):
 
 def stop_camera_thread():
     """카메라 스레드 안전 종료"""
-    global camera_running, camera_thread, current_frame
+    global camera_running, camera_thread, current_frame, current_frame_observed_at
     global active_camera_role, active_camera_device_index
     camera_running = False
 
@@ -2712,6 +2718,7 @@ def stop_camera_thread():
 
     camera_thread = None
     current_frame = None
+    current_frame_observed_at = None
     active_camera_role = None
     active_camera_device_index = None
 
@@ -3231,6 +3238,15 @@ def video_frame():
         return Response(b'', status=500)
 
 
+def camera_observation():
+    """Additive UI telemetry. Does not change model thresholds or inference."""
+    if current_frame is None or current_frame_observed_at is None:
+        return {'camera_state': last_camera_error or 'missing', 'frame_age_ms': None}
+    age_ms = max(0, round((time.monotonic() - current_frame_observed_at) * 1000))
+    return {'camera_state': 'stale' if age_ms > 3000 else 'streaming',
+            'frame_age_ms': age_ms}
+
+
 @app.route('/detect_status', methods=['GET'])
 def detect_status():
     """
@@ -3243,11 +3259,13 @@ def detect_status():
     """
     global current_frame
     try:
-        if current_frame is None:
+        observation = camera_observation()
+        if observation['camera_state'] != 'streaming':
             return jsonify({
                 'detected': False,
                 'confidence': 0,
-                'message': '카메라 연결을 기다리는 중...'
+                'message': '카메라 프레임이 멈췄습니다.' if observation['camera_state'] == 'stale' else '카메라 연결을 기다리는 중...',
+                **observation,
             }), 200
         
         detected, confidence = check_eye_detection(current_frame)
@@ -3255,7 +3273,8 @@ def detect_status():
         return jsonify({
             'detected': detected,
             'confidence': round(confidence, 3),
-            'message': '🟢 눈이 감지되었습니다!' if detected else '⚪ 눈을 맞춰주세요'
+            'message': '🟢 눈이 감지되었습니다!' if detected else '⚪ 눈을 맞춰주세요',
+            **observation,
         }), 200
     
     except Exception as e:

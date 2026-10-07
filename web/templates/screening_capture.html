@@ -11,28 +11,6 @@
         })();
     </script>
     <style>
-        :root {
-            --primary: #007aff;
-            --primary-soft: #eaf3ff;
-            --bg: #f5f5f7;
-            --surface: #ffffff;
-            --text: #172033;
-            --sub: #667085;
-            --border: #d9e0ea;
-            --success: #138a52;
-            --danger: #b42318;
-        }
-        [data-theme="dark"] {
-            --primary: #58a6ff;
-            --primary-soft: #142a42;
-            --bg: #0f1115;
-            --surface: #171b22;
-            --text: #eef2f7;
-            --sub: #a7b0bf;
-            --border: #303846;
-            --success: #4fd18b;
-            --danger: #ff8b83;
-        }
         * { box-sizing: border-box; }
         body { margin: 0; width: 100%; min-height: 800px; background: var(--bg); color: var(--text); font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; }
         .page { min-height: 800px; padding: 32px 54px 38px; display: flex; flex-direction: column; }
@@ -86,9 +64,14 @@
             .btn { padding: 0 12px; }
         }
     </style>
+    <script src="/static/js/translations.js"></script>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
-    <main class="page">
+<body class="mf-patient mf-screening-capture">
+{% set ui_step = 5 %}{% include "_guided_header.html" %}
+    <main id="mf-content" class="page">
         <header>
             <div>
                 <div class="eyebrow">종합 건강 스크리닝 · 이미지 입력</div>

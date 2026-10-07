@@ -174,7 +174,7 @@
             // Check API key status when opening chat
             checkApiKeyStatus().then(function (hasKey) {
                 if (!hasKey) {
-                    var apiMsg = '채팅 서비스 설정을 확인해 주세요. 관리자에게 문의해 주세요.';
+                    var apiMsg = getTranslation('chat_api_unconfigured') || '선택한 설명 provider가 준비되지 않았습니다. 관리자에게 문의해 주세요.';
                     appendMessage('ai', apiMsg);
                     input.disabled = true;
                     sendBtn.disabled = true;

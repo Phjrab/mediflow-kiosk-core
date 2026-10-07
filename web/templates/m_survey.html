@@ -22,12 +22,6 @@
     </script>
     <style>
         :root {
-            --primary: #007AFF;
-            --bg: #f5f5f7;
-            --card: #ffffff;
-            --text: #1d1d1f;
-            --border: #d2d2d7;
-            --accent: #28cd41;
             --safe-top: env(safe-area-inset-top, 0);
             --safe-bottom: env(safe-area-inset-bottom, 0);
             --safe-left: env(safe-area-inset-left, 0);
@@ -38,14 +32,7 @@
             --fluid-font: clamp(0.95rem, 2.2vw, 1.2rem);
         }
 
-        [data-theme="dark"] {
-            --primary: #4ea1ff;
-            --bg: #0f1115;
-            --card: #161a22;
-            --text: #e5e7eb;
-            --border: #2a3240;
-            --accent: #34d399;
-        }
+
 
         .theme-toggle-floating {
             position: fixed;
@@ -404,15 +391,19 @@
         }
 
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-survey">
+{% set ui_step = 4 %}{% include "_guided_header.html" %}
 
     <header>
         <h1 data-i18n="survey_title">📋 안구 건강 정밀 문진</h1>
         <p data-i18n="survey_instruction">정확한 AI 분석을 위해 현재 상태를 솔직하게 답변해 주세요.</p>
     </header>
 
-    <div class="main-container">
+    <div id="mf-content" class="main-container">
         <div class="card">
             <h2>👤 기본 정보</h2>
             <div class="input-row">

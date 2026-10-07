@@ -22,21 +22,12 @@
     <!-- Global language FAB intentionally not included on this page -->
     <style>
         :root { 
-            --primary: #007AFF; 
+
             --bg: #f5f5f7; 
             --card: #ffffff; 
             --text: #1d1d1f; 
             --border: #d2d2d7; 
             --guide-color: rgba(40, 205, 65, 0.6); /* 연한 녹색 가이드 */
-        }
-
-        [data-theme="dark"] {
-            --primary: #4ea1ff;
-            --bg: #0f1115;
-            --card: #161a22;
-            --text: #e5e7eb;
-            --border: #2a3240;
-            --guide-color: rgba(52, 211, 153, 0.55);
         }
 
         .theme-toggle-floating {
@@ -431,13 +422,19 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-capture">
+{% set ui_step = 5 %}{% include "_guided_header.html" %}
 
+    <div class="mf-task-heading"><h1 data-i18n="mf_capture_heading">촬영할 이미지를 준비해 주세요</h1><p>카메라 안내에 맞춰 촬영하거나 이미지 파일을 업로드하세요.</p></div>
+    <main id="mf-content" class="mf-capture-workspace">
     <div class="left-panel">
         <div class="video-container">
             <!-- Canvas 또는 img로 프레임 표시 -->
-            <img id="video-feed" src="">
+            <img id="video-feed" src="" alt="USB 카메라 또는 업로드 이미지 미리보기">
             <div id="mobile-preview-hint" class="mobile-preview-hint"><span data-i18n="mobile_preview_hint">모바일 업로드 전용 모드입니다.<br>"얼굴 사진 업로드" 버튼으로 사진을 선택해 주세요.</span></div>
             <div id="upload-progress-overlay" class="upload-progress-overlay" aria-live="polite">
                 <div class="upload-progress-card">
@@ -461,7 +458,7 @@
             <div id="detection-status" class="detection-status-box">
                 <div id="status-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #ccc;"></div>
                 <div>
-                    <div id="status-message" class="status-message" data-i18n="status_camera_connecting">카메라 연결 중...</div>
+                    <div id="status-message" role="status" class="status-message" data-i18n="status_camera_connecting">카메라 연결 중...</div>
                     <div id="confidence-text" class="confidence-text"></div>
                 </div>
             </div>
@@ -499,6 +496,7 @@
 
     </div>
 
+    </main>
     <div id="confirm-toast" class="confirm-toast" role="dialog" aria-modal="true" aria-live="assertive">
         <div id="confirm-toast-message" class="confirm-toast-message"></div>
         <div class="confirm-toast-actions">
@@ -519,7 +517,10 @@
         let mobileUploadOnlyMode = false;
         let captureCameraSessionActive = false;
         let videoFallbackInterval = null;
-        let faceMeshPreviewEnabled = true;
+        let faceMeshPreviewEnabled = false;
+        let detectionInFlight = false;
+        let detectionAbort = null;
+        let capturePageActive = true;
         const AUTO_SHUTTER_CONF_THRESHOLD = 0.70; // 70%
         const LAST_UPLOAD_KEY = 'last_mobile_upload_capture';
         const MOBILE_HINT_SEEN_KEY = 'mobile_upload_hint_seen_v1';
@@ -811,29 +812,34 @@
         // 눈 감지 상태 폴링 (서버에서 감지 여부 조회)
         // ==========================================
         async function pollDetectionStatus() {
-            if (mobileUploadOnlyMode) return;
+            if (mobileUploadOnlyMode || previewMode !== 'camera' || detectionInFlight || !capturePageActive) return;
+            detectionInFlight = true;
+            detectionAbort = new AbortController();
+            const statusDot = document.getElementById('status-dot');
+            const statusMessage = document.getElementById('status-message');
+            statusMessage.removeAttribute('data-i18n');
+            const captureButton = document.getElementById('btn-capture-photo');
             try {
-                const response = await fetch('/detect_status');
+                const response = await fetch('/detect_status', {signal: detectionAbort.signal});
                 const data = await response.json();
-                
-                const statusDot = document.getElementById('status-dot');
-                const statusMessage = document.getElementById('status-message');
-                const confidenceText = document.getElementById('confidence-text');
-                
-                if (data.detected) {
-                    statusDot.style.background = '#28cd41';  // 녹색
-                    statusMessage.textContent = data.message;
-                    confidenceText.textContent = `신뢰도: ${(data.confidence * 100).toFixed(1)}%`;
-                } else {
-                    statusDot.style.background = '#b0bec5';  // 회색
-                    statusMessage.textContent = data.message;
-                    confidenceText.textContent = '';
-                }
-
-                handleAutoShutter(data.detected, data.confidence || 0);
+                if (!capturePageActive || previewMode !== 'camera') return;
+                if (!response.ok || data.error) throw new Error('camera_status_unavailable');
+                const stale = data.camera_state === 'stale';
+                const permission = data.camera_state === 'permission_denied';
+                const missing = data.camera_state === 'missing' || /연결|기다리/.test(data.message || '');
+                const ready = data.detected && !stale && !missing && !permission;
+                statusMessage.textContent = permission ? '카메라 접근 권한이 없습니다. 관리자에게 문의해 주세요.' : stale ? '영상이 멈췄습니다. 카메라 연결을 확인해 주세요.' : missing ? '카메라를 연결해 주세요.' : ready ? '촬영할 수 있습니다.' : '촬영 위치를 조정해 주세요.';
+                statusDot.style.background = ready ? '#146b65' : '#795400';
+                captureButton.disabled = stale || missing || permission;
+                document.getElementById('confidence-text').textContent = '';
+                handleAutoShutter(ready, ready ? data.confidence || 0 : 0);
             } catch (error) {
-                console.error('[Detection Status Error]', error);
-            }
+                if (error.name !== 'AbortError' && capturePageActive) {
+                    statusMessage.textContent = '카메라 상태를 확인할 수 없습니다. 연결을 확인해 주세요.';
+                    statusDot.style.background = '#a12b22';
+                    captureButton.disabled = true;
+                }
+            } finally { detectionInFlight = false; }
         }
 
         function toggleAutoShutter() {
@@ -990,6 +996,7 @@
         }
 
         async function useLastUploadedImage() {
+            if (isCapturing) return;
             const captureMessage = document.getElementById('capture-message');
             const dataUrl = localStorage.getItem(LAST_UPLOAD_KEY);
             if (!dataUrl) {
@@ -998,6 +1005,7 @@
             }
 
             try {
+                isCapturing = true;
                 setUploadProgress(true, '최근 업로드 불러오는 중...', '저장된 이미지를 다시 분석합니다.');
                 capturedPhoto = dataUrl;
                 applyUploadedPreview(dataUrl);
@@ -1007,6 +1015,7 @@
                 captureMessage.textContent = normalizeUploadError(error);
             } finally {
                 setUploadProgress(false);
+                isCapturing = false;
             }
         }
 
@@ -1079,6 +1088,7 @@
         }
 
         async function handleUploadedImage(event) {
+            if (isCapturing) return;
             const file = event.target.files && event.target.files[0];
             if (!file) {
                 return;
@@ -1091,6 +1101,7 @@
                     throw new Error('unsupported-image-format');
                 }
 
+                isCapturing = true;
                 captureMessage.textContent = '업로드 이미지 처리 중...';
                 setUploadProgress(true, '이미지 읽는 중...', '사진 파일을 불러오고 있습니다.');
                 const rawDataUrl = await new Promise((resolve, reject) => {
@@ -1138,6 +1149,7 @@
                 captureMessage.textContent = normalizeUploadError(error);
             } finally {
                 setUploadProgress(false);
+                isCapturing = false;
                 event.target.value = '';
             }
         }
@@ -1333,7 +1345,8 @@
                     const captureMessage = document.getElementById('capture-message');
 
                     if (statusDot) statusDot.style.background = '#ef4444';
-                    if (statusMessage) statusMessage.textContent = '카메라 시작 실패';
+                    if (statusMessage) statusMessage.textContent = '카메라를 연결해 주세요.';
+                    document.getElementById('btn-capture-photo').disabled = true;
                     if (captureMessage) {
                         captureMessage.textContent = '카메라 연결에 실패했습니다. 케이블 연결 후 새로고침해 주세요.';
                     }
@@ -1350,6 +1363,8 @@
 
         // 페이지 종료 시 폴링 중지
         window.onbeforeunload = () => {
+            capturePageActive = false;
+            if (detectionAbort) detectionAbort.abort();
             if (detectionPollingInterval) {
                 clearInterval(detectionPollingInterval);
             }
@@ -1358,6 +1373,8 @@
         };
 
         window.addEventListener('pagehide', () => {
+            capturePageActive = false;
+            if (detectionAbort) detectionAbort.abort();
             stopCaptureCameraSession();
         });
     </script>

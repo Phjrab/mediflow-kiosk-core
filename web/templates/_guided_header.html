@@ -1,0 +1,11 @@
+<a class="mf-skip" href="#mf-content" data-i18n="mf_skip">본문으로 이동</a>
+<header class="mf-header">
+  <div class="mf-brand-row"><a class="mf-brand" href="/">MediFlow</a><span class="mf-mode">Guided Screening</span></div>
+  <nav aria-label="검사 진행 단계" data-i18n-aria-label="mf_steps">
+    <ol class="mf-steps">
+    {% for key, label in [('mf_start','시작'),('mf_identity','식별·동의'),('mf_select','검사 선택'),('mf_survey','문진'),('mf_capture','촬영·분석'),('mf_result','결과')] %}
+      <li {% if loop.index == ui_step %}aria-current="step"{% endif %}><span class="mf-step-number" aria-hidden="true">{{ loop.index }}</span><span data-i18n="{{ key }}">{{ label }}</span></li>
+    {% endfor %}
+    </ol>
+  </nav>
+</header>

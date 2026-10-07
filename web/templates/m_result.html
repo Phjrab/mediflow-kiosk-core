@@ -23,27 +23,9 @@
         <!-- Global language FAB intentionally not included on this page -->
     <script defer src="/static/js/chat-widget.js"></script>
     <style>
-        :root { 
-            --primary: #007AFF; 
-            --bg: #f5f5f7; 
-            --card: #ffffff; 
-            --text: #1d1d1f; 
-            --accent: #28cd41; 
-            --danger: #ff3b30; 
-            --warning: #ff9500; 
-            --border: #d2d2d7; 
-        }
 
-        [data-theme="dark"] {
-            --primary: #4ea1ff;
-            --bg: #0f1115;
-            --card: #161a22;
-            --text: #e5e7eb;
-            --accent: #34d399;
-            --danger: #f87171;
-            --warning: #fbbf24;
-            --border: #2a3240;
-        }
+
+
 
         .theme-toggle-floating {
             position: fixed;
@@ -653,9 +635,15 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-result">
+{% set ui_step = 6 %}{% include "_guided_header.html" %}
 
+    <div class="mf-task-heading"><h1 data-i18n="mf_result_heading">검사 결과를 확인하세요</h1><p class="mf-notice">연구용 AI 선별 결과 · 진료 확인 필요<br>모델 점수는 임상 진단 확률이 아닙니다. Grad-CAM은 모델 반응 시각화이며 병변 경계를 뜻하지 않습니다.</p></div>
+    <main id="mf-content" class="mf-capture-workspace">
     <div class="left-panel">
         <div class="captured-media" id="captured-media">
             <img id="captured-image" alt="진단 이미지">
@@ -679,11 +667,12 @@
     </div>
 
     <div class="right-panel">
+        <button class="btn" type="button" data-mf-finish>검사 종료</button>
         <div class="card">
             <h2>🔍 자동 측정 데이터</h2>
             <div style="font-size:0.9rem; color:#475569;">
-                <div data-i18n="redness_left">좌안 충혈도: <b id="redness-left">-</b> <span id="redness-left-level"></span></div>
-                <div style="margin-top:4px;" data-i18n="redness_right">우안 충혈도: <b id="redness-right">-</b> <span id="redness-right-level"></span></div>
+                <div><span data-i18n="redness_left">좌안 충혈도:</span> <b id="redness-left">-</b> <span id="redness-left-level"></span></div>
+                <div style="margin-top:4px;"><span data-i18n="redness_right">우안 충혈도:</span> <b id="redness-right">-</b> <span id="redness-right-level"></span></div>
                 <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">
                     기준: 정상(&lt;0.08) · 경미(0.08~&lt;0.14) · 심함(0.14~&lt;0.22) · 매우심함(≥0.22)
                 </div>
@@ -710,6 +699,7 @@
     </div>
 
 
+    </main>
     <div id="confirm-toast" class="confirm-toast" role="dialog" aria-modal="true" aria-live="assertive">
         <div id="confirm-toast-message" class="confirm-toast-message"></div>
         <div class="confirm-toast-actions">
@@ -809,18 +799,21 @@
         }
 
         function confidenceToLevel(conf) {
+            if (conf == null) return 'tag-warning';
             if (conf >= 80) return 'tag-danger';
             if (conf >= 60) return 'tag-warning';
             return 'tag-normal';
         }
 
         function confidenceToNormalLevel(conf) {
+            if (conf == null) return 'tag-warning';
             if (conf >= 80) return 'tag-normal';
             if (conf >= 60) return 'tag-warning';
             return 'tag-danger';
         }
 
         function formatResultText(conf) {
+            if (conf == null) return '모델 점수 미제공';
             const safeConf = readConfidencePercent(conf);
             if (safeConf >= 80) return `의심(높음, ${safeConf.toFixed(1)}%)`;
             if (safeConf >= 60) return `관찰 필요(${safeConf.toFixed(1)}%)`;
@@ -828,6 +821,7 @@
         }
 
         function formatNormalText(conf) {
+            if (conf == null) return '모델 점수 미제공';
             const safeConf = readConfidencePercent(conf);
             if (safeConf >= 80) return `정상 가능성 높음(${safeConf.toFixed(1)}%)`;
             if (safeConf >= 60) return `정상 가능성 중간(${safeConf.toFixed(1)}%)`;
@@ -1287,11 +1281,11 @@
 
         function extractDiseaseScores(analysis) {
             const scores = {
-                normal: 0,
-                conj: 0,
-                uveitis: 0,
-                eyelid: 0,
-                cataract: 0
+                normal: null,
+                conj: null,
+                uveitis: null,
+                eyelid: null,
+                cataract: null
             };
 
             const eyes = [analysis?.left_eye, analysis?.right_eye].filter(Boolean);

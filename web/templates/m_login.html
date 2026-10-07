@@ -10,14 +10,7 @@
         <script src="/static/js/i18n.js"></script>
         <!-- Global language FAB intentionally not included on this page -->
     <style>
-        :root {
-            --primary: #007AFF;
-            --bg: #f5f7fb;
-            --card: #ffffff;
-            --text: #0f172a;
-            --sub: #64748b;
-            --border: #dbe2ea;
-        }
+
 
         * { box-sizing: border-box; }
 
@@ -103,8 +96,13 @@
             color: #ef4444;
         }
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-login">
+{% set ui_step = 2 %}{% include "_guided_header.html" %}
+<div id="mf-content" tabindex="-1"></div>
 <div class="card" id="mobile-login-card" data-request-id="{{ request_id|e }}">
     <h1 data-i18n="m_login_title">📱 모바일 PIN 인증</h1>
     <p class="desc">키오스크 화면에 표시된 4자리 PIN을 입력해 주세요.</p>

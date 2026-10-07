@@ -23,25 +23,9 @@
         <!-- Global language FAB intentionally not included on this page -->
     <script src="/static/js/chat-widget.js"></script>
     <style>
-        :root {
-            --primary: #007AFF;
-            --bg: #f5f5f7;
-            --card: #ffffff;
-            --text: #1d1d1f;
-            --border: #d2d2d7;
-            --accent: #28cd41;
-            --danger: #ff3b30;
-        }
 
-        [data-theme="dark"] {
-            --primary: #4ea1ff;
-            --bg: #0f1115;
-            --card: #161a22;
-            --text: #e5e7eb;
-            --border: #2a3240;
-            --accent: #34d399;
-            --danger: #f87171;
-        }
+
+
 
         .theme-toggle-floating {
             position: fixed;
@@ -899,11 +883,17 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-report">
+{% set ui_step = 6 %}{% include "_guided_header.html" %}
 
+    <main id="mf-content" class="mf-report-content">
     <header>
         <h1 data-i18n="report_title">👁️ 안구 건강 종합 리포트</h1>
+        <button class="btn" type="button" data-mf-finish>검사 종료</button>
         <div class="user-info" id="user-display" data-i18n="user_info_loading">사용자 정보 불러오는 중...</div>
     </header>
 
@@ -932,11 +922,11 @@
                     <div class="eye-compare-box">
                         <div class="eye-frame" onclick="viewImage('past_L')">
                             <span id="badge-past-L" class="date-badge">왼쪽 눈</span>
-                            <img src="https://via.placeholder.com/200x150/333/fff?text=Past+L" id="img-past-L">
+                            <img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect width=%22200%22 height=%22150%22 fill=%22%23e7f1ed%22/%3E%3Ctext x=%22100%22 y=%2280%22 text-anchor=%22middle%22 fill=%22%23445f5c%22 font-size=%2214%22%3ENo image data%3C/text%3E%3C/svg%3E" id="img-past-L">
                         </div>
                         <div class="eye-frame" onclick="viewImage('past_R')">
                             <span id="badge-past-R" class="date-badge">오른쪽 눈</span>
-                            <img src="https://via.placeholder.com/200x150/333/fff?text=Past+R" id="img-past-R">
+                            <img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect width=%22200%22 height=%22150%22 fill=%22%23e7f1ed%22/%3E%3Ctext x=%22100%22 y=%2280%22 text-anchor=%22middle%22 fill=%22%23445f5c%22 font-size=%2214%22%3ENo image data%3C/text%3E%3C/svg%3E" id="img-past-R">
                         </div>
                     </div>
                 </div>
@@ -1042,6 +1032,7 @@
         </div>
     </div>
 
+    </main>
     <div id="imageModal" class="modal" onclick="this.style.display='none'">
         <img class="modal-content" id="modal-img">
     </div>
@@ -1097,9 +1088,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', async function() {
-            const age = readSessionValue('user_age') || "24";
+            const age = readSessionValue('user_age') || "미입력";
             const userId = readSessionValue('user_id') || "anonymous";
             activeUserId = userId;
+            document.getElementById('user-display').removeAttribute('data-i18n');
             document.getElementById('user-display').innerText = `사용자: ${userId} 님 (${age}세)`;
 
             await loadHistory(userId);
@@ -1410,8 +1402,8 @@
                 }
             };
 
-            const emptyCurrent = 'https://via.placeholder.com/200x150/e2e8f0/64748b?text=No+Current';
-            const emptyPast = 'https://via.placeholder.com/200x150/e2e8f0/64748b?text=No+Past';
+            const emptyCurrent = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect width=%22200%22 height=%22150%22 fill=%22%23e7f1ed%22/%3E%3Ctext x=%22100%22 y=%2280%22 text-anchor=%22middle%22 fill=%22%23445f5c%22 font-size=%2214%22%3ENo image data%3C/text%3E%3C/svg%3E';
+            const emptyPast = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect width=%22200%22 height=%22150%22 fill=%22%23e7f1ed%22/%3E%3Ctext x=%22100%22 y=%2280%22 text-anchor=%22middle%22 fill=%22%23445f5c%22 font-size=%2214%22%3ENo image data%3C/text%3E%3C/svg%3E';
             document.getElementById('img-curr-L').src = emptyCurrent;
             document.getElementById('img-curr-R').src = emptyCurrent;
             document.getElementById('img-past-L').src = emptyPast;

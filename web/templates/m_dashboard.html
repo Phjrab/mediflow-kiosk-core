@@ -10,14 +10,7 @@
         <script src="/static/js/i18n.js"></script>
         <!-- Global language FAB intentionally not included on this page -->
     <style>
-        :root {
-            --primary: #007AFF;
-            --bg: #f8fafc;
-            --text: #0f172a;
-            --sub: #64748b;
-            --card: #ffffff;
-            --border: #dbe2ea;
-        }
+
 
         * { box-sizing: border-box; }
 
@@ -88,9 +81,13 @@
             color: #1e293b;
         }
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
-<div class="card">
+<body class="mf-patient mf-mobile-dashboard">
+{% set ui_step = 2 %}{% include "_guided_header.html" %}
+<main id="mf-content" class="card">
     <h1 data-i18n="m_dashboard_title">✅ 모바일 인증 완료</h1>
     <p>키오스크와 모바일 연동이 정상적으로 완료되었습니다.<br>키오스크 화면에서 다음 단계를 진행해 주세요.</p>
     <div id="meta" class="meta"></div>
@@ -99,7 +96,7 @@
         <button class="btn btn-primary" type="button" onclick="location.href='/screening'">검사 선택 화면 열기</button>
         <button class="btn btn-secondary" type="button" onclick="location.href='/m'">PIN 재인증 화면</button>
     </div>
-</div>
+</main>
 
 <script>
     (function () {

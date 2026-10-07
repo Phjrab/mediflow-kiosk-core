@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+import os
 from typing import Callable
 
 import cv2
@@ -52,6 +53,8 @@ def open_usb_uvc_camera(
 
     index = int(device_index)
     device_path = f'/dev/video{index}'
+    if os.path.exists(device_path) and not os.access(device_path, os.R_OK | os.W_OK):
+        raise UvcCameraError(f'permission_denied: USB UVC camera {device_path}')
     candidates = [
         ('v4l2-index', lambda: cv2.VideoCapture(index, cv2.CAP_V4L2)),
         ('v4l2-path', lambda: cv2.VideoCapture(device_path, cv2.CAP_V4L2)),

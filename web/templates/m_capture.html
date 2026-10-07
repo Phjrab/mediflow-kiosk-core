@@ -22,7 +22,7 @@
     <!-- Global language FAB intentionally not included on this page -->
     <style>
         :root { 
-            --primary: #007AFF; 
+
             --bg: #f5f5f7; 
             --card: #ffffff; 
             --text: #1d1d1f; 
@@ -37,14 +37,7 @@
             --fluid-radius: clamp(12px, 3vw, 18px);
         }
 
-        [data-theme="dark"] {
-            --primary: #4ea1ff;
-            --bg: #0f1115;
-            --card: #161a22;
-            --text: #e5e7eb;
-            --border: #2a3240;
-            --guide-color: rgba(52, 211, 153, 0.55);
-        }
+
 
         .theme-toggle-floating {
             position: fixed;
@@ -736,11 +729,7 @@
                 --border: #333;
             }
 
-            [data-theme="dark"] {
-                --primary: #66b3ff;
-                --text: #fff;
-                --border: #999;
-            }
+
 
             .btn-capture {
                 font-weight: 900;
@@ -1046,9 +1035,14 @@
 
 
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-capture">
+{% set ui_step = 5 %}{% include "_guided_header.html" %}
 
+    <main id="mf-content" class="mf-capture-workspace">
     <div class="left-panel">
         <div class="video-container">
             <img id="video-feed" src="">
@@ -1094,6 +1088,7 @@
 
     </div>
 
+    </main>
     <div id="confirm-toast" class="confirm-toast" role="dialog" aria-modal="true" aria-live="assertive">
         <div id="confirm-toast-message" class="confirm-toast-message"></div>
         <div class="confirm-toast-actions">
@@ -1110,6 +1105,9 @@
         let autoShutterEnabled = true;
         let isCapturing = false;
         let autoCooldownUntil = 0;
+        let detectionInFlight = false;
+        let detectionAbort = null;
+        let capturePageActive = true;
         let previewMode = 'camera'; // 'camera' | 'upload'
         let mobileUploadOnlyMode = false;
         let captureCameraSessionActive = false;
@@ -1311,7 +1309,7 @@
             stopVideoFallbackPolling();
             videoFallbackInterval = setInterval(() => {
                 if (previewMode !== 'camera') return;
-                videoImg.src = `/video_frame?t=${Date.now()}`;
+                videoImg.src = `/video_frame?mesh=0&t=${Date.now()}`;
             }, 250);
         }
 
@@ -1363,29 +1361,34 @@
         // 눈 감지 상태 폴링 (서버에서 감지 여부 조회)
         // ==========================================
         async function pollDetectionStatus() {
-            if (mobileUploadOnlyMode) return;
+            if (mobileUploadOnlyMode || previewMode !== 'camera' || detectionInFlight || !capturePageActive) return;
+            detectionInFlight = true;
+            detectionAbort = new AbortController();
+            const statusDot = document.getElementById('status-dot');
+            const statusMessage = document.getElementById('status-message');
+            statusMessage.removeAttribute('data-i18n');
+            const captureButton = document.getElementById('btn-capture-photo');
             try {
-                const response = await fetch('/detect_status');
+                const response = await fetch('/detect_status', {signal: detectionAbort.signal});
                 const data = await response.json();
-                
-                const statusDot = document.getElementById('status-dot');
-                const statusMessage = document.getElementById('status-message');
-                const confidenceText = document.getElementById('confidence-text');
-                
-                if (data.detected) {
-                    statusDot.style.background = '#28cd41';  // 녹색
-                    statusMessage.textContent = data.message;
-                    confidenceText.textContent = `신뢰도: ${(data.confidence * 100).toFixed(1)}%`;
-                } else {
-                    statusDot.style.background = '#b0bec5';  // 회색
-                    statusMessage.textContent = data.message;
-                    confidenceText.textContent = '';
-                }
-
-                handleAutoShutter(data.detected, data.confidence || 0);
+                if (!capturePageActive || previewMode !== 'camera') return;
+                if (!response.ok || data.error) throw new Error('camera_status_unavailable');
+                const stale = data.camera_state === 'stale';
+                const permission = data.camera_state === 'permission_denied';
+                const missing = data.camera_state === 'missing' || /연결|기다리/.test(data.message || '');
+                const ready = data.detected && !stale && !missing && !permission;
+                statusMessage.textContent = permission ? '카메라 접근 권한이 없습니다. 관리자에게 문의해 주세요.' : stale ? '영상이 멈췄습니다. 카메라 연결을 확인해 주세요.' : missing ? '카메라를 연결해 주세요.' : ready ? '촬영할 수 있습니다.' : '촬영 위치를 조정해 주세요.';
+                statusDot.style.background = ready ? '#146b65' : '#795400';
+                captureButton.disabled = stale || missing || permission;
+                document.getElementById('confidence-text').textContent = '';
+                handleAutoShutter(ready, ready ? data.confidence || 0 : 0);
             } catch (error) {
-                console.error('[Detection Status Error]', error);
-            }
+                if (error.name !== 'AbortError' && capturePageActive) {
+                    statusMessage.textContent = '카메라 상태를 확인할 수 없습니다. 연결을 확인해 주세요.';
+                    statusDot.style.background = '#a12b22';
+                    captureButton.disabled = true;
+                }
+            } finally { detectionInFlight = false; }
         }
 
         function toggleAutoShutter() {
@@ -1468,7 +1471,7 @@
                 stopVideoFallbackPolling();
             };
             videoImg.src = '';
-            videoImg.src = `/video_feed?t=${Date.now()}`;
+            videoImg.src = `/video_feed?mesh=0&t=${Date.now()}`;
             videoImg.style.objectFit = 'cover';
             videoImg.style.transform = `scaleX(-1) scale(${digitalZoom})`;
             captureMessage.textContent = '실시간 카메라 모드로 복귀했습니다.';
@@ -1830,6 +1833,8 @@
 
         // 페이지 종료 시 폴링 중지
         window.onbeforeunload = () => {
+            capturePageActive = false;
+            if (detectionAbort) detectionAbort.abort();
             if (detectionPollingInterval) {
                 clearInterval(detectionPollingInterval);
             }
@@ -1838,6 +1843,8 @@
         };
 
         window.addEventListener('pagehide', () => {
+            capturePageActive = false;
+            if (detectionAbort) detectionAbort.abort();
             stopCaptureCameraSession();
         });
 

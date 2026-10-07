@@ -52,6 +52,14 @@ class UvcCameraTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'non-negative'):
             uvc_camera.open_usb_uvc_camera(-1)
 
+    @mock.patch.object(uvc_camera.os.path, 'exists', return_value=True)
+    @mock.patch.object(uvc_camera.os, 'access', return_value=False)
+    @mock.patch.object(uvc_camera.cv2, 'VideoCapture')
+    def test_permission_denied_does_not_open_device(self, capture, access, exists):
+        with self.assertRaisesRegex(uvc_camera.UvcCameraError, 'permission_denied'):
+            uvc_camera.open_usb_uvc_camera(0)
+        capture.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main()

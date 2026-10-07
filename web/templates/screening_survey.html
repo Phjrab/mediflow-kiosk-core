@@ -11,24 +11,6 @@
         })();
     </script>
     <style>
-        :root {
-            --primary: #007aff;
-            --bg: #f5f5f7;
-            --surface: #ffffff;
-            --text: #172033;
-            --sub: #667085;
-            --border: #d9e0ea;
-            --field: #f9fafb;
-        }
-        [data-theme="dark"] {
-            --primary: #58a6ff;
-            --bg: #0f1115;
-            --surface: #171b22;
-            --text: #eef2f7;
-            --sub: #a7b0bf;
-            --border: #303846;
-            --field: #11161d;
-        }
         * { box-sizing: border-box; }
         body { margin: 0; width: 100%; min-height: 800px; background: var(--bg); color: var(--text); font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; }
         .page { width: 100%; min-height: 800px; padding: 34px 64px 42px; }
@@ -80,9 +62,14 @@
             .btn { padding: 0 12px; }
         }
     </style>
+    <script src="/static/js/translations.js"></script>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
-    <main class="page">
+<body class="mf-patient mf-survey">
+{% set ui_step = 4 %}{% include "_guided_header.html" %}
+    <main id="mf-content" class="page">
         <header>
             <div>
                 <div class="eyebrow">종합 건강 스크리닝 · 통합 문진</div>
@@ -199,7 +186,7 @@
             </section>
         </form>
 
-        <div id="form-error" class="error"></div>
+        <div id="form-error" class="error" role="alert" tabindex="-1"></div>
         <footer class="footer">
             <div class="note">입력 내용은 선택한 검사 결과와 함께 저장됩니다.</div>
             <div class="actions">
@@ -219,6 +206,28 @@
         plan.forEach((id) => {
             const section = document.getElementById(`${id}-section`);
             if (section) section.hidden = false;
+        });
+
+        // Session-only draft; no new long-term browser persistence.
+        const surveyForm = document.getElementById('survey-form');
+        const draftKey = 'screening_survey_draft';
+        const identity = sessionStorage.getItem('user_id') || '';
+        try {
+            const draft = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
+            if (identity && draft?.identity === identity) {
+                Array.from(surveyForm.elements).forEach((element, index) => {
+                    const saved = draft.fields[index];
+                    if (!saved || saved.id !== element.id || saved.name !== element.name) return;
+                    if (element.type === 'checkbox') element.checked = saved.checked;
+                    else element.value = saved.value;
+                });
+            }
+        } catch (error) { /* A malformed draft must not prevent a new survey. */ }
+        surveyForm.addEventListener('input', () => {
+            if (!identity) return;
+            try {
+                sessionStorage.setItem(draftKey, JSON.stringify({identity, fields: Array.from(surveyForm.elements).map(element => ({id: element.id, name: element.name, value: element.value, checked: element.checked}))}));
+            } catch (error) { /* Storage unavailable: the live form still works. */ }
         });
 
         function values(name) {
@@ -273,6 +282,7 @@
 
         document.getElementById('submit-button').addEventListener('click', async () => {
             const error = document.getElementById('form-error');
+            if (document.getElementById('submit-button').disabled) return;
             const age = document.getElementById('age');
             if (!age.reportValidity()) return;
 
@@ -285,10 +295,14 @@
 
             const button = document.getElementById('submit-button');
             button.disabled = true;
+            button.textContent = '문진 저장 중…';
             error.style.display = 'none';
             const survey = buildPayload();
 
             try {
+                const config = await ScreeningFlow.getConfig();
+                const available = new Set((config.modalities || []).filter(item => item.model_status === 'ready').map(item => item.id));
+                if (plan.some(id => !available.has(id))) throw new Error('선택한 검사 모델이 준비되지 않았습니다. 검사 선택으로 돌아가 주세요.');
                 const response = await fetch('/api/survey', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -303,6 +317,8 @@
                 error.textContent = `문진 저장에 실패했습니다. ${requestError.message || requestError}`;
                 error.style.display = 'block';
                 button.disabled = false;
+                button.textContent = '문진 완료';
+                error.focus();
             }
         });
     </script>

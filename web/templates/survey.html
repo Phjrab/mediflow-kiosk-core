@@ -21,25 +21,6 @@
         })();
     </script>
     <style>
-        :root {
-            --primary: #3182f6;
-            --bg: #f2f4f6;
-            --card: #ffffff;
-            --text: #191f28;
-            --text-muted: #4e5968;
-            --border: #dfe3ea;
-            --accent: #34d399;
-        }
-
-        [data-theme="dark"] {
-            --primary: #4ea1ff;
-            --bg: #0f1115;
-            --card: #161a22;
-            --text: #e5e7eb;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --accent: #34d399;
-        }
 
         body {
             background-color: var(--bg) !important;
@@ -95,7 +76,7 @@
 
         input:focus, select:focus, textarea:focus {
             background-color: #ffffff !important;
-            border-color: #3182f6 !important;
+            border-color: var(--primary) !important;
             box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.12) !important;
         }
 
@@ -131,7 +112,7 @@
             min-width: 180px;
             height: 48px !important;
             padding: 0 24px !important;
-            background: #3182f6 !important;
+            background: var(--primary) !important;
             color: #ffffff !important;
             border: none !important;
             border-radius: 14px !important;
@@ -364,7 +345,7 @@
             top: 50%;
             width: 50%;
             height: 6px;
-            background: linear-gradient(90deg, #007AFF, #2563eb);
+            background: linear-gradient(90deg, var(--primary), var(--primary));
             border-radius: 999px;
             transform: translateY(-50%);
             z-index: 0;
@@ -395,8 +376,8 @@
         }
 
         .progress-step.active .progress-circle {
-            background: #007AFF;
-            border-color: #007AFF;
+            background: var(--primary);
+            border-color: var(--primary);
             color: #ffffff;
             box-shadow: 0 14px 32px rgba(0, 122, 255, 0.2);
         }
@@ -658,8 +639,12 @@
         }
 
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-survey">
+{% set ui_step = 4 %}{% include "_guided_header.html" %}
 
     <header>
         <h1 data-i18n="survey_title">📋 안구 건강 정밀 문진</h1>
@@ -678,7 +663,7 @@
         </div>
     </div>
 
-    <div class="main-container">
+    <div id="mf-content" class="main-container">
         <div class="card step-card" id="info-card">
             <div class="step-panel expanded" id="step1Panel">
                 <h2>👤 기본 정보</h2>

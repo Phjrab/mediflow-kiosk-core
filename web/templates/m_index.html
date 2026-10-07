@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Eye Healthcare - Mobile</title>
     <script>
         (function () {
@@ -20,34 +20,10 @@
             <script src="/static/js/translations.js"></script>
             <script src="/static/js/i18n.js"></script>
             <!-- Global language FAB intentionally not included on this page -->
-            <script>
-        })();
-    </script>
     <style>
-        :root {
-            --primary: #007AFF;
-            --primary-2: #5856D6;
-            --bg: #ffffff;
-            --card-bg: #ffffff;
-            --text-dark: #1d1d1f;
-            --text-sub: #86868b;
-            --border: #d2d2d7;
-            --tag-bg: #f5f5f7;
-            --helper: #86868b;
-            --btn-shadow: rgba(0, 122, 255, 0.15);
-        }
 
-        [data-theme="dark"] {
-            --primary: #0A84FF;
-            --primary-2: #5E5CE6;
-            --bg: #000000;
-            --card-bg: #1c1c1e;
-            --text-dark: #f5f5f7;
-            --text-sub: #86868b;
-            --border: #38383a;
-            --tag-bg: #2c2c2e;
-            --helper: #86868b;
-        }
+
+
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "SF Pro Display", "Pretendard", sans-serif;
@@ -192,8 +168,13 @@
             50% { transform: translateY(-10px); }
         }
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-start">
+{% set ui_step = 1 %}{% include "_guided_header.html" %}
+<div id="mf-content" tabindex="-1"></div>
 
     <button id="theme-toggle" class="theme-toggle">
         <span id="theme-icon">🌙</span>
@@ -212,9 +193,9 @@
         </p>
 
         <div class="feature-tags">
-            <span>#결막염</span>
-            <span>#백내장</span>
-            <span>#익상편</span>
+            <span>안구 스크리닝</span>
+            <span>피부·두피 모델 미설정</span>
+            <span>연구용</span>
         </div>
 
         <div class="action-group">

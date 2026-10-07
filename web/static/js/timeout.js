@@ -5,7 +5,9 @@
 
   const IDLE_MS = 180000; // 3 minutes
   const SCREENSAVER_SECONDS = 30; // 30s countdown
-  const CACHE_KEYS = ['last_mobile_upload_capture', 'user_id'];
+  const CACHE_KEYS = ['last_mobile_upload_capture', 'user_id', 'user_role', 'active_capture_user_id',
+    'user_age', 'data_updated', 'bilateral_capture', 'bilateral_analysis', 'bilateral_selected_eye',
+    'eye_photo_L', 'eye_photo_R', 'eye_analysis_L', 'eye_analysis_R', 'admin_csrf_token'];
 
   // expose session init globally
   window.initializeMasterSession = function() {

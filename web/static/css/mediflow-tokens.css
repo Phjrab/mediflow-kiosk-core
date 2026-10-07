@@ -1,0 +1,35 @@
+/* MediFlow's single colour/spacing layer. Legacy names are compatibility aliases. */
+:root {
+  --mf-bg: #f6f8f5; --mf-surface: #fff; --mf-ink: #173534;
+  --mf-muted: #526764; --mf-teal: #146b65; --mf-soft: #e7f1ed;
+  --mf-line: #a6bcb5; --mf-danger: #a12b22; --mf-warning: #795400;
+  --mf-radius: 18px; --mf-focus: #795400;
+  --primary: var(--mf-teal); --primary-2: var(--mf-teal); --primary-hover: #10564f;
+  --bg: var(--mf-bg); --surface: var(--mf-surface); --card: var(--mf-surface); --card-bg: var(--mf-surface);
+  --text: var(--mf-ink); --text-dark: var(--mf-ink); --text-strong: var(--mf-ink); --text-sub: var(--mf-muted);
+  --sub: var(--mf-muted); --muted: var(--mf-muted); --text-muted: var(--mf-muted); --helper: var(--mf-muted);
+  --border: var(--mf-line); --line: var(--mf-line); --border-strong: var(--mf-line);
+  --primary-soft: var(--mf-soft); --tag-bg: var(--mf-soft); --field: var(--mf-bg); --panel: var(--mf-bg);
+  --surface-soft: var(--mf-bg); --surface-muted: var(--mf-bg); --surface-elevated: var(--mf-soft); --surface-strong: var(--mf-soft);
+  --success: #176046; --accent: #176046; --success-soft: var(--mf-soft); --accent-bg: var(--mf-soft); --accent-text: #176046;
+  --warning: var(--mf-warning); --warning-soft: #fff3d5; --danger: var(--mf-danger);
+  --status-normal-bg: var(--mf-soft); --status-normal-text: var(--mf-teal);
+  --status-warning-bg: #fff3d5; --status-warning-text: var(--mf-warning);
+  --status-danger-bg: #fdecea; --status-danger-text: var(--mf-danger);
+  --navy: #1b3949; --navy-dark: #18303d; --teal: var(--mf-teal); --mint: var(--mf-soft);
+  --amber: var(--mf-warning); --coral: var(--mf-danger); --teal-primary: var(--mf-teal); --teal-light: var(--mf-soft);
+  --page-bg-start: var(--mf-bg); --page-bg-end: var(--mf-bg); --page-bg-accent-1: transparent; --page-bg-accent-2: transparent;
+  --inset-shadow: transparent; --btn-shadow: transparent; --btn-shadow-hover: transparent;
+  --shadow: 0 4px 16px rgba(23,53,52,.06); --theme-btn-shadow: transparent;
+  --theme-btn-bg: var(--mf-surface); --theme-btn-text: var(--mf-ink); --theme-btn-border: var(--mf-line); --theme-btn-active: var(--mf-soft);
+  --guide-color: rgba(183,222,210,.8);
+}
+:root[data-theme="dark"] {
+  --mf-bg: #102422; --mf-surface: #18312e; --mf-ink: #edf5f1;
+  --mf-muted: #b5c9c1; --mf-teal: #8ed5bf; --mf-soft: #24453d;
+  --mf-line: #668c7f; --mf-danger: #ffb4aa; --mf-warning: #f5d28d;
+  --mf-focus: #f5d28d; --primary-hover: #a6e2ce;
+  --success: #8ed5bf; --accent: #8ed5bf; --accent-text: #8ed5bf;
+  --warning-soft: #473c20; --status-warning-bg: #473c20;
+  --status-danger-bg: #4a2e2a; --navy: #b6d6df; --navy-dark: #d4e8ed;
+}

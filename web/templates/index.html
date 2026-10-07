@@ -24,45 +24,6 @@
     <script src="/static/js/chat-widget.js"></script>
         <script defer src="/static/js/i18n-global.js"></script>
     <style>
-        :root {
-            --primary: #007AFF;
-            --primary-2: #5856D6;
-            --bg: #f5f5f7;
-            --card-bg: #ffffff;
-            --text-dark: #0f172a;
-            --text-sub: #64748b;
-            --border: #e2e8f0;
-            --tag-bg: #f1f5f9;
-            --helper: #94a3b8;
-            --inset-shadow: rgba(0,0,0,0.02);
-            --btn-shadow: rgba(0, 122, 255, 0.3);
-            --btn-shadow-hover: rgba(0, 122, 255, 0.4);
-            --theme-btn-bg: #ffffff;
-            --theme-btn-text: #0f172a;
-            --theme-btn-border: #e2e8f0;
-            --theme-btn-shadow: rgba(15, 23, 42, 0.08);
-            --theme-btn-active: #f8fafc;
-        }
-
-        [data-theme="dark"] {
-            --primary: #4ea1ff;
-            --primary-2: #7b79ff;
-            --bg: #0f1115;
-            --card-bg: #161a22;
-            --text-dark: #e5e7eb;
-            --text-sub: #aab3c2;
-            --border: #2a3240;
-            --tag-bg: #1a2230;
-            --helper: #8a94a8;
-            --inset-shadow: rgba(255,255,255,0.02);
-            --btn-shadow: rgba(78, 161, 255, 0.32);
-            --btn-shadow-hover: rgba(78, 161, 255, 0.45);
-            --theme-btn-bg: #1f2632;
-            --theme-btn-text: #e5e7eb;
-            --theme-btn-border: #334155;
-            --theme-btn-shadow: rgba(0, 0, 0, 0.35);
-            --theme-btn-active: #273244;
-        }
 
         body {
             font-family: 'Pretendard', -apple-system, sans-serif;
@@ -737,10 +698,14 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-start">
+{% set ui_step = 1 %}{% include "_guided_header.html" %}
 
-<div class="welcome-container">
+<main id="mf-content" class="welcome-container">
     <button id="global-theme-toggle" class="theme-toggle-floating" type="button" aria-label="Toggle theme">
         <span data-role="icon" data-i18n="theme_icon_dark">🌙</span>
         <span data-role="label" data-i18n="theme_dark_mode">Dark Mode</span>
@@ -750,19 +715,15 @@
         <span class="eye-scan-icon" aria-hidden="true">🩺</span>
     </div>
 
-    <h1 data-i18n="main_title">Comprehensive Health Screening</h1>
-    <p class="subtitle">
-        <span data-i18n-html="true" data-i18n="subtitle_line1">Powered by <strong>NVIDIA Jetson AI</strong></span><br>
-        <span data-i18n="subtitle_line2">Screen eye, skin, and scalp conditions in one flow.</span>
-    </p>
-    
-    <div class="feature-tags">
-        <span data-i18n="tag_conjunctivitis">#Eye</span>
-        <span data-i18n="tag_cataract">#Skin</span>
-        <span data-i18n="tag_pterygium">#Scalp</span>
-    </div>
-
-    <div class="start-section">
+    <div class="mf-start-content">
+    <aside class="mf-start-guide">
+        <h2 data-i18n="mf_before_start">시작 전 안내</h2>
+        <ol><li data-i18n="mf_guide_identity">식별 정보와 동의를 확인합니다.</li><li data-i18n="mf_guide_survey">문진 후 촬영 또는 이미지를 업로드합니다.</li><li data-i18n="mf_guide_result">결과를 확인하고 이력·보고서로 이어갑니다.</li></ol>
+    </aside>
+    <h1 data-i18n="main_title">안내에 따라 검사를 시작하세요</h1>
+    <p class="subtitle"><span data-i18n="subtitle_line1">현재 준비된 검사부터 차례로 진행합니다.</span><br><span data-i18n="subtitle_line2">연구용 AI 선별 결과는 의료진의 확인이 필요합니다.</span></p>
+    <div id="mf-capabilities" class="mf-notice" role="status" data-i18n="mf_cap_loading">검사 준비 상태를 확인하고 있습니다.</div>
+        <div class="start-section">
         <a href="{{ url_for('login') }}" class="btn-start" data-i18n="btn_start_diagnosis">
             Start Screening
         </a>
@@ -771,6 +732,7 @@
         <p class="helper-text" data-i18n="helper_disclaimer">※ This service is provided for medical support and screening purposes.</p>
     </div>
 </div>
+</main>
 
 <!-- Language Selector FAB (Bottom-Right Corner) -->
 <div class="language-selector-fab" id="language-selector-fab">
@@ -1355,6 +1317,8 @@
     }
 </script>
 
+    <script src="/static/js/screening-flow.js"></script>
+    <script src="/static/js/start-screening.js"></script>
     <script src="/static/js/timeout.js"></script>
 </body>
 </html>

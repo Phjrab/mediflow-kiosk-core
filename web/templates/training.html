@@ -16,33 +16,9 @@
         })();
     </script>
     <style>
-        :root {
-            --primary: #3182f6;
-            --primary-hover: #1b64da;
-            --bg: #f2f4f6;
-            --card: #ffffff;
-            --text: #191f28;
-            --text-muted: #4e5968;
-            --border: #dfe3ea;
-            --accent-bg: #f0fdf4;
-            --accent-text: #166534;
-            --teal-primary: #00897b;
-            --teal-light: #e0f2f1;
-        }
 
-        [data-theme="dark"] {
-            --primary: #4ea1ff;
-            --primary-hover: #2b84ff;
-            --bg: #0f1115;
-            --card: #161a22;
-            --text: #e5e7eb;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --accent-bg: #14291a;
-            --accent-text: #34d399;
-            --teal-primary: #26a69a;
-            --teal-light: #0d2d2a;
-        }
+
+
 
         [data-theme="dark"] .kiosk-window {
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24), 0 20px 40px rgba(0, 0, 0, 0.36);
@@ -288,8 +264,13 @@
             border-radius: 999px;
         }
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-training">
+{% set ui_step = 5 %}{% include "_guided_header.html" %}
+<div id="mf-content" tabindex="-1"></div>
 
     <div class="kiosk-window">
         <!-- 상단 헤더 타이틀 부 구역 -->
