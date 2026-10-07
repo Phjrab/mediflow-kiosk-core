@@ -5,10 +5,29 @@
 
 const translations = {
   ko: {
+    mf_capture_heading: '촬영할 이미지를 준비해 주세요',
+    mf_result_heading: '검사 결과를 확인하세요',
+    mf_cap_loading: '검사 준비 상태를 확인하고 있습니다.',
+    mf_cap_status: '현재 가능: {ready} · {missing} 모델 미설정',
+    mf_cap_error: '검사 준비 상태를 확인할 수 없습니다. 검사 선택에서 다시 확인해 주세요.',
+    mf_operations_heading: '설정과 운영 상태',
+
+    mf_skip: '본문으로 이동',
+    mf_start: '시작',
+    mf_identity: '식별·동의',
+    mf_select: '검사 선택',
+    mf_survey: '문진',
+    mf_capture: '촬영·분석',
+    mf_result: '결과',
+    mf_before_start: '시작 전 안내',
+    mf_guide_identity: '식별 정보와 동의를 확인합니다.',
+    mf_guide_survey: '문진 후 촬영 또는 이미지를 업로드합니다.',
+    mf_guide_result: '결과를 확인하고 이력·보고서로 이어갑니다.',
+
     // Main title and subtitle
-    main_title: '종합 건강 스크리닝',
-    subtitle_line1: '<strong>NVIDIA Jetson AI</strong> 기술을 활용하여',
-    subtitle_line2: '안구, 피부, 두피 상태를 한 번에 점검하세요.',
+    main_title: '안내에 따라 검사를 시작하세요',
+    subtitle_line1: '현재 준비된 검사부터 차례로 진행합니다.',
+    subtitle_line2: '연구용 AI 선별 결과는 의료진의 확인이 필요합니다.',
     
     // Feature tags
     tag_conjunctivitis: '#안구',
@@ -21,7 +40,7 @@ const translations = {
     btn_mobile_access: '📱 모바일 기기로 접속',
     
     // Helper text
-    helper_disclaimer: '※ 본 서비스는 건강 상태 스크리닝 및 의료 의사결정 보조용입니다.',
+    helper_disclaimer: '※ 연구용 AI 선별 결과 · 진료 확인 필요',
     
     // Theme toggle
     theme_dark_mode: '다크 모드',
@@ -75,7 +94,7 @@ const translations = {
     // Page titles
     report_title: '👁️ 안구 건강 종합 리포트',
     survey_title: '📋 안구 건강 정밀 문진',
-    admin_config_title: '⚙️ 관리자 Config 설정',
+    admin_config_title: '설정과 운영 상태',
     m_dashboard_title: '✅ 모바일 인증 완료',
     m_login_title: '📱 모바일 PIN 인증',
     capture_title: '안구 촬영',
@@ -122,14 +141,33 @@ const translations = {
     chat_greeting: '안녕하세요. AI 의료 상담입니다. 현재 불편한 증상이나 궁금한 점을 입력해 주세요.',
     chat_placeholder: '증상이나 궁금한 점을 입력하세요.',
     chat_close_btn: '채팅 닫기',
-    chat_api_unconfigured: '⚠️ API 키가 연결되어 있지 않습니다. 관리자에게 문의해주세요. OpenAI API 키를 설정한 후 서비스를 이용할 수 있습니다.',
+    chat_api_unconfigured: '선택한 설명 provider가 준비되지 않았습니다. 관리자에게 문의해 주세요.',
   },
 
   en: {
+    mf_capture_heading: 'Prepare your screening image',
+    mf_result_heading: 'Review your screening results',
+    mf_cap_loading: 'Checking screening availability.',
+    mf_cap_status: 'Available: {ready} · {missing} models not configured',
+    mf_cap_error: 'Cannot confirm availability. Check again on screening selection.',
+    mf_operations_heading: 'Settings and operations',
+
+    mf_skip: 'Skip to content',
+    mf_start: 'Start',
+    mf_identity: 'Identity & consent',
+    mf_select: 'Selection',
+    mf_survey: 'Survey',
+    mf_capture: 'Capture & analysis',
+    mf_result: 'Results',
+    mf_before_start: 'Before you start',
+    mf_guide_identity: 'Confirm identification and consent.',
+    mf_guide_survey: 'Complete the survey, then capture or upload an image.',
+    mf_guide_result: 'Review results, history and reports.',
+
     // Main title and subtitle
-    main_title: 'Comprehensive Health Screening',
-    subtitle_line1: 'Powered by <strong>NVIDIA Jetson AI</strong>',
-    subtitle_line2: 'Screen eye, skin, and scalp conditions in one flow.',
+    main_title: 'Start your guided screening',
+    subtitle_line1: 'Continue with the screenings currently available.',
+    subtitle_line2: 'Research AI screening results need review by a clinician.',
     
     // Feature tags
     tag_conjunctivitis: '#Eye',
@@ -142,7 +180,7 @@ const translations = {
     btn_mobile_access: '📱 Access via Mobile Device',
     
     // Helper text
-    helper_disclaimer: '※ This service is provided for medical support and screening purposes.',
+    helper_disclaimer: 'Research AI screening · clinician review required',
     
     // Theme toggle
     theme_dark_mode: 'Dark Mode',
@@ -196,7 +234,7 @@ const translations = {
     // Page titles
     report_title: '👁️ Comprehensive Eye Health Report',
     survey_title: '📋 Detailed Eye Health Survey',
-    admin_config_title: '⚙️ Admin Config Settings',
+    admin_config_title: 'Settings and operations',
     m_dashboard_title: '✅ Mobile Verification Complete',
     m_login_title: '📱 Mobile PIN Verification',
     capture_title: 'Capture Eyes',
@@ -243,14 +281,33 @@ const translations = {
     chat_greeting: 'Hello. This is AI medical consultation. Please describe your symptoms or ask any questions.',
     chat_placeholder: 'Enter your symptoms or questions.',
     chat_close_btn: 'Close Chat',
-    chat_api_unconfigured: '⚠️ API key is not connected. Please contact the administrator. AI consultation service is available after OpenAI API key is configured.',
+    chat_api_unconfigured: 'The selected explanation provider is unavailable. Contact the administrator.',
   },
 
   zh: {
+    mf_capture_heading: '准备筛查图像',
+    mf_result_heading: '查看筛查结果',
+    mf_cap_loading: '正在确认筛查状态。',
+    mf_cap_status: '当前可用：{ready} · {missing} 模型未配置',
+    mf_cap_error: '无法确认筛查状态，请在项目选择中重试。',
+    mf_operations_heading: '设置与运行状态',
+
+    mf_skip: '跳至内容',
+    mf_start: '开始',
+    mf_identity: '身份与同意',
+    mf_select: '选择项目',
+    mf_survey: '问卷',
+    mf_capture: '拍摄与分析',
+    mf_result: '结果',
+    mf_before_start: '开始前',
+    mf_guide_identity: '确认身份信息和同意。',
+    mf_guide_survey: '完成问卷后拍摄或上传图片。',
+    mf_guide_result: '查看结果、历史和报告。',
+
     // Main title and subtitle
-    main_title: '综合健康筛查',
-    subtitle_line1: '由 <strong>NVIDIA Jetson AI</strong> 提供支持',
-    subtitle_line2: '一次完成眼部、皮肤和头皮状态筛查。',
+    main_title: '按照指引开始筛查',
+    subtitle_line1: '从当前已准备好的筛查项目开始。',
+    subtitle_line2: '研究用 AI 筛查结果需要医务人员确认。',
     
     // Feature tags
     tag_conjunctivitis: '#眼部',
@@ -263,7 +320,7 @@ const translations = {
     btn_mobile_access: '📱 通过移动设备访问',
     
     // Helper text
-    helper_disclaimer: '※ 本服务仅供医疗辅助和筛查之用。',
+    helper_disclaimer: '研究用 AI 筛查 · 需要医务人员确认',
     
     // Theme toggle
     theme_dark_mode: '暗黑模式',
@@ -317,7 +374,7 @@ const translations = {
     // Page titles
     report_title: '👁️ 眼部健康综合报告',
     survey_title: '📋 眼部健康详细问诊',
-    admin_config_title: '⚙️ 管理员配置',
+    admin_config_title: '设置与运行状态',
     m_dashboard_title: '✅ 移动验证完成',
     m_login_title: '📱 移动 PIN 验证',
     capture_title: '采集眼部照片',
@@ -355,14 +412,33 @@ const translations = {
     chat_greeting: '您好。这是AI医学咨询服务。请描述您的症状或提出任何问题。',
     chat_placeholder: '输入您的症状或问题。',
     chat_close_btn: '关闭聊天',
-    chat_api_unconfigured: '⚠️ API密钥未连接。请联系管理员。配置OpenAI API密钥后可使用AI咨询服务。',
+    chat_api_unconfigured: '所选解释服务尚未准备好，请联系管理员。',
   },
 
   vi: {
+    mf_capture_heading: 'Chuẩn bị ảnh sàng lọc',
+    mf_result_heading: 'Xem kết quả sàng lọc',
+    mf_cap_loading: 'Đang kiểm tra khả năng sàng lọc.',
+    mf_cap_status: 'Sẵn sàng: {ready} · {missing} chưa cấu hình mô hình',
+    mf_cap_error: 'Không thể xác nhận. Kiểm tra lại ở màn hình chọn.',
+    mf_operations_heading: 'Cài đặt và vận hành',
+
+    mf_skip: 'Đến nội dung',
+    mf_start: 'Bắt đầu',
+    mf_identity: 'Nhận dạng và đồng ý',
+    mf_select: 'Chọn mục',
+    mf_survey: 'Khảo sát',
+    mf_capture: 'Chụp và phân tích',
+    mf_result: 'Kết quả',
+    mf_before_start: 'Trước khi bắt đầu',
+    mf_guide_identity: 'Xác nhận nhận dạng và đồng ý.',
+    mf_guide_survey: 'Điền khảo sát rồi chụp hoặc tải ảnh.',
+    mf_guide_result: 'Xem kết quả, lịch sử và báo cáo.',
+
     // Main title and subtitle
-    main_title: 'Sàng lọc Sức khỏe Tổng hợp',
-    subtitle_line1: 'Được hỗ trợ bởi <strong>NVIDIA Jetson AI</strong>',
-    subtitle_line2: 'Sàng lọc mắt, da và da đầu trong một quy trình.',
+    main_title: 'Bắt đầu sàng lọc theo hướng dẫn',
+    subtitle_line1: 'Tiếp tục với các mục sàng lọc hiện sẵn sàng.',
+    subtitle_line2: 'Kết quả AI nghiên cứu cần được bác sĩ xem xét.',
     
     // Feature tags
     tag_conjunctivitis: '#Mắt',
@@ -375,7 +451,7 @@ const translations = {
     btn_mobile_access: '📱 Truy cập qua Thiết bị Di động',
     
     // Helper text
-    helper_disclaimer: '※ Dịch vụ này được cung cấp cho mục đích hỗ trợ y tế và sàng lọc.',
+    helper_disclaimer: 'Sàng lọc AI nghiên cứu · cần bác sĩ xem xét',
     
     // Theme toggle
     theme_dark_mode: 'Chế độ Tối',
@@ -429,7 +505,7 @@ const translations = {
     // Page titles
     report_title: '👁️ Báo cáo tổng hợp sức khỏe mắt',
     survey_title: '📋 Bảng câu hỏi sức khỏe mắt chi tiết',
-    admin_config_title: '⚙️ Cấu hình quản trị',
+    admin_config_title: 'Cài đặt và vận hành',
     m_dashboard_title: '✅ Xác thực di động hoàn tất',
     m_login_title: '📱 Xác thực PIN di động',
     capture_title: 'Chụp ảnh mắt',
@@ -467,14 +543,33 @@ const translations = {
     chat_greeting: 'Xin chào. Đây là dịch vụ tư vấn y tế AI. Vui lòng mô tả triệu chứng của bạn hoặc đặt bất kỳ câu hỏi nào.',
     chat_placeholder: 'Nhập triệu chứng hoặc câu hỏi của bạn.',
     chat_close_btn: 'Đóng Trò chuyện',
-    chat_api_unconfigured: '⚠️ Khóa API chưa được kết nối. Vui lòng liên hệ với quản trị viên. Dịch vụ tư vấn AI khả dụng sau khi khóa OpenAI API được cấu hình.',
+    chat_api_unconfigured: 'Nhà cung cấp giải thích đã chọn chưa sẵn sàng. Hãy liên hệ quản trị viên.',
   },
 
   ru: {
+    mf_capture_heading: 'Подготовьте снимок для скрининга',
+    mf_result_heading: 'Посмотрите результаты скрининга',
+    mf_cap_loading: 'Проверяем доступность скрининга.',
+    mf_cap_status: 'Доступно: {ready} · модели {missing} не настроены',
+    mf_cap_error: 'Не удалось проверить. Повторите проверку на экране выбора.',
+    mf_operations_heading: 'Настройки и работа системы',
+
+    mf_skip: 'К содержимому',
+    mf_start: 'Начало',
+    mf_identity: 'Данные и согласие',
+    mf_select: 'Выбор',
+    mf_survey: 'Анкета',
+    mf_capture: 'Снимок и анализ',
+    mf_result: 'Результаты',
+    mf_before_start: 'Перед началом',
+    mf_guide_identity: 'Подтвердите данные и согласие.',
+    mf_guide_survey: 'Заполните анкету и сделайте или загрузите снимок.',
+    mf_guide_result: 'Посмотрите результаты, историю и отчёты.',
+
     // Main title and subtitle
-    main_title: 'Комплексный скрининг здоровья',
-    subtitle_line1: 'Работает на базе <strong>NVIDIA Jetson AI</strong>',
-    subtitle_line2: 'Проверьте состояние глаз, кожи и кожи головы.',
+    main_title: 'Начните скрининг по инструкции',
+    subtitle_line1: 'Продолжайте с доступными видами скрининга.',
+    subtitle_line2: 'Результаты исследовательского ИИ требуют оценки врача.',
     
     // Feature tags
     tag_conjunctivitis: '#Глаза',
@@ -487,7 +582,7 @@ const translations = {
     btn_mobile_access: '📱 Доступ с мобильного устройства',
     
     // Helper text
-    helper_disclaimer: '※ Этот сервис предоставляется в целях медицинской поддержки и скрининга.',
+    helper_disclaimer: 'Исследовательский ИИ · требуется оценка врача',
     
     // Theme toggle
     theme_dark_mode: 'Темный режим',
@@ -543,7 +638,7 @@ const translations = {
     // Page titles
     report_title: '👁️ Комплексный отчет о здоровье глаз',
     survey_title: '📋 Детальная анкета по здоровью глаз',
-    admin_config_title: '⚙️ Настройки администратора',
+    admin_config_title: 'Настройки и работа системы',
     m_dashboard_title: '✅ Мобильная верификация завершена',
     m_login_title: '📱 Мобильная PIN-верификация',
     capture_title: 'Съемка глаза',
@@ -581,14 +676,33 @@ const translations = {
     chat_greeting: 'Привет. Это сервис медицинской консультации ИИ. Пожалуйста, опишите свои симптомы или задайте любые вопросы.',
     chat_placeholder: 'Введите ваши симптомы или вопросы.',
     chat_close_btn: 'Закрыть чат',
-    chat_api_unconfigured: '⚠️ Ключ API не подключен. Пожалуйста, свяжитесь с администратором. Сервис медицинской консультации ИИ доступен после настройки ключа OpenAI API.',
+    chat_api_unconfigured: 'Выбранный поставщик объяснений недоступен. Обратитесь к администратору.',
   },
 
   ja: {
+    mf_capture_heading: '検査画像を準備してください',
+    mf_result_heading: '検査結果を確認してください',
+    mf_cap_loading: '検査の準備状態を確認しています。',
+    mf_cap_status: '利用可能: {ready} · {missing} モデル未設定',
+    mf_cap_error: '準備状態を確認できません。検査選択で再確認してください。',
+    mf_operations_heading: '設定と運用状態',
+
+    mf_skip: '本文へ移動',
+    mf_start: '開始',
+    mf_identity: '識別・同意',
+    mf_select: '検査選択',
+    mf_survey: '問診',
+    mf_capture: '撮影・分析',
+    mf_result: '結果',
+    mf_before_start: '開始前の案内',
+    mf_guide_identity: '識別情報と同意を確認します。',
+    mf_guide_survey: '問診の後、撮影または画像をアップロードします。',
+    mf_guide_result: '結果を確認し、履歴と報告書へ進みます。',
+
     // Main title and subtitle
-    main_title: '総合健康スクリーニング',
-    subtitle_line1: '<strong>NVIDIA Jetson AI</strong>を利用',
-    subtitle_line2: '眼・皮膚・頭皮の状態を一度に確認します。',
+    main_title: '案内に沿って検査を始めましょう',
+    subtitle_line1: '現在利用できる検査から順に進みます。',
+    subtitle_line2: '研究用AIの結果は医療者による確認が必要です。',
     
     // Feature tags
     tag_conjunctivitis: '#眼',
@@ -601,7 +715,7 @@ const translations = {
     btn_mobile_access: '📱 モバイルデバイスからアクセス',
     
     // Helper text
-    helper_disclaimer: '※ このサービスは医療補助とスクリーニング目的で提供されます。',
+    helper_disclaimer: '研究用AIスクリーニング · 医療者の確認が必要',
     
     // Theme toggle
     theme_dark_mode: 'ダークモード',
@@ -657,7 +771,7 @@ const translations = {
     // Page titles
     report_title: '👁️ 眼の健康総合レポート',
     survey_title: '📋 眼の健康詳細アンケート',
-    admin_config_title: '⚙️ 管理者設定',
+    admin_config_title: '設定と運用状態',
     m_dashboard_title: '✅ モバイル認証完了',
     m_login_title: '📱 モバイルPIN認証',
     capture_title: '眼の撮影',
@@ -695,7 +809,7 @@ const translations = {
     chat_greeting: 'こんにちは。AI医療相談サービスです。症状を説明するか、ご質問ください。',
     chat_placeholder: '症状やご質問を入力してください。',
     chat_close_btn: 'チャットを閉じる',
-    chat_api_unconfigured: '⚠️ APIキーが接続されていません。管理者にお問い合わせください。OpenAI APIキーを設定した後、AI相談サービスがご利用いただけます。',
+    chat_api_unconfigured: '選択した説明プロバイダーは利用できません。管理者にお問い合わせください。',
   }
 };
 

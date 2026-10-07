@@ -22,7 +22,7 @@
     <!-- Global language FAB intentionally not included on this page -->
     <style>
         :root { 
-            --primary: #007AFF; 
+
             --bg: #f5f5f7; 
             --card: #ffffff; 
             --text: #1d1d1f; 
@@ -37,14 +37,7 @@
             --fluid-radius: clamp(12px, 3vw, 18px);
         }
 
-        [data-theme="dark"] {
-            --primary: #4ea1ff;
-            --bg: #0f1115;
-            --card: #161a22;
-            --text: #e5e7eb;
-            --border: #2a3240;
-            --guide-color: rgba(52, 211, 153, 0.55);
-        }
+
 
         .theme-toggle-floating {
             position: fixed;
@@ -58,9 +51,9 @@
             border-radius: 999px;
             min-height: 44px;
             padding: 10px 14px;
-            font-size: 0.9rem;
-            font-weight: 800;
-            letter-spacing: -0.2px;
+            font-size: var(--mf-type-support);
+            font-weight: 700;
+            letter-spacing: 0;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -90,7 +83,7 @@
         .confirm-toast.show { display: block; }
 
         .confirm-toast-message {
-            font-size: 0.92rem;
+            font-size: var(--mf-type-support);
             line-height: 1.45;
             margin-bottom: 10px;
             word-break: keep-all;
@@ -106,7 +99,7 @@
             border: none;
             border-radius: 8px;
             padding: 7px 10px;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
         }
@@ -131,7 +124,7 @@
         [data-theme="dark"] .confidence-text { color: #94a3b8 !important; }
 
         body { 
-            font-family: 'Pretendard', sans-serif; 
+            font-family: var(--font-ui);
             background-color: var(--bg); 
             color: var(--text); 
             margin: 0; 
@@ -186,7 +179,7 @@
             top: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
             color: #cbd5e1;
             background: rgba(15, 23, 42, 0.55);
             border: 1px solid rgba(148, 163, 184, 0.35);
@@ -229,13 +222,13 @@
         }
 
         .upload-progress-title {
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             margin-bottom: 6px;
         }
 
         .upload-progress-sub {
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             color: #cbd5e1;
         }
 
@@ -250,7 +243,7 @@
             border-radius: 999px;
             min-height: 42px;
             padding: 8px 12px;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
             display: none;
@@ -263,7 +256,7 @@
             background: #eef2ff;
             color: #334155;
             border: 1px dashed var(--border);
-            font-size: 0.9rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
             margin-top: 8px;
@@ -275,17 +268,17 @@
         .camera-bottom-btns { height: 18%; background: #ffffff; display: flex; align-items: center; justify-content: center; gap: 20px; border-top: 1px solid var(--border); padding: 0 20px; box-sizing: border-box; }
         .right-panel { flex: 1; padding: 30px; display: flex; flex-direction: column; justify-content: flex-start; background: var(--card); border-radius: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow-y: auto; box-sizing: border-box; }
         .card { background: var(--card); padding: 25px; border-radius: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .btn-capture { width: 100%; padding: 25px; border-radius: 15px; background: var(--primary); color: white; font-weight: 800; border: none; font-size: 1.3rem; cursor: pointer; display: none; }
+        .btn-capture { width: 100%; padding: 25px; border-radius: 15px; background: var(--primary); color: white; font-weight: 700; border: none; font-size: 1.3rem; cursor: pointer; display: none; }
         .btn-upload { width: 100%; padding: 16px; border-radius: 12px; background: var(--primary); color: white; font-weight: 700; border: none; font-size: 1rem; cursor: pointer; margin-top: 10px; }
-        .btn-restore { width: 100%; padding: 14px; border-radius: 12px; background: #f8fafc; color: #475569; font-weight: 700; border: 1px solid var(--border); font-size: 0.95rem; cursor: pointer; margin-top: 8px; }
-        .btn-go-result { width: 100%; padding: 18px; border-radius: 12px; background: #16a34a; color: #fff; font-weight: 800; border: none; font-size: 1.05rem; cursor: pointer; margin-top: 10px; }
+        .btn-restore { width: 100%; padding: 14px; border-radius: 12px; background: #f8fafc; color: #475569; font-weight: 700; border: 1px solid var(--border); font-size: var(--mf-type-support); cursor: pointer; margin-top: 8px; }
+        .btn-go-result { width: 100%; padding: 18px; border-radius: 12px; background: #16a34a; color: #fff; font-weight: 700; border: none; font-size: 1.05rem; cursor: pointer; margin-top: 10px; }
         .btn-go-result:disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
         .eye-select-wrap { display:flex; gap:10px; }
         .btn-eye { flex:1; padding:14px; border:1px solid var(--border); border-radius:10px; background:#fff; font-weight:700; cursor:pointer; }
         .btn-eye.active { background:var(--primary); color:#fff; border-color:var(--primary); }
         .thumb-wrap { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
         .thumb-box { border:1px solid var(--border); border-radius:10px; padding:8px; background:#f8fafc; cursor:pointer; }
-        .thumb-title { font-size:0.8rem; color:#64748b; margin-bottom:6px; font-weight:700; }
+        .thumb-title { font-size: var(--mf-type-support); color:#64748b; margin-bottom:6px; font-weight:700; }
         .thumb-img { width:100%; height:70px; object-fit:cover; border-radius:8px; background:#e2e8f0; }
 
         .detection-status-box {
@@ -298,12 +291,12 @@
         }
 
         .status-message {
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
             color: #64748b;
         }
 
         .confidence-text {
-            font-size: 0.85rem;
+            font-size: var(--mf-type-support);
             color: #999;
             margin-top: 3px;
         }
@@ -550,13 +543,13 @@
             }
 
             body.mobile-upload-only #capture-message {
-                font-size: 0.86rem;
+                font-size: var(--mf-type-support);
                 line-height: 1.45;
             }
 
             body.mobile-upload-only .mobile-preview-hint {
                 display: block;
-                font-size: 0.9rem;
+                font-size: var(--mf-type-support);
                 width: min(90%, 360px);
             }
 
@@ -736,14 +729,10 @@
                 --border: #333;
             }
 
-            [data-theme="dark"] {
-                --primary: #66b3ff;
-                --text: #fff;
-                --border: #999;
-            }
+
 
             .btn-capture {
-                font-weight: 900;
+                font-weight: 700;
             }
         }
 
@@ -1046,9 +1035,14 @@
 
 
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-capture">
+{% set ui_step = 5 %}{% include "_guided_header.html" %}
 
+    <main id="mf-content" class="mf-capture-workspace">
     <div class="left-panel">
         <div class="video-container">
             <img id="video-feed" src="">
@@ -1063,7 +1057,7 @@
         </div>
 
         <div class="camera-bottom-btns" style="display: none;">
-            <div id="camera-guide-text" style="font-size: 0.9rem; color: #64748b;">
+            <div id="camera-guide-text" style="font-size: var(--mf-type-support); color: #64748b;">
                 <span data-i18n="capture_eye_align_hint">※ 고해상도 촬영을 위해 가이드 중앙에 눈을 정렬해 주세요.</span>
             </div>
         </div>
@@ -1089,11 +1083,12 @@
             <button class="btn-restore" onclick="restoreCameraPreview()" data-i18n="btn_restore_camera" style="display: none;">↩️ 실시간 카메라로 복귀</button>
             <button id="btn-go-result" class="btn-go-result" onclick="goToResult()" disabled data-i18n="btn_view_result">✅ 결과 보기</button>
             <input id="upload-image-input" type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleUploadedImage(event)">
-            <div id="capture-message" style="margin-top:10px; font-size:0.9rem; color:#64748b;" data-i18n="capture_guidance">안내: 얼굴 사진 한 장을 업로드하면 분석 후 결과를 확인할 수 있습니다.</div>
+            <div id="capture-message" style="margin-top:10px; font-size: var(--mf-type-support); color:#64748b;" data-i18n="capture_guidance">안내: 얼굴 사진 한 장을 업로드하면 분석 후 결과를 확인할 수 있습니다.</div>
         </div>
 
     </div>
 
+    </main>
     <div id="confirm-toast" class="confirm-toast" role="dialog" aria-modal="true" aria-live="assertive">
         <div id="confirm-toast-message" class="confirm-toast-message"></div>
         <div class="confirm-toast-actions">
@@ -1110,6 +1105,9 @@
         let autoShutterEnabled = true;
         let isCapturing = false;
         let autoCooldownUntil = 0;
+        let detectionInFlight = false;
+        let detectionAbort = null;
+        let capturePageActive = true;
         let previewMode = 'camera'; // 'camera' | 'upload'
         let mobileUploadOnlyMode = false;
         let captureCameraSessionActive = false;
@@ -1311,7 +1309,7 @@
             stopVideoFallbackPolling();
             videoFallbackInterval = setInterval(() => {
                 if (previewMode !== 'camera') return;
-                videoImg.src = `/video_frame?t=${Date.now()}`;
+                videoImg.src = `/video_frame?mesh=0&t=${Date.now()}`;
             }, 250);
         }
 
@@ -1363,29 +1361,34 @@
         // 눈 감지 상태 폴링 (서버에서 감지 여부 조회)
         // ==========================================
         async function pollDetectionStatus() {
-            if (mobileUploadOnlyMode) return;
+            if (mobileUploadOnlyMode || previewMode !== 'camera' || detectionInFlight || !capturePageActive) return;
+            detectionInFlight = true;
+            detectionAbort = new AbortController();
+            const statusDot = document.getElementById('status-dot');
+            const statusMessage = document.getElementById('status-message');
+            statusMessage.removeAttribute('data-i18n');
+            const captureButton = document.getElementById('btn-capture-photo');
             try {
-                const response = await fetch('/detect_status');
+                const response = await fetch('/detect_status', {signal: detectionAbort.signal});
                 const data = await response.json();
-                
-                const statusDot = document.getElementById('status-dot');
-                const statusMessage = document.getElementById('status-message');
-                const confidenceText = document.getElementById('confidence-text');
-                
-                if (data.detected) {
-                    statusDot.style.background = '#28cd41';  // 녹색
-                    statusMessage.textContent = data.message;
-                    confidenceText.textContent = `신뢰도: ${(data.confidence * 100).toFixed(1)}%`;
-                } else {
-                    statusDot.style.background = '#b0bec5';  // 회색
-                    statusMessage.textContent = data.message;
-                    confidenceText.textContent = '';
-                }
-
-                handleAutoShutter(data.detected, data.confidence || 0);
+                if (!capturePageActive || previewMode !== 'camera') return;
+                if (!response.ok || data.error) throw new Error('camera_status_unavailable');
+                const stale = data.camera_state === 'stale';
+                const permission = data.camera_state === 'permission_denied';
+                const missing = data.camera_state === 'missing' || /연결|기다리/.test(data.message || '');
+                const ready = data.detected && !stale && !missing && !permission;
+                statusMessage.textContent = permission ? '카메라 접근 권한이 없습니다. 관리자에게 문의해 주세요.' : stale ? '영상이 멈췄습니다. 카메라 연결을 확인해 주세요.' : missing ? '카메라를 연결해 주세요.' : ready ? '촬영할 수 있습니다.' : '촬영 위치를 조정해 주세요.';
+                statusDot.style.background = ready ? '#146b65' : '#795400';
+                captureButton.disabled = stale || missing || permission;
+                document.getElementById('confidence-text').textContent = '';
+                handleAutoShutter(ready, ready ? data.confidence || 0 : 0);
             } catch (error) {
-                console.error('[Detection Status Error]', error);
-            }
+                if (error.name !== 'AbortError' && capturePageActive) {
+                    statusMessage.textContent = '카메라 상태를 확인할 수 없습니다. 연결을 확인해 주세요.';
+                    statusDot.style.background = '#a12b22';
+                    captureButton.disabled = true;
+                }
+            } finally { detectionInFlight = false; }
         }
 
         function toggleAutoShutter() {
@@ -1468,7 +1471,7 @@
                 stopVideoFallbackPolling();
             };
             videoImg.src = '';
-            videoImg.src = `/video_feed?t=${Date.now()}`;
+            videoImg.src = `/video_feed?mesh=0&t=${Date.now()}`;
             videoImg.style.objectFit = 'cover';
             videoImg.style.transform = `scaleX(-1) scale(${digitalZoom})`;
             captureMessage.textContent = '실시간 카메라 모드로 복귀했습니다.';
@@ -1830,6 +1833,8 @@
 
         // 페이지 종료 시 폴링 중지
         window.onbeforeunload = () => {
+            capturePageActive = false;
+            if (detectionAbort) detectionAbort.abort();
             if (detectionPollingInterval) {
                 clearInterval(detectionPollingInterval);
             }
@@ -1838,6 +1843,8 @@
         };
 
         window.addEventListener('pagehide', () => {
+            capturePageActive = false;
+            if (detectionAbort) detectionAbort.abort();
             stopCaptureCameraSession();
         });
 

@@ -5,7 +5,9 @@
 
   const IDLE_MS = 180000; // 3 minutes
   const SCREENSAVER_SECONDS = 30; // 30s countdown
-  const CACHE_KEYS = ['last_mobile_upload_capture', 'user_id'];
+  const CACHE_KEYS = ['last_mobile_upload_capture', 'user_id', 'user_role', 'active_capture_user_id',
+    'user_age', 'data_updated', 'bilateral_capture', 'bilateral_analysis', 'bilateral_selected_eye',
+    'eye_photo_L', 'eye_photo_R', 'eye_analysis_L', 'eye_analysis_R', 'admin_csrf_token'];
 
   // expose session init globally
   window.initializeMasterSession = function() {
@@ -25,13 +27,13 @@
     overlay.innerHTML = `
       <div style="text-align: center; max-width: 560px; width: 92%; padding: 28px; background: rgba(30,41,59,0.75); border-radius: 14px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); color: #fff;">
         <div style="font-size: 2.6rem; margin-bottom: 8px;">⏳</div>
-        <h2 style="font-size: 1.25rem; margin: 0 0 10px 0; font-weight: 700;">터치하지 않으면 처음화면으로 돌아갑니다</h2>
-        <p style="color: #94a3b8; margin: 0 0 18px 0; font-size: 0.95rem;">화면을 터치하면 진단이 계속됩니다.</p>
+        <h2 style="font-size: var(--mf-type-section, 22px); margin: 0 0 10px 0; font-weight: 700;">터치하지 않으면 처음화면으로 돌아갑니다</h2>
+        <p style="color: #94a3b8; margin: 0 0 18px 0; font-size: var(--mf-type-body, 18px);">화면을 터치하면 진단이 계속됩니다.</p>
         <div style="width: 100%; height: 8px; background: #334155; border-radius: 999px; overflow: hidden; margin-bottom: 14px;">
           <div id="screensaver-progress" style="width: 100%; height: 100%; background: linear-gradient(90deg, #ef4444, #f43f5e); border-radius: 999px; transition: width 1s linear;"></div>
         </div>
-        <div id="screensaver-countdown" style="font-size: 2.2rem; font-weight: 800; color: #f43f5e; margin-bottom: 16px;">${SCREENSAVER_SECONDS}</div>
-        <button id="screensaver-cancel" style="width:100%; padding:12px 18px; font-size:1.05rem; font-weight:700; color:#fff; background:#10b981; border:none; border-radius:10px; cursor:pointer;">진단 계속하기</button>
+        <div id="screensaver-countdown" style="font-size: var(--mf-type-title, 32px); font-weight: 700; color: #f43f5e; margin-bottom: 16px;">${SCREENSAVER_SECONDS}</div>
+        <button id="screensaver-cancel" style="width:100%; padding:12px 18px; font-size:var(--mf-type-action, 19px); font-weight:600; color:#fff; background:#10b981; border:none; border-radius:10px; cursor:pointer;">진단 계속하기</button>
       </div>
     `;
 

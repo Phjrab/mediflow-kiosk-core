@@ -11,29 +11,6 @@
         })();
     </script>
     <style>
-        :root {
-            --primary: #007aff;
-            --primary-soft: #eaf3ff;
-            --success: #138a52;
-            --warning: #9a6700;
-            --bg: #f5f5f7;
-            --surface: #ffffff;
-            --text: #172033;
-            --sub: #667085;
-            --border: #d9e0ea;
-        }
-
-        [data-theme="dark"] {
-            --primary: #58a6ff;
-            --primary-soft: #142a42;
-            --success: #4fd18b;
-            --warning: #f0c45c;
-            --bg: #0f1115;
-            --surface: #171b22;
-            --text: #eef2f7;
-            --sub: #a7b0bf;
-            --border: #303846;
-        }
 
         * { box-sizing: border-box; }
 
@@ -43,7 +20,7 @@
             min-height: 800px;
             background: var(--bg);
             color: var(--text);
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: var(--font-ui);
         }
 
         .page {
@@ -61,8 +38,8 @@
             margin-bottom: 36px;
         }
 
-        .service-name { color: var(--primary); font-weight: 800; font-size: 1.05rem; }
-        .step { color: var(--sub); font-weight: 700; font-size: 0.95rem; }
+        .service-name { color: var(--primary); font-weight: 700; font-size: 1.05rem; }
+        .step { color: var(--sub); font-weight: 700; font-size: var(--mf-type-support); }
         h1 { margin: 0; font-size: 2.5rem; letter-spacing: 0; }
         .lead { margin: 12px 0 30px; color: var(--sub); font-size: 1.1rem; }
 
@@ -90,7 +67,7 @@
             border-radius: 8px;
             min-height: 42px;
             padding: 0 18px;
-            font-weight: 800;
+            font-weight: 700;
             white-space: nowrap;
             cursor: pointer;
         }
@@ -119,10 +96,10 @@
         .modality:hover { transform: translateY(-2px); }
         .modality.selected { border-color: var(--primary); box-shadow: 0 10px 26px rgba(0, 122, 255, 0.14); }
         .modality:focus-visible, button:focus-visible { outline: 3px solid rgba(0, 122, 255, 0.35); outline-offset: 2px; }
-        .number { color: var(--primary); font-size: 0.9rem; font-weight: 800; }
+        .number { color: var(--primary); font-size: var(--mf-type-support); font-weight: 700; }
         .modality h2 { margin: 16px 0 8px; font-size: 1.55rem; }
         .modality p { margin: 0; color: var(--sub); line-height: 1.5; }
-        .source { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.9rem; color: var(--sub); }
+        .source { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); font-size: var(--mf-type-support); color: var(--sub); }
 
         .status {
             position: absolute;
@@ -130,14 +107,14 @@
             top: 18px;
             border-radius: 999px;
             padding: 6px 10px;
-            font-size: 0.78rem;
-            font-weight: 800;
+            font-size: var(--mf-type-support);
+            font-weight: 700;
             background: var(--primary-soft);
             color: var(--primary);
         }
 
         .status.ready { color: var(--success); background: rgba(19, 138, 82, 0.12); }
-        .checkmark { position: absolute; right: 22px; bottom: 20px; font-weight: 900; color: var(--primary); opacity: 0; }
+        .checkmark { position: absolute; right: 22px; bottom: 20px; font-weight: 700; color: var(--primary); opacity: 0; }
         .selected .checkmark { opacity: 1; }
 
         .footer {
@@ -155,7 +132,7 @@
             border-radius: 8px;
             padding: 0 26px;
             font-size: 1rem;
-            font-weight: 800;
+            font-weight: 700;
             border: 1px solid var(--border);
             cursor: pointer;
         }
@@ -168,9 +145,9 @@
             .page { min-height: 100vh; padding: 24px 16px; }
             .topline { margin-bottom: 24px; }
             h1 { font-size: 1.9rem; }
-            .lead { font-size: 0.98rem; margin-bottom: 22px; }
+            .lead { font-size: var(--mf-type-support); margin-bottom: 22px; }
             .all-row { align-items: flex-start; gap: 12px; padding: 14px; }
-            .all-row span { display: block; margin: 4px 0 0; font-size: 0.86rem; }
+            .all-row span { display: block; margin: 4px 0 0; font-size: var(--mf-type-support); }
             .modality-grid { grid-template-columns: 1fr; }
             .modality { min-height: 168px; }
             .footer { align-items: stretch; flex-direction: column; gap: 14px; }
@@ -178,26 +155,32 @@
             .btn { padding: 0 14px; }
         }
     </style>
+    <script src="/static/js/translations.js"></script>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
-    <main class="page">
+<body class="mf-patient mf-select">
+{% set ui_step = 3 %}{% include "_guided_header.html" %}
+    <main id="mf-content" class="page">
         <div class="topline">
             <div id="service-name" class="service-name">종합 건강 스크리닝</div>
             <div class="step">검사 선택</div>
         </div>
 
         <h1>검사 항목을 선택하세요</h1>
-        <p class="lead">한 항목 또는 여러 항목을 선택할 수 있습니다.</p>
+        <p class="lead">현재 서버에서 분석 가능한 검사만 선택할 수 있습니다.</p>
 
         <section class="all-row" aria-label="전체 검사 선택">
-            <div><strong>전체 검사</strong><span>안구, 피부, 두피를 순서대로 진행합니다.</span></div>
+            <div><strong>전체 검사</strong><span id="all-availability">검사 준비 상태를 확인 중입니다.</span></div>
             <button id="toggle-all" class="toggle-all" type="button" aria-pressed="false">전체 선택</button>
         </section>
 
+        <button id="retry-config" class="btn btn-back" type="button" hidden>검사 상태 다시 확인</button>
         <section id="modality-grid" class="modality-grid" aria-label="검사 항목"></section>
 
         <footer class="footer">
-            <div id="selection-summary" class="selection-summary">선택된 검사 없음</div>
+            <div id="selection-summary" class="selection-summary" role="status">선택된 검사 없음</div>
             <div class="actions">
                 <button class="btn btn-back" type="button" onclick="location.href='/'">이전</button>
                 <button id="continue-button" class="btn btn-next" type="button" disabled>문진 시작</button>
@@ -209,71 +192,68 @@
     <script>
         const selected = new Set();
         let modalities = [];
-
-        function statusText(modality) {
-            return modality.model_status === 'ready' ? '분석 가능' : '모델 연결 전';
-        }
-
-        function sourceText(modality) {
-            if (modality.camera_role === 'usb_microscope') return 'USB 현미경 카메라 · 이미지 업로드';
-            return '웹캠 · 이미지 업로드';
-        }
-
+        const ready = () => modalities.filter(item => item.model_status === 'ready');
         function render() {
             const grid = document.getElementById('modality-grid');
-            grid.innerHTML = '';
             modalities.forEach((modality, index) => {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = `modality${selected.has(modality.id) ? ' selected' : ''}`;
-                button.dataset.modality = modality.id;
-                button.setAttribute('aria-pressed', selected.has(modality.id) ? 'true' : 'false');
-                button.innerHTML = `
-                    <span class="number">0${index + 1}</span>
-                    <span class="status ${modality.model_status === 'ready' ? 'ready' : ''}">${statusText(modality)}</span>
-                    <h2>${modality.label}</h2>
-                    <p>${modality.short_description}</p>
-                    <div class="source">${sourceText(modality)}</div>
-                    <span class="checkmark" aria-hidden="true">선택됨</span>
-                `;
-                button.addEventListener('click', () => {
-                    selected.has(modality.id) ? selected.delete(modality.id) : selected.add(modality.id);
-                    render();
-                });
-                grid.appendChild(button);
+                let button = grid.querySelector(`[data-modality="${modality.id}"]`);
+                if (!button) {
+                    button = document.createElement('button');
+                    button.type = 'button'; button.className = 'modality'; button.dataset.modality = modality.id;
+                    const entries = [['span','number',`0${index + 1}`],['span','status',modality.model_status === 'ready' ? '분석 가능' : '준비되지 않음'],['h2','',modality.label],['p','',modality.model_status === 'ready' ? modality.short_description : '모델 미설정 · 현재 검사를 시작할 수 없습니다.'],['div','source',modality.camera_role === 'usb_microscope' ? 'USB 현미경 · 이미지 업로드' : 'USB UVC 웹캠 · 이미지 업로드'],['span','checkmark','선택됨']];
+                    // Server strings are inserted as text, never executable HTML.
+                    entries.forEach(([tag, cls, text]) => { const e = document.createElement(tag); e.className = cls; e.textContent = text; button.appendChild(e); });
+                    button.children[1].textContent = modality.model_status === 'ready' ? '분석 가능' : '준비되지 않음';
+                    button.children[3].textContent = modality.model_status === 'ready' ? modality.short_description : '모델 미설정 · 현재 검사를 시작할 수 없습니다.';
+                    button.children[4].textContent = modality.camera_role === 'usb_microscope' ? 'USB 현미경 · 이미지 업로드' : 'USB UVC 웹캠 · 이미지 업로드';
+                    button.children[5].textContent = '선택됨';
+                    button.children[5].setAttribute('aria-hidden','true');
+                    button.addEventListener('click', () => { if (button.disabled) return; selected.has(modality.id) ? selected.delete(modality.id) : selected.add(modality.id); render(); });
+                    grid.appendChild(button);
+                }
+                button.disabled = modality.model_status !== 'ready';
+                if (button.disabled) selected.delete(modality.id);
+                button.classList.toggle('selected', selected.has(modality.id));
+                button.setAttribute('aria-pressed', String(selected.has(modality.id)));
+                button.children[1].classList.toggle('ready', !button.disabled);
             });
-
-            const allSelected = modalities.length > 0 && modalities.every((item) => selected.has(item.id));
+            const available = ready();
+            const allSelected = available.length > 0 && available.every(item => selected.has(item.id));
             const allButton = document.getElementById('toggle-all');
+            allButton.disabled = !available.length;
             allButton.classList.toggle('active', allSelected);
-            allButton.setAttribute('aria-pressed', allSelected ? 'true' : 'false');
-            allButton.textContent = allSelected ? '전체 해제' : '전체 선택';
-
-            const labels = modalities.filter((item) => selected.has(item.id)).map((item) => item.label);
+            allButton.setAttribute('aria-pressed', String(allSelected));
+            allButton.textContent = allSelected ? '선택 해제' : '가능한 검사 모두 선택';
+            const missing = modalities.filter(item => item.model_status !== 'ready').map(item => item.label);
+            document.getElementById('all-availability').textContent = `${available.map(item => item.label).join(' · ') || '준비된 검사 없음'}${missing.length ? `만 진행 가능 · ${missing.join('·')}는 모델 미설정` : ' 검사 진행 가능'}`;
+            const labels = available.filter(item => selected.has(item.id)).map(item => item.label);
             document.getElementById('selection-summary').textContent = labels.length ? `선택: ${labels.join(' · ')}` : '선택된 검사 없음';
-            document.getElementById('continue-button').disabled = labels.length === 0;
+            document.getElementById('continue-button').disabled = !labels.length;
         }
-
         document.getElementById('toggle-all').addEventListener('click', () => {
-            const allSelected = modalities.length > 0 && modalities.every((item) => selected.has(item.id));
-            selected.clear();
-            if (!allSelected) modalities.forEach((item) => selected.add(item.id));
-            render();
+            const allSelected = ready().length > 0 && ready().every(item => selected.has(item.id));
+            selected.clear(); if (!allSelected) ready().forEach(item => selected.add(item.id)); render();
         });
-
         document.getElementById('continue-button').addEventListener('click', () => {
-            const plan = ScreeningFlow.begin(Array.from(selected));
+            const plan = ScreeningFlow.begin(ready().filter(item => selected.has(item.id)).map(item => item.id));
             if (plan.length) location.href = '/screening/survey';
         });
-
-        ScreeningFlow.getConfig().then((config) => {
-            modalities = config.modalities || [];
-            document.getElementById('service-name').textContent = config.service_name || '종합 건강 스크리닝';
-            ScreeningFlow.getPlan().forEach((id) => selected.add(id));
-            render();
-        }).catch(() => {
-            document.getElementById('selection-summary').textContent = '검사 설정을 불러오지 못했습니다.';
-        });
+        async function loadCapabilities() {
+            document.getElementById('retry-config').hidden = true;
+            document.getElementById('toggle-all').disabled = true;
+            try {
+                const config = await ScreeningFlow.getConfig();
+                modalities = (config.modalities || []).filter(item => ScreeningFlow.ORDER.includes(item.id));
+                document.getElementById('service-name').textContent = 'MediFlow · Guided Screening';
+                ScreeningFlow.getPlan().forEach(id => selected.add(id)); render();
+            } catch (error) {
+                document.getElementById('selection-summary').textContent = '검사 상태를 확인할 수 없습니다. 연결을 확인한 뒤 다시 시도해 주세요.';
+                document.getElementById('continue-button').disabled = true;
+                document.getElementById('retry-config').hidden = false;
+            }
+        }
+        document.getElementById('retry-config').addEventListener('click', loadCapabilities);
+        loadCapabilities();
     </script>
     <script src="/static/js/timeout.js"></script>
 </body>

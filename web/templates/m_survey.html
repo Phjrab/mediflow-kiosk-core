@@ -22,12 +22,6 @@
     </script>
     <style>
         :root {
-            --primary: #007AFF;
-            --bg: #f5f5f7;
-            --card: #ffffff;
-            --text: #1d1d1f;
-            --border: #d2d2d7;
-            --accent: #28cd41;
             --safe-top: env(safe-area-inset-top, 0);
             --safe-bottom: env(safe-area-inset-bottom, 0);
             --safe-left: env(safe-area-inset-left, 0);
@@ -38,14 +32,7 @@
             --fluid-font: clamp(0.95rem, 2.2vw, 1.2rem);
         }
 
-        [data-theme="dark"] {
-            --primary: #4ea1ff;
-            --bg: #0f1115;
-            --card: #161a22;
-            --text: #e5e7eb;
-            --border: #2a3240;
-            --accent: #34d399;
-        }
+
 
         .theme-toggle-floating {
             position: fixed;
@@ -59,9 +46,9 @@
             border-radius: 999px;
             min-height: 44px;
             padding: 10px 14px;
-            font-size: 0.9rem;
-            font-weight: 800;
-            letter-spacing: -0.2px;
+            font-size: var(--mf-type-support);
+            font-weight: 700;
+            letter-spacing: 0;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -91,7 +78,7 @@
         .confirm-toast.show { display: block; }
 
         .confirm-toast-message {
-            font-size: 0.92rem;
+            font-size: var(--mf-type-support);
             line-height: 1.45;
             margin-bottom: 10px;
             word-break: keep-all;
@@ -107,7 +94,7 @@
             border: none;
             border-radius: 8px;
             padding: 7px 10px;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
         }
@@ -123,7 +110,7 @@
         }
 
         body {
-            font-family: 'Pretendard', sans-serif;
+            font-family: var(--font-ui);
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
@@ -166,7 +153,7 @@
         /* 입력 폼 스타일 */
         .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .field { display: flex; flex-direction: column; gap: 5px; }
-        label { font-weight: 600; font-size: 0.9rem; }
+        label { font-weight: 600; font-size: var(--mf-type-support); }
         input, select, textarea {
             padding: 12px;
             border-radius: 10px;
@@ -346,7 +333,7 @@
             }
 
             label {
-                font-size: 0.88rem;
+                font-size: var(--mf-type-support);
             }
 
             input,
@@ -354,7 +341,7 @@
             textarea {
                 min-height: 44px;
                 padding: 12px;
-                font-size: 0.95rem;
+                font-size: var(--mf-type-support);
             }
 
             textarea {
@@ -363,7 +350,7 @@
 
             .check-item {
                 padding: 10px;
-                font-size: 0.95rem;
+                font-size: var(--mf-type-support);
             }
 
             .footer-btns {
@@ -373,7 +360,7 @@
 
             .btn {
                 padding: 12px 14px;
-                font-size: 0.98rem;
+                font-size: var(--mf-type-support);
             }
         }
 
@@ -388,13 +375,13 @@
             }
 
             .check-item {
-                font-size: 0.92rem;
+                font-size: var(--mf-type-support);
                 padding: 9px;
             }
 
             .btn {
                 padding: 11px 12px;
-                font-size: 0.95rem;
+                font-size: var(--mf-type-support);
             }
 
             .confirm-toast {
@@ -404,15 +391,19 @@
         }
 
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-survey">
+{% set ui_step = 4 %}{% include "_guided_header.html" %}
 
     <header>
         <h1 data-i18n="survey_title">📋 안구 건강 정밀 문진</h1>
         <p data-i18n="survey_instruction">정확한 AI 분석을 위해 현재 상태를 솔직하게 답변해 주세요.</p>
     </header>
 
-    <div class="main-container">
+    <div id="mf-content" class="main-container">
         <div class="card">
             <h2>👤 기본 정보</h2>
             <div class="input-row">

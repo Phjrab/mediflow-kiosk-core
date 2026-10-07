@@ -11,46 +11,24 @@
         })();
     </script>
     <style>
-        :root {
-            --primary: #007aff;
-            --bg: #f5f5f7;
-            --surface: #ffffff;
-            --text: #172033;
-            --sub: #667085;
-            --border: #d9e0ea;
-            --success: #138a52;
-            --success-soft: #e9f7ef;
-            --warning: #9a6700;
-            --warning-soft: #fff7dd;
-        }
-        [data-theme="dark"] {
-            --primary: #58a6ff;
-            --bg: #0f1115;
-            --surface: #171b22;
-            --text: #eef2f7;
-            --sub: #a7b0bf;
-            --border: #303846;
-            --success: #4fd18b;
-            --success-soft: #173126;
-            --warning: #f0c45c;
-            --warning-soft: #342c17;
-        }
+
+
         * { box-sizing: border-box; }
-        body { margin: 0; width: 100%; min-height: 800px; background: var(--bg); color: var(--text); font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; width: 100%; min-height: 800px; background: var(--bg); color: var(--text); font-family: var(--font-ui); }
         .page { width: 100%; min-height: 800px; padding: 46px 66px 40px; display: flex; flex-direction: column; }
-        .eyebrow { color: var(--primary); font-weight: 800; margin-bottom: 8px; }
+        .eyebrow { color: var(--primary); font-weight: 700; margin-bottom: 8px; }
         h1 { margin: 0; font-size: 2.45rem; letter-spacing: 0; }
         .lead { margin: 12px 0 30px; color: var(--sub); font-size: 1.05rem; }
         .summary-list { display: grid; gap: 12px; }
         .summary-row { min-height: 112px; display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; align-items: center; gap: 22px; padding: 20px 24px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
-        .modality { font-size: 1.25rem; font-weight: 900; }
+        .modality { font-size: 1.25rem; font-weight: 700; }
         .description { color: var(--sub); line-height: 1.55; }
-        .status { min-width: 104px; padding: 8px 12px; border-radius: 6px; text-align: center; font-size: 0.84rem; font-weight: 800; }
+        .status { min-width: 104px; padding: 8px 12px; border-radius: 6px; text-align: center; font-size: var(--mf-type-support); font-weight: 700; }
         .status.ready { color: var(--success); background: var(--success-soft); }
         .status.pending { color: var(--warning); background: var(--warning-soft); }
         .notice { margin-top: 20px; padding: 17px 20px; border-left: 4px solid var(--primary); background: var(--surface); color: var(--sub); line-height: 1.55; }
         footer { margin-top: auto; padding-top: 28px; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
-        .btn { min-height: 52px; padding: 0 24px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 1rem; font-weight: 800; cursor: pointer; }
+        .btn { min-height: 52px; padding: 0 24px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 1rem; font-weight: 700; cursor: pointer; }
         .btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; min-width: 190px; }
         @media (max-width: 768px) {
             body { width: 100%; min-height: 100vh; }
@@ -63,18 +41,23 @@
             .btn { width: 100%; }
         }
     </style>
+    <script src="/static/js/translations.js"></script>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
-    <main class="page">
+<body class="mf-patient mf-summary">
+{% set ui_step = 6 %}{% include "_guided_header.html" %}
+    <main id="mf-content" class="page">
         <div class="eyebrow">종합 건강 스크리닝</div>
-        <h1>선택한 검사가 완료되었습니다</h1>
+        <h1>검사 진행 결과를 확인하세요</h1>
         <p class="lead">영역별 분석 준비 상태와 확보된 결과를 확인하세요.</p>
 
         <section id="summary-list" class="summary-list" aria-label="통합 검사 결과"></section>
         <div class="notice">이 결과는 건강 상태 스크리닝 및 의료 의사결정 보조용입니다. 증상이 지속되거나 악화되면 의료 전문가의 진료를 받으세요.</div>
 
         <footer>
-            <button class="btn" type="button" onclick="location.href='/'">홈으로</button>
+            <button class="btn" type="button" data-mf-finish>검사 종료</button>
             <button id="restart-button" class="btn btn-primary" type="button">새 검사 시작</button>
         </footer>
     </main>

@@ -16,33 +16,9 @@
         })();
     </script>
     <style>
-        :root {
-            --primary: #3182f6;
-            --primary-hover: #1b64da;
-            --bg: #f2f4f6;
-            --card: #ffffff;
-            --text: #191f28;
-            --text-muted: #4e5968;
-            --border: #dfe3ea;
-            --accent-bg: #f0fdf4;
-            --accent-text: #166534;
-            --teal-primary: #00897b;
-            --teal-light: #e0f2f1;
-        }
 
-        [data-theme="dark"] {
-            --primary: #4ea1ff;
-            --primary-hover: #2b84ff;
-            --bg: #0f1115;
-            --card: #161a22;
-            --text: #e5e7eb;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --accent-bg: #14291a;
-            --accent-text: #34d399;
-            --teal-primary: #26a69a;
-            --teal-light: #0d2d2a;
-        }
+
+
 
         [data-theme="dark"] .kiosk-window {
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24), 0 20px 40px rgba(0, 0, 0, 0.36);
@@ -92,7 +68,7 @@
 
         body {
             background-color: var(--bg);
-            font-family: 'Pretendard', -apple-system, sans-serif;
+            font-family: var(--font-ui);
             color: var(--text);
             margin: 0;
             padding: 20px;
@@ -137,7 +113,7 @@
         }
 
         .header-section p {
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
             color: var(--text-muted);
             margin: 0;
         }
@@ -173,7 +149,7 @@
             align-self: flex-start;
             padding: 6px 12px;
             border-radius: 10px;
-            font-size: 0.8rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             background: var(--teal-light);
             color: var(--teal-primary);
@@ -204,7 +180,7 @@
             background: var(--card);
             padding: 10px 14px;
             border-radius: 12px;
-            font-size: 0.88rem;
+            font-size: var(--mf-type-support);
             line-height: 1.4;
             color: var(--text);
             display: flex;
@@ -215,7 +191,7 @@
         .step-num {
             background: var(--teal-primary);
             color: white;
-            font-size: 0.75rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             min-width: 18px;
             height: 18px;
@@ -288,8 +264,13 @@
             border-radius: 999px;
         }
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-training">
+{% set ui_step = 5 %}{% include "_guided_header.html" %}
+<div id="mf-content" tabindex="-1"></div>
 
     <div class="kiosk-window">
         <!-- 상단 헤더 타이틀 부 구역 -->

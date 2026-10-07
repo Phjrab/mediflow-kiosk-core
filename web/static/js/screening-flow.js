@@ -112,8 +112,8 @@
             sessionStorage.setItem(KEYS.config, JSON.stringify(payload));
             return payload;
         } catch (error) {
-            const cached = readJson(KEYS.config, null);
-            if (cached) return cached;
+            // A saved capability snapshot cannot authorize a new screening.
+            // Keep the old preference/state keys compatible, but fail closed.
             throw error;
         }
     }

@@ -16,66 +16,9 @@
         })();
     </script>
     <style>
-        :root {
-            --navy: #12324f;
-            --navy-dark: #0b1f33;
-            --teal: #2ca6a4;
-            --mint: #dff6f4;
-            --amber: #f4b740;
-            --coral: #e86f61;
-            --page-bg-start: #eef4f9;
-            --page-bg-end: #f7fafc;
-            --page-bg-accent-1: rgba(18, 50, 79, 0.10);
-            --page-bg-accent-2: rgba(44, 166, 164, 0.12);
-            --surface: #ffffff;
-            --surface-soft: #f8fbff;
-            --surface-muted: #fbfdff;
-            --surface-elevated: #eef6fb;
-            --surface-strong: #e2e8f0;
-            --border: #dbe5ef;
-            --border-strong: #dce6ef;
-            --text-strong: #1f2937;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --line: #d8e0e8;
-            --panel: #f7fafc;
-            --bg: #eef4f9;
-            --shadow: 0 16px 46px rgba(15, 23, 42, 0.10);
-            --status-normal-bg: #e6faf7;
-            --status-normal-text: #0f766e;
-            --status-warning-bg: #fff3dc;
-            --status-warning-text: #b45309;
-            --status-danger-bg: #fee4e2;
-            --status-danger-text: #b42318;
-        }
 
-        [data-theme="dark"] {
-            --navy: #8db4ff;
-            --navy-dark: #cfe0ff;
-            --page-bg-start: #0f172a;
-            --page-bg-end: #111827;
-            --page-bg-accent-1: rgba(78, 161, 255, 0.12);
-            --page-bg-accent-2: rgba(52, 211, 153, 0.10);
-            --surface: #161a22;
-            --surface-soft: #111827;
-            --surface-muted: #0f172a;
-            --surface-elevated: #1f2937;
-            --surface-strong: #334155;
-            --border: #2a3240;
-            --border-strong: #334155;
-            --text-strong: #f8fafc;
-            --text: #e5e7eb;
-            --muted: #9ca3af;
-            --line: #2a3240;
-            --panel: #161a22;
-            --shadow: 0 18px 54px rgba(0, 0, 0, 0.45);
-            --status-normal-bg: #0f2f2a;
-            --status-normal-text: #6ee7d8;
-            --status-warning-bg: #3a2a10;
-            --status-warning-text: #fbbf24;
-            --status-danger-bg: #3a1714;
-            --status-danger-text: #fca5a5;
-        }
+
+
 
         * { box-sizing: border-box; }
 
@@ -87,7 +30,7 @@
                 radial-gradient(circle at top right, var(--page-bg-accent-2), transparent 24%),
                 linear-gradient(180deg, var(--page-bg-start) 0%, var(--page-bg-end) 100%);
             color: var(--text);
-            font-family: 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+            font-family: var(--font-ui);
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
             word-break: keep-all;
@@ -117,10 +60,10 @@
             padding: 10px 16px;
             border: none;
             border-radius: 12px;
-            font-size: 0.95rem;
-            font-weight: 800;
+            font-size: var(--mf-type-support);
+            font-weight: 700;
             cursor: pointer;
-            letter-spacing: -0.2px;
+            letter-spacing: 0;
         }
 
         .btn-back { background: var(--surface-strong); color: #1e293b; }
@@ -162,7 +105,7 @@
         .kicker {
             color: var(--navy);
             font-size: 9pt;
-            font-weight: 800;
+            font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
         }
@@ -186,7 +129,7 @@
             color: var(--navy);
             border-radius: 999px;
             font-size: 8.8pt;
-            font-weight: 800;
+            font-weight: 700;
             padding: 5px 10px;
             white-space: nowrap;
         }
@@ -218,7 +161,7 @@
 
         .meta-value {
             font-size: 11pt;
-            font-weight: 800;
+            font-weight: 700;
             color: var(--text);
         }
 
@@ -242,12 +185,12 @@
             border-bottom: 1px solid var(--border);
             color: var(--navy);
             font-size: 11pt;
-            font-weight: 900;
+            font-weight: 700;
         }
 
         .chip {
             font-size: 8.5pt;
-            font-weight: 800;
+            font-weight: 700;
             color: var(--navy);
             border: 1px solid var(--border-strong);
             background: var(--surface-elevated);
@@ -329,7 +272,7 @@
             background: var(--surface-soft);
             border-bottom: 1px solid var(--border);
             font-size: 9.6pt;
-            font-weight: 800;
+            font-weight: 700;
             color: var(--navy);
         }
 
@@ -391,7 +334,7 @@
             padding: 4px 9px;
             border-radius: 999px;
             font-size: 8.6pt;
-            font-weight: 800;
+            font-weight: 700;
             white-space: nowrap;
         }
 
@@ -437,7 +380,7 @@
             margin-bottom: 8px;
             color: var(--navy);
             font-size: 10pt;
-            font-weight: 900;
+            font-weight: 700;
         }
 
         .guide-summary {
@@ -472,7 +415,7 @@
             margin-bottom: 8px;
             color: var(--navy);
             font-size: 10pt;
-            font-weight: 900;
+            font-weight: 700;
         }
 
         .guide-bullets {
@@ -596,8 +539,13 @@
             border-color: var(--border);
         }
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-pdf">
+{% set ui_step = 6 %}{% include "_guided_header.html" %}
+<div id="mf-content" tabindex="-1"></div>
     <div class="shell">
         <div class="toolbar no-print">
             <button class="btn btn-back" onclick="location.href='/report'">리포트로 돌아가기</button>
@@ -608,9 +556,9 @@
             <div class="header">
                 <div class="header-top">
                     <div class="brand">
-                        <div class="kicker">Smart Eye Diagnosis System</div>
+                        <div class="kicker">MediFlow · Guided Screening</div>
                         <h1 class="title">안구 건강 종합 리포트</h1>
-                        <p class="subtitle">의료 보조용 AI 분석 결과 · 브라우저 출력 최적화 보고서</p>
+                        <p class="subtitle">연구용 AI 선별 결과 · 진료 확인 필요 · 수치는 모델 점수</p>
                     </div>
                     <div class="badge" id="overall-badge">AI 분석 대기</div>
                 </div>
@@ -664,20 +612,20 @@
                         <article class="eye-card">
                             <div class="eye-head">
                                 <span>좌안 / Left Eye</span>
-                                <span class="eye-label" id="left-badge">[좌안] 원본 및 관심영역 추출 완료</span>
+                                <span class="eye-label" id="left-badge">좌안 데이터 확인 중</span>
                             </div>
                             <div class="eye-wrap">
-                                <img id="left-image" class="eye-image" alt="Left eye crop" src="https://via.placeholder.com/640x360/e2e8f0/64748b?text=Left+Eye" />
+                                <img id="left-image" class="eye-image" alt="Left eye crop" />
                             </div>
                             <div class="eye-caption" id="left-caption">Confidence: - · BBox 추출 결과 기반</div>
                         </article>
                         <article class="eye-card">
                             <div class="eye-head">
                                 <span>우안 / Right Eye</span>
-                                <span class="eye-label" id="right-badge">[우안] 원본 및 관심영역 추출 완료</span>
+                                <span class="eye-label" id="right-badge">우안 데이터 확인 중</span>
                             </div>
                             <div class="eye-wrap">
-                                <img id="right-image" class="eye-image" alt="Right eye crop" src="https://via.placeholder.com/640x360/e2e8f0/64748b?text=Right+Eye" />
+                                <img id="right-image" class="eye-image" alt="Right eye crop" />
                             </div>
                             <div class="eye-caption" id="right-caption">Confidence: - · BBox 추출 결과 기반</div>
                         </article>
@@ -1129,8 +1077,8 @@
                 resolveSessionEyeImage(state.latestSession, 'L'),
                 resolveSessionEyeImage(state.latestSession, 'R')
             ]);
-            document.getElementById('left-image').src = leftImage || 'https://via.placeholder.com/640x360/e2e8f0/64748b?text=Left+Eye';
-            document.getElementById('right-image').src = rightImage || 'https://via.placeholder.com/640x360/e2e8f0/64748b?text=Right+Eye';
+            document.getElementById('left-image').src = leftImage || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22640%22 height=%22360%22%3E%3Ctext x=%2230%22 y=%22180%22%3ENo image data%3C/text%3E%3C/svg%3E';
+            document.getElementById('right-image').src = rightImage || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22640%22 height=%22360%22%3E%3Ctext x=%2230%22 y=%22180%22%3ENo image data%3C/text%3E%3C/svg%3E';
 
             document.getElementById('left-caption').textContent = leftEye
                 ? `Confidence: ${Number(leftEye.confidence).toFixed(1)}% · ${leftEye.detection_confidence != null ? `Detection ${Number(leftEye.detection_confidence).toFixed(1)}%` : 'BBox 추출 결과 기반'}`

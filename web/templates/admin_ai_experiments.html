@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>MediFlow 연구 비교</title>
     <style>
-        body { font-family: sans-serif; margin: 2rem; color: #172033; background: #f4f7fb; }
+        body { font-family: var(--font-ui); margin: 2rem; color: #172033; background: #f4f7fb; }
         .notice { padding: 1rem; background: #fff7d6; border: 1px solid #e7c760; border-radius: .5rem; }
         table { margin-top: 1rem; width: 100%; border-collapse: collapse; background: white; }
         th, td { padding: .65rem; border: 1px solid #d8dfeb; text-align: left; vertical-align: top; }
@@ -16,11 +16,17 @@
         input { min-width: 20rem; margin: .25rem; padding: .4rem; }
         select, button { margin: .25rem; padding: .4rem; }
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <link rel="stylesheet" href="/static/css/clinical-operations.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-clinical mf-research">
+{% set research = true %}{% include "_clinical_header.html" %}
+    <main id="mf-content" class="mf-research-main">
     <h1>AI 연구 비교</h1>
     <p class="notice">이 화면의 VLM 출력은 독립 연구 결과입니다. 기존 EfficientNet 결과, 사용자 결과, PDF 보고서를 변경하지 않습니다. 모델 간 일치는 정답이나 확진을 뜻하지 않습니다.</p>
-    <p id="capabilities">상태 확인 중…</p>
+    <p id="capabilities" class="mf-research-state" role="status">상태 확인 중…</p>
     <p id="error" class="error"></p>
     <section class="compare">
         <h2>승인된 운영 이력 ROI 등록</h2>
@@ -34,20 +40,21 @@
             <option value="holdout">holdout</option><option value="prospective">prospective</option>
             <option value="train">train</option><option value="validation">validation</option><option value="test">test</option>
         </select>
-        <button type="button" id="import-button">ROI 등록</button>
+        <button type="button" id="import-button" disabled>ROI 등록</button>
         <pre id="import-result">명시적 승인 참조와 보존 정책 참조가 모두 필요합니다.</pre>
     </section>
     <section class="compare">
         <h2>E0/E1 동일 샘플 run 비교</h2>
         <input id="left-run" aria-label="왼쪽 run ID" placeholder="E0 run ID">
         <input id="right-run" aria-label="오른쪽 run ID" placeholder="E1 run ID">
-        <button type="button" id="compare-button">비교</button>
+        <button type="button" id="compare-button" disabled>비교</button>
         <pre id="comparison">두 run의 공통 sample만 paired 집계합니다. 일치율은 정확도가 아닙니다.</pre>
     </section>
-    <table>
+    <div class="mf-table-scroll"><table>
         <thead><tr><th>샘플 / arm</th><th>작업 상태</th><th>연구 분석</th><th>실행</th></tr></thead>
         <tbody id="jobs"></tbody>
-    </table>
+    </table></div>
+    </main>
     <script>
         let adminCsrfToken = '';
         function cell(text) {
@@ -68,9 +75,16 @@
                 const value = caps.capabilities;
                 adminCsrfToken = String(caps.csrf_token || '');
                 document.getElementById('capabilities').textContent =
-                    `enabled=${value.enabled}, baseline=${value.baseline_enabled}, vlm=${value.vlm_enabled}, survey=${value.survey_enabled}, explanation=${value.explanation_enabled}, hybrid=${value.hybrid_enabled}, import=${value.operational_import_ready}, mode=${value.mode}, profile=${value.deployment_profile}`;
+                    `Research · ${value.enabled ? '연구 기능 활성' : '연구 기능 비활성'} · VLM ${value.vlm_enabled ? '준비됨' : '준비되지 않음'} · mode=${value.mode} · profile=${value.deployment_profile} · ROI 등록 ${value.operational_import_ready ? '가능' : '준비되지 않음'}`;
+                document.getElementById('import-button').disabled = !value.operational_import_ready;
+                document.getElementById('compare-button').disabled = !value.enabled;
                 const body = document.getElementById('jobs');
                 body.replaceChildren();
+                if (!jobs.jobs.length) {
+                    const empty = document.createElement('tr'); empty.className = 'research-empty';
+                    const message = cell('연구 작업이 없습니다. 운영 결과는 이 목록에 자동으로 추가되지 않습니다.'); message.colSpan = 4;
+                    empty.appendChild(message); body.appendChild(empty);
+                }
                 jobs.jobs.forEach((job) => {
                     const row = document.createElement('tr');
                     row.appendChild(cell(`${job.sample_id}\n${job.arm_id} repeat=${job.repeat_index}\nrun=${job.run_id}\n${job.selected_eye} ${job.modality}`));

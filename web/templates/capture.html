@@ -22,21 +22,12 @@
     <!-- Global language FAB intentionally not included on this page -->
     <style>
         :root { 
-            --primary: #007AFF; 
+
             --bg: #f5f5f7; 
             --card: #ffffff; 
             --text: #1d1d1f; 
             --border: #d2d2d7; 
             --guide-color: rgba(40, 205, 65, 0.6); /* 연한 녹색 가이드 */
-        }
-
-        [data-theme="dark"] {
-            --primary: #4ea1ff;
-            --bg: #0f1115;
-            --card: #161a22;
-            --text: #e5e7eb;
-            --border: #2a3240;
-            --guide-color: rgba(52, 211, 153, 0.55);
         }
 
         .theme-toggle-floating {
@@ -51,9 +42,9 @@
             border-radius: 999px;
             min-height: 44px;
             padding: 10px 14px;
-            font-size: 0.9rem;
-            font-weight: 800;
-            letter-spacing: -0.2px;
+            font-size: var(--mf-type-support);
+            font-weight: 700;
+            letter-spacing: 0;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -83,7 +74,7 @@
         .confirm-toast.show { display: block; }
 
         .confirm-toast-message {
-            font-size: 0.92rem;
+            font-size: var(--mf-type-support);
             line-height: 1.45;
             margin-bottom: 10px;
             word-break: keep-all;
@@ -99,7 +90,7 @@
             border: none;
             border-radius: 8px;
             padding: 7px 10px;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
         }
@@ -124,7 +115,7 @@
         [data-theme="dark"] .confidence-text { color: #94a3b8 !important; }
 
         body { 
-            font-family: 'Pretendard', sans-serif; 
+            font-family: var(--font-ui);
             background-color: var(--bg); 
             color: var(--text); 
             margin: 0 auto;
@@ -181,7 +172,7 @@
             top: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
             color: #cbd5e1;
             background: rgba(15, 23, 42, 0.55);
             border: 1px solid rgba(148, 163, 184, 0.35);
@@ -224,13 +215,13 @@
         }
 
         .upload-progress-title {
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             margin-bottom: 6px;
         }
 
         .upload-progress-sub {
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             color: #cbd5e1;
         }
 
@@ -245,7 +236,7 @@
             border-radius: 999px;
             min-height: 42px;
             padding: 8px 12px;
-            font-size: 0.82rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
             display: none;
@@ -258,7 +249,7 @@
             background: #eef2ff;
             color: #334155;
             border: 1px dashed var(--border);
-            font-size: 0.9rem;
+            font-size: var(--mf-type-support);
             font-weight: 700;
             cursor: pointer;
             margin-top: 8px;
@@ -270,20 +261,20 @@
         .camera-bottom-btns { height: 18%; background: #ffffff; display: flex; align-items: center; justify-content: center; gap: 20px; border-top: 1px solid var(--border); padding: 0 20px; box-sizing: border-box; }
         .right-panel { flex: 1; padding: 30px; display: flex; flex-direction: column; justify-content: flex-start; background: var(--card); border-radius: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow-y: auto; box-sizing: border-box; }
         .card { background: var(--card); padding: 25px; border-radius: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .btn-capture { width: 100%; padding: 25px; border-radius: 15px; background: var(--primary); color: white; font-weight: 800; border: none; font-size: 1.3rem; cursor: pointer; }
+        .btn-capture { width: 100%; padding: 25px; border-radius: 15px; background: var(--primary); color: white; font-weight: 700; border: none; font-size: 1.3rem; cursor: pointer; }
         .btn-upload { width: 100%; padding: 16px; border-radius: 12px; background: #eef2ff; color: #334155; font-weight: 700; border: 1px solid var(--border); font-size: 1rem; cursor: pointer; margin-top: 10px; }
-        .btn-restore { width: 100%; padding: 14px; border-radius: 12px; background: #f8fafc; color: #475569; font-weight: 700; border: 1px solid var(--border); font-size: 0.95rem; cursor: pointer; margin-top: 8px; }
-        .btn-mesh-toggle { width: 100%; padding: 14px; border-radius: 12px; background: #eef2ff; color: #1e3a8a; font-weight: 700; border: 1px solid #c7d2fe; font-size: 0.95rem; cursor: pointer; margin-top: 8px; }
+        .btn-restore { width: 100%; padding: 14px; border-radius: 12px; background: #f8fafc; color: #475569; font-weight: 700; border: 1px solid var(--border); font-size: var(--mf-type-support); cursor: pointer; margin-top: 8px; }
+        .btn-mesh-toggle { width: 100%; padding: 14px; border-radius: 12px; background: #eef2ff; color: #1e3a8a; font-weight: 700; border: 1px solid #c7d2fe; font-size: var(--mf-type-support); cursor: pointer; margin-top: 8px; }
         .btn-mesh-toggle.active { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
         .btn-mesh-toggle:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn-go-result { width: 100%; padding: 18px; border-radius: 12px; background: #16a34a; color: #fff; font-weight: 800; border: none; font-size: 1.05rem; cursor: pointer; margin-top: 10px; }
+        .btn-go-result { width: 100%; padding: 18px; border-radius: 12px; background: #16a34a; color: #fff; font-weight: 700; border: none; font-size: 1.05rem; cursor: pointer; margin-top: 10px; }
         .btn-go-result:disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
         .eye-select-wrap { display:flex; gap:10px; }
         .btn-eye { flex:1; padding:14px; border:1px solid var(--border); border-radius:10px; background:#fff; font-weight:700; cursor:pointer; }
         .btn-eye.active { background:var(--primary); color:#fff; border-color:var(--primary); }
         .thumb-wrap { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
         .thumb-box { border:1px solid var(--border); border-radius:10px; padding:8px; background:#f8fafc; cursor:pointer; }
-        .thumb-title { font-size:0.8rem; color:#64748b; margin-bottom:6px; font-weight:700; }
+        .thumb-title { font-size: var(--mf-type-support); color:#64748b; margin-bottom:6px; font-weight:700; }
         .thumb-img { width:100%; height:70px; object-fit:cover; border-radius:8px; background:#e2e8f0; }
 
         .detection-status-box {
@@ -296,12 +287,12 @@
         }
 
         .status-message {
-            font-size: 0.95rem;
+            font-size: var(--mf-type-support);
             color: #64748b;
         }
 
         .confidence-text {
-            font-size: 0.85rem;
+            font-size: var(--mf-type-support);
             color: #999;
             margin-top: 3px;
         }
@@ -406,13 +397,13 @@
             }
 
             body.mobile-upload-only #capture-message {
-                font-size: 0.86rem;
+                font-size: var(--mf-type-support);
                 line-height: 1.45;
             }
 
             body.mobile-upload-only .mobile-preview-hint {
                 display: block;
-                font-size: 0.9rem;
+                font-size: var(--mf-type-support);
                 width: min(90%, 360px);
             }
 
@@ -431,13 +422,19 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="/static/css/mediflow-tokens.css">
+    <link rel="stylesheet" href="/static/css/guided-screening.css">
+    <script defer src="/static/js/ui-shell.js"></script>
 </head>
-<body>
+<body class="mf-patient mf-capture">
+{% set ui_step = 5 %}{% include "_guided_header.html" %}
 
+    <div class="mf-task-heading"><h1 data-i18n="mf_capture_heading">촬영할 이미지를 준비해 주세요</h1><p>카메라 안내에 맞춰 촬영하거나 이미지 파일을 업로드하세요.</p></div>
+    <main id="mf-content" class="mf-capture-workspace">
     <div class="left-panel">
         <div class="video-container">
             <!-- Canvas 또는 img로 프레임 표시 -->
-            <img id="video-feed" src="">
+            <img id="video-feed" src="" alt="USB 카메라 또는 업로드 이미지 미리보기">
             <div id="mobile-preview-hint" class="mobile-preview-hint"><span data-i18n="mobile_preview_hint">모바일 업로드 전용 모드입니다.<br>"얼굴 사진 업로드" 버튼으로 사진을 선택해 주세요.</span></div>
             <div id="upload-progress-overlay" class="upload-progress-overlay" aria-live="polite">
                 <div class="upload-progress-card">
@@ -449,7 +446,7 @@
         </div>
 
         <div class="camera-bottom-btns">
-            <div id="camera-guide-text" style="font-size: 0.9rem; color: #64748b;">
+            <div id="camera-guide-text" style="font-size: var(--mf-type-support); color: #64748b;">
                 <span data-i18n="capture_eye_align_hint">※ 고해상도 촬영을 위해 가이드 중앙에 눈을 정렬해 주세요.</span>
             </div>
         </div>
@@ -461,7 +458,7 @@
             <div id="detection-status" class="detection-status-box">
                 <div id="status-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #ccc;"></div>
                 <div>
-                    <div id="status-message" class="status-message" data-i18n="status_camera_connecting">카메라 연결 중...</div>
+                    <div id="status-message" role="status" class="status-message" data-i18n="status_camera_connecting">카메라 연결 중...</div>
                     <div id="confidence-text" class="confidence-text"></div>
                 </div>
             </div>
@@ -470,17 +467,17 @@
         <div id="step2-card" class="card">
             <h2 style="margin:0 0 15px 0; font-size: 1.2rem; color: var(--primary);" data-i18n="capture_step1">Step 1. 자동셔터 / 디지털 줌</h2>
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-                <span style="font-size:0.95rem; color:#334155;" data-i18n="auto_shutter_label">자동셔터</span>
-                <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#64748b;">
+                <span style="font-size: var(--mf-type-support); color:#334155;" data-i18n="auto_shutter_label">자동셔터</span>
+                <label style="display:flex; align-items:center; gap:8px; font-size: var(--mf-type-support); color:#64748b;">
                     <input type="checkbox" id="auto-shutter-toggle" onchange="toggleAutoShutter()">
                     <span data-i18n="use_label">사용</span>
                 </label>
             </div>
-            <div id="auto-shutter-status" style="font-size:0.85rem; color:#64748b; margin-bottom:14px;">자동셔터 꺼짐</div>
+            <div id="auto-shutter-status" style="font-size: var(--mf-type-support); color:#64748b; margin-bottom:14px;">자동셔터 꺼짐</div>
 
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                <span style="font-size:0.95rem; color:#334155;" data-i18n="digital_zoom_label">디지털 줌</span>
-                <span id="zoom-value" style="font-size:0.9rem; color:#64748b;">1.0x</span>
+                <span style="font-size: var(--mf-type-support); color:#334155;" data-i18n="digital_zoom_label">디지털 줌</span>
+                <span id="zoom-value" style="font-size: var(--mf-type-support); color:#64748b;">1.0x</span>
             </div>
             <input id="zoom-slider" type="range" min="1" max="2.5" step="0.1" value="1" oninput="setDigitalZoom(this.value)" style="width:100%;">
         </div>
@@ -494,11 +491,12 @@
             <button id="btn-face-mesh-toggle" class="btn-mesh-toggle active" onclick="toggleFaceMeshPreview()">👁️ Face Mesh 끄기</button>
             <button id="btn-go-result" class="btn-go-result" onclick="goToResult()" disabled data-i18n="btn_view_result">✅ 결과 보기</button>
             <input id="upload-image-input" type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleUploadedImage(event)">
-            <div id="capture-message" style="margin-top:10px; font-size:0.9rem; color:#64748b;" data-i18n="capture_guidance">안내: 얼굴 사진 한 장을 촬영하면 MediaPipe Face Mesh가 좌/우 눈을 자동으로 감지해 분석합니다.</div>
+            <div id="capture-message" style="margin-top:10px; font-size: var(--mf-type-support); color:#64748b;" data-i18n="capture_guidance">안내: 얼굴 사진 한 장을 촬영하면 MediaPipe Face Mesh가 좌/우 눈을 자동으로 감지해 분석합니다.</div>
         </div>
 
     </div>
 
+    </main>
     <div id="confirm-toast" class="confirm-toast" role="dialog" aria-modal="true" aria-live="assertive">
         <div id="confirm-toast-message" class="confirm-toast-message"></div>
         <div class="confirm-toast-actions">
@@ -519,7 +517,10 @@
         let mobileUploadOnlyMode = false;
         let captureCameraSessionActive = false;
         let videoFallbackInterval = null;
-        let faceMeshPreviewEnabled = true;
+        let faceMeshPreviewEnabled = false;
+        let detectionInFlight = false;
+        let detectionAbort = null;
+        let capturePageActive = true;
         const AUTO_SHUTTER_CONF_THRESHOLD = 0.70; // 70%
         const LAST_UPLOAD_KEY = 'last_mobile_upload_capture';
         const MOBILE_HINT_SEEN_KEY = 'mobile_upload_hint_seen_v1';
@@ -811,29 +812,34 @@
         // 눈 감지 상태 폴링 (서버에서 감지 여부 조회)
         // ==========================================
         async function pollDetectionStatus() {
-            if (mobileUploadOnlyMode) return;
+            if (mobileUploadOnlyMode || previewMode !== 'camera' || detectionInFlight || !capturePageActive) return;
+            detectionInFlight = true;
+            detectionAbort = new AbortController();
+            const statusDot = document.getElementById('status-dot');
+            const statusMessage = document.getElementById('status-message');
+            statusMessage.removeAttribute('data-i18n');
+            const captureButton = document.getElementById('btn-capture-photo');
             try {
-                const response = await fetch('/detect_status');
+                const response = await fetch('/detect_status', {signal: detectionAbort.signal});
                 const data = await response.json();
-                
-                const statusDot = document.getElementById('status-dot');
-                const statusMessage = document.getElementById('status-message');
-                const confidenceText = document.getElementById('confidence-text');
-                
-                if (data.detected) {
-                    statusDot.style.background = '#28cd41';  // 녹색
-                    statusMessage.textContent = data.message;
-                    confidenceText.textContent = `신뢰도: ${(data.confidence * 100).toFixed(1)}%`;
-                } else {
-                    statusDot.style.background = '#b0bec5';  // 회색
-                    statusMessage.textContent = data.message;
-                    confidenceText.textContent = '';
-                }
-
-                handleAutoShutter(data.detected, data.confidence || 0);
+                if (!capturePageActive || previewMode !== 'camera') return;
+                if (!response.ok || data.error) throw new Error('camera_status_unavailable');
+                const stale = data.camera_state === 'stale';
+                const permission = data.camera_state === 'permission_denied';
+                const missing = data.camera_state === 'missing' || /연결|기다리/.test(data.message || '');
+                const ready = data.detected && !stale && !missing && !permission;
+                statusMessage.textContent = permission ? '카메라 접근 권한이 없습니다. 관리자에게 문의해 주세요.' : stale ? '영상이 멈췄습니다. 카메라 연결을 확인해 주세요.' : missing ? '카메라를 연결해 주세요.' : ready ? '촬영할 수 있습니다.' : '촬영 위치를 조정해 주세요.';
+                statusDot.style.background = ready ? '#146b65' : '#795400';
+                captureButton.disabled = stale || missing || permission;
+                document.getElementById('confidence-text').textContent = '';
+                handleAutoShutter(ready, ready ? data.confidence || 0 : 0);
             } catch (error) {
-                console.error('[Detection Status Error]', error);
-            }
+                if (error.name !== 'AbortError' && capturePageActive) {
+                    statusMessage.textContent = '카메라 상태를 확인할 수 없습니다. 연결을 확인해 주세요.';
+                    statusDot.style.background = '#a12b22';
+                    captureButton.disabled = true;
+                }
+            } finally { detectionInFlight = false; }
         }
 
         function toggleAutoShutter() {
@@ -990,6 +996,7 @@
         }
 
         async function useLastUploadedImage() {
+            if (isCapturing) return;
             const captureMessage = document.getElementById('capture-message');
             const dataUrl = localStorage.getItem(LAST_UPLOAD_KEY);
             if (!dataUrl) {
@@ -998,6 +1005,7 @@
             }
 
             try {
+                isCapturing = true;
                 setUploadProgress(true, '최근 업로드 불러오는 중...', '저장된 이미지를 다시 분석합니다.');
                 capturedPhoto = dataUrl;
                 applyUploadedPreview(dataUrl);
@@ -1007,6 +1015,7 @@
                 captureMessage.textContent = normalizeUploadError(error);
             } finally {
                 setUploadProgress(false);
+                isCapturing = false;
             }
         }
 
@@ -1079,6 +1088,7 @@
         }
 
         async function handleUploadedImage(event) {
+            if (isCapturing) return;
             const file = event.target.files && event.target.files[0];
             if (!file) {
                 return;
@@ -1091,6 +1101,7 @@
                     throw new Error('unsupported-image-format');
                 }
 
+                isCapturing = true;
                 captureMessage.textContent = '업로드 이미지 처리 중...';
                 setUploadProgress(true, '이미지 읽는 중...', '사진 파일을 불러오고 있습니다.');
                 const rawDataUrl = await new Promise((resolve, reject) => {
@@ -1138,6 +1149,7 @@
                 captureMessage.textContent = normalizeUploadError(error);
             } finally {
                 setUploadProgress(false);
+                isCapturing = false;
                 event.target.value = '';
             }
         }
@@ -1333,7 +1345,8 @@
                     const captureMessage = document.getElementById('capture-message');
 
                     if (statusDot) statusDot.style.background = '#ef4444';
-                    if (statusMessage) statusMessage.textContent = '카메라 시작 실패';
+                    if (statusMessage) statusMessage.textContent = '카메라를 연결해 주세요.';
+                    document.getElementById('btn-capture-photo').disabled = true;
                     if (captureMessage) {
                         captureMessage.textContent = '카메라 연결에 실패했습니다. 케이블 연결 후 새로고침해 주세요.';
                     }
@@ -1350,6 +1363,8 @@
 
         // 페이지 종료 시 폴링 중지
         window.onbeforeunload = () => {
+            capturePageActive = false;
+            if (detectionAbort) detectionAbort.abort();
             if (detectionPollingInterval) {
                 clearInterval(detectionPollingInterval);
             }
@@ -1358,6 +1373,8 @@
         };
 
         window.addEventListener('pagehide', () => {
+            capturePageActive = false;
+            if (detectionAbort) detectionAbort.abort();
             stopCaptureCameraSession();
         });
     </script>
