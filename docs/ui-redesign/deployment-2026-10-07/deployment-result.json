@@ -1,0 +1,31 @@
+{
+  "status": "DEPLOYED",
+  "source": "625f1d468682bdb9f2590bd59ca56c5111147e93",
+  "previous_commit": "69f9e52ffa5a18cb8425f09fa7920476c3e84232",
+  "deployment_commit": "4b87d9e6a1a763a4117499f6cea34fb3453ae1c3",
+  "branch": "codex/admin-control-a-deploy",
+  "backup_branch": "backup/ui-before-625f1d4-20261007",
+  "old_web": {
+    "pid": 856731,
+    "start_ticks": 76528102
+  },
+  "new_web": {
+    "pid": 3506090,
+    "start_ticks": 157492086
+  },
+  "before_health": {
+    "status": "running",
+    "models_loaded": true,
+    "camera_connected": false
+  },
+  "after_health": {
+    "status": "running",
+    "models_loaded": true,
+    "camera_connected": false
+  },
+  "protected_files_unchanged": true,
+  "kakao_still_stopped": true,
+  "deployed_file_count": 41,
+  "candidate_unit_tests": 197,
+  "candidate_browser_tests": 22
+}

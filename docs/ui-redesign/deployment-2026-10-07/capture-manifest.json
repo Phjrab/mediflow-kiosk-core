@@ -1,0 +1,62 @@
+[
+  {
+    "filename": "live-start.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "deployment_sha": "4b87d9e6a1a763a4117499f6cea34fb3453ae1c3",
+    "source_sha": "625f1d468682bdb9f2590bd59ca56c5111147e93",
+    "captured_at": "2026-10-07T10:18:17.341992+00:00",
+    "route": "/",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "data_provenance": "public empty UI; no patient or identifier entered",
+    "live_actions": "GET public UI only; no form submission, inference, camera, admin write or messaging",
+    "sha256": "08c379c7b7d445a156971b6982e63e51e3926c3cf75142061dd4f6b2d932c1a3"
+  },
+  {
+    "filename": "live-mobile.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "deployment_sha": "4b87d9e6a1a763a4117499f6cea34fb3453ae1c3",
+    "source_sha": "625f1d468682bdb9f2590bd59ca56c5111147e93",
+    "captured_at": "2026-10-07T10:18:18.492637+00:00",
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "data_provenance": "public empty UI; no patient or identifier entered",
+    "live_actions": "GET public UI only; no form submission, inference, camera, admin write or messaging",
+    "sha256": "aba495b687195a5a5a09d9ed1db51297d92c591f346a2bba874ba2e5c57f7831"
+  },
+  {
+    "filename": "live-selection.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "deployment_sha": "4b87d9e6a1a763a4117499f6cea34fb3453ae1c3",
+    "source_sha": "625f1d468682bdb9f2590bd59ca56c5111147e93",
+    "captured_at": "2026-10-07T10:18:19.368962+00:00",
+    "route": "/screening",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "data_provenance": "public empty UI; no patient or identifier entered",
+    "live_actions": "GET public UI only; no form submission, inference, camera, admin write or messaging",
+    "sha256": "a43d273db1cbddec7bbbd818c6d20702561a1acb1522c41733281ea7b6bf3b5c"
+  },
+  {
+    "filename": "live-identity.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "deployment_sha": "4b87d9e6a1a763a4117499f6cea34fb3453ae1c3",
+    "source_sha": "625f1d468682bdb9f2590bd59ca56c5111147e93",
+    "captured_at": "2026-10-07T10:18:20.225922+00:00",
+    "route": "/login",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "data_provenance": "public empty UI; no patient or identifier entered",
+    "live_actions": "GET public UI only; no form submission, inference, camera, admin write or messaging",
+    "sha256": "20e65d63679b889e6f3e2d9f6be9eff8c394a297d20124ccc62156aa0bbee094"
+  }
+]

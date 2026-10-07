@@ -1,0 +1,98 @@
+[
+  {
+    "template": "screening_capture.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "m_survey.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "index.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "test_i18n.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "admin_ai_experiments.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "admin_config.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "survey.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "screening_result.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "m_dashboard.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "m_capture.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "login.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "screening_summary.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "m_result.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "m_report.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "screening_select.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "capture.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "m_login.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "report_pdf.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "training.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "result.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "report.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "screening_survey.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "m_index.html",
+    "missing_existing_ids": []
+  },
+  {
+    "template": "m_login_start.html",
+    "missing_existing_ids": []
+  }
+]

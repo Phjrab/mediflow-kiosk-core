@@ -1,0 +1,262 @@
+[
+  {
+    "name": "start",
+    "route": "/",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "status": "PASS",
+    "metrics": {
+      "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "width": 1920,
+      "scroll": 1920
+    },
+    "fonts": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1,h2",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 7
+          }
+        ]
+      }
+    ],
+    "prevented": [
+      {
+        "path": "/npm/qrcodejs@1.0.0/qrcode.min.js",
+        "method": "GET"
+      }
+    ],
+    "errors": [],
+    "file": "live-start.png",
+    "data": "public empty UI; no patient or identifier entered",
+    "deployment": "4b87d9e6a1a763a4117499f6cea34fb3453ae1c3"
+  },
+  {
+    "name": "mobile",
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "status": "PASS",
+    "metrics": {
+      "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "width": 390,
+      "scroll": 390
+    },
+    "fonts": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1,h2",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 7
+          }
+        ]
+      }
+    ],
+    "prevented": [
+      {
+        "path": "/npm/qrcodejs@1.0.0/qrcode.min.js",
+        "method": "GET"
+      }
+    ],
+    "errors": [],
+    "file": "live-mobile.png",
+    "data": "public empty UI; no patient or identifier entered",
+    "deployment": "4b87d9e6a1a763a4117499f6cea34fb3453ae1c3"
+  },
+  {
+    "name": "selection",
+    "route": "/screening",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "status": "PASS",
+    "metrics": {
+      "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "width": 1920,
+      "scroll": 1920
+    },
+    "fonts": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1,h2",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          }
+        ]
+      }
+    ],
+    "prevented": [],
+    "errors": [],
+    "file": "live-selection.png",
+    "data": "public empty UI; no patient or identifier entered",
+    "deployment": "4b87d9e6a1a763a4117499f6cea34fb3453ae1c3"
+  },
+  {
+    "name": "identity",
+    "route": "/login",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "status": "PASS",
+    "metrics": {
+      "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "width": 390,
+      "scroll": 390
+    },
+    "fonts": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1,h2",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          }
+        ]
+      }
+    ],
+    "prevented": [],
+    "errors": [],
+    "file": "live-identity.png",
+    "data": "public empty UI; no patient or identifier entered",
+    "deployment": "4b87d9e6a1a763a4117499f6cea34fb3453ae1c3"
+  },
+  {
+    "name": "auth-and-font-asset",
+    "status": "PASS",
+    "anonymousAdmin": [
+      {
+        "route": "/admin/config",
+        "status": 302,
+        "location": "/login"
+      },
+      {
+        "route": "/admin/ai-experiments",
+        "status": 302,
+        "location": "/login"
+      },
+      {
+        "route": "/api/admin/config",
+        "status": 403
+      },
+      {
+        "route": "/api/admin/ai-experiments/capabilities",
+        "status": 403
+      }
+    ],
+    "fontHTTP": 200,
+    "fontSHA256": "aa894a204d5a6fbae259dac6868d350cbd373a390caee0313f92946af741df23"
+  }
+]

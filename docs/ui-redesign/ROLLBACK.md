@@ -1,5 +1,9 @@
 # UI 변경 rollback
 
+사용자 승인 후 운영 배포 `4b87d9e`만 원복하려면
+[배포 원복 절차](deployment-2026-10-07/README.md#원복)를 따른다.
+복구 branch는 A의 `backup/ui-before-625f1d4-20261007`이다. 아래는 로컬 UI 작업 당시의 원복 기록이다.
+
 ## SUIT 후속 변경만 원복
 
 SUIT source는 `54cedc308a67b8a91517919870bc04bd22da16e1`이다.

@@ -1,5 +1,14 @@
 # 최종 인계 · 2026-10-07
 
+## 최신 상태: 사용자 승인 후 운영 배포 완료
+
+UI source `625f1d4`를 feature branch에 푸시했고, 기존 Jetson A 운영 branch에
+`4b87d9e6a1a763a4117499f6cea34fb3453ae1c3`로 적용·푸시했다. URL은 http://192.168.50.10:5000/.
+기존 환경을 보존해 웹만 재시작했으며 카카오는 stopped, DB·환경·로컬 설정 해시는 동일하다.
+장비 격리 후보 Python 197/197·browser 22/22, 실제 공개 UI·SUIT 렌더링·익명 관리자 보호를 확인했다.
+완료 증거·한계·정확한 원복은 [deployment-2026-10-07](deployment-2026-10-07/README.md)에 있다.
+아래 운영 미실행 내용은 후속 배포 승인 이전의 기록이다.
+
 ## 최신 후속 작업: SUIT typography
 
 현재 구조를 유지한 SUIT 작업의 source commit은 `54cedc308a67b8a91517919870bc04bd22da16e1`이다.
