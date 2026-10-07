@@ -5,10 +5,13 @@ Guided Screening은 한 화면 한 과제와 기존 순서(시작 → 식별·�
 
 색은 mediflow-tokens.css의 단일 계층: 배경 #F6F8F5, 표면 #FFFFFF, 본문 #173534,
 primary #146B65, 보조 #E7F1ED. 기존 변수는 alias로 연결한다. theme preference와
-6개 기존 언어를 유지한다. system font를 쓰며 CDN 없이 렌더된다.
+6개 기존 언어를 유지한다. SUIT Variable v2.0.5를 로컬 정적 자산으로 제공한다.
+font-ui/font-display/font-numeric은 같은 family이며 미지원 glyph는 시스템 대체 글꼴로 렌더된다.
 
-환자 본문 20px, 제목 32~44px, touch control 56px 이상, radius 18px.
-모바일은 18px 본문·56px 주요 행동, 단일 열, 문서 scroll. 고정 height/overflow를 피한다.
+환자 본문 20px/1.6, 주요 안내·버튼 22px, 제목 32~40px/1.3, 보조 18px, meta 16px.
+모바일은 18px 본문·19px 핵심 버튼·28px 제목이며 기존 56px 주요 행동 높이를 유지한다.
+굵기는 본문 400/500, 문진·버튼 500/600, 제목 600/700, 한글 자간 0이다.
+단일 열과 문서 scroll을 유지하며 고정 height/overflow를 피한다. radius 18px.
 관리자는 navbar + 작업별 section과 목록·상세를 쓴다. plan과 Apply는 분리한다.
 미준비/실패/미확인/오래됨을 문구와 disabled/경계 스타일로 표시한다.
 

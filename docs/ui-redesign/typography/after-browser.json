@@ -1,0 +1,4736 @@
+[
+  {
+    "name": "start",
+    "phase": "after",
+    "route": "/",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 16
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": ".ai-chat-title",
+        "fonts": []
+      },
+      {
+        "sample": "MediFlow",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "sample": "얼굴을 화면 중앙에 맞춰주세요",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 16
+          }
+        ]
+      },
+      {
+        "sample": "촬영 준비 완료",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "sample": "추가 확인 권장",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "sample": "검사 결과를 확인해주세요",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 13
+          }
+        ]
+      },
+      {
+        "sample": "Health Screening",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 16
+          }
+        ]
+      },
+      {
+        "sample": "2026.10.07",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 10
+          }
+        ]
+      }
+    ],
+    "file": "after-start.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "identity",
+    "phase": "after",
+    "route": "/login",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "identifier",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 13
+          }
+        ]
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 11
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 34
+          }
+        ]
+      }
+    ],
+    "file": "after-identity.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "selection",
+    "phase": "after",
+    "route": "/screening",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          }
+        ]
+      },
+      {
+        "selector": ".modality p",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 11
+          }
+        ]
+      }
+    ],
+    "file": "after-selection.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "survey",
+    "phase": "after",
+    "route": "/screening/survey",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "age",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "gender",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "conditions",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "smoking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "SELECT",
+          "id": "drinking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "common-notes",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "eye-wearing",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-left",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-right",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "eye-surgery",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 14
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Medium",
+            "isCustomFont": true,
+            "glyphCount": 4
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": "select",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 2
+          }
+        ]
+      }
+    ],
+    "file": "after-survey.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "capture",
+    "phase": "after",
+    "route": "/capture",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 16
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": []
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 2
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      }
+    ],
+    "file": "after-capture.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "pending",
+    "phase": "after",
+    "route": "/capture",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 16
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": []
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 2
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      }
+    ],
+    "file": "after-pending.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "result",
+    "phase": "after",
+    "route": "/result",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 6
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": ".ai-chat-title",
+        "fonts": []
+      }
+    ],
+    "file": "after-result.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "history",
+    "phase": "after",
+    "route": "/report",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 13
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": ".ai-chat-title",
+        "fonts": []
+      }
+    ],
+    "file": "after-history.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "operations",
+    "phase": "after",
+    "route": "/admin/config",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "15px",
+      "lineHeight": "23.25px",
+      "letterSpacing": "normal",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "SELECT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "ai-temperature",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "ai-top-p",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "ai-max-tokens",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "ai-profile",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "SELECT",
+          "id": "ai-chat-artifact",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "SELECT",
+          "id": "ai-vlm-artifact",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 9
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 11
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "select",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 5
+          }
+        ]
+      }
+    ],
+    "file": "after-operations.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "research",
+    "phase": "after",
+    "route": "/admin/ai-experiments",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "15px",
+      "lineHeight": "23.25px",
+      "letterSpacing": "normal",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "history-id",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "selected-eye",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "permission-ref",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "retention-ref",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "retention-until",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "research-split",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "left-run",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "right-run",
+          "height": 44,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "21px"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 6
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 10
+          }
+        ]
+      },
+      {
+        "selector": "select",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 1
+          }
+        ]
+      }
+    ],
+    "file": "after-research.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "error",
+    "phase": "after",
+    "route": "/screening",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          }
+        ]
+      }
+    ],
+    "file": "after-error.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "modal",
+    "phase": "after",
+    "route": "/login",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "identifier",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 13
+          }
+        ]
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 11
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 25
+          }
+        ]
+      }
+    ],
+    "file": "after-modal.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "widget",
+    "phase": "after",
+    "route": "/result",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 18
+          }
+        ]
+      },
+      {
+        "selector": ".ai-chat-title",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      }
+    ],
+    "file": "after-widget.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "html-report",
+    "phase": "after",
+    "route": "/report/pdf",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 9
+          }
+        ]
+      }
+    ],
+    "file": "after-html-report.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "mobile",
+    "phase": "after",
+    "route": "/screening",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          }
+        ]
+      },
+      {
+        "selector": ".modality p",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 11
+          }
+        ]
+      }
+    ],
+    "file": "after-mobile.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "mobile-survey",
+    "phase": "after",
+    "route": "/screening/survey",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "age",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "gender",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "conditions",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "smoking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "SELECT",
+          "id": "drinking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "common-notes",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "eye-wearing",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-left",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-right",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "eye-surgery",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 14
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Medium",
+            "isCustomFont": true,
+            "glyphCount": 4
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": "select",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 2
+          }
+        ]
+      }
+    ],
+    "file": "after-mobile-survey.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "mobile-capture",
+    "phase": "after",
+    "route": "/capture",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 16
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": []
+      },
+      {
+        "selector": "label",
+        "fonts": []
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      }
+    ],
+    "file": "after-mobile-capture.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "mobile-result",
+    "phase": "after",
+    "route": "/result",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": ".ai-chat-title",
+        "fonts": []
+      }
+    ],
+    "file": "after-mobile-result.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "mobile-history",
+    "phase": "after",
+    "route": "/report",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 13
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": ".ai-chat-title",
+        "fonts": []
+      }
+    ],
+    "file": "after-mobile-history.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "mobile-pin",
+    "phase": "after",
+    "route": "/m",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "pin-input",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 11
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 4
+          }
+        ]
+      }
+    ],
+    "file": "after-mobile-pin.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "mobile-dashboard",
+    "phase": "after",
+    "route": "/m/dashboard",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 10
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 11
+          }
+        ]
+      }
+    ],
+    "file": "after-mobile-dashboard.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "portrait",
+    "phase": "after",
+    "route": "/screening/survey",
+    "viewport": {
+      "width": 1080,
+      "height": 1920
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1080,
+      "scrollWidth": 1080,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "age",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "gender",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "conditions",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "smoking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "SELECT",
+          "id": "drinking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "common-notes",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "eye-wearing",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-left",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-right",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "eye-surgery",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 14
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Medium",
+            "isCustomFont": true,
+            "glyphCount": 4
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": "select",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 2
+          }
+        ]
+      }
+    ],
+    "file": "after-portrait.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "english",
+    "phase": "after",
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 26
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 9
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": ".ai-chat-title",
+        "fonts": []
+      }
+    ],
+    "file": "after-english.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "language-zh",
+    "phase": "after",
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "PingFang SC",
+            "postScriptName": "PingFangSC-Semibold",
+            "isCustomFont": false,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "PingFang SC",
+            "postScriptName": "PingFangSC-Semibold",
+            "isCustomFont": false,
+            "glyphCount": 4
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": ".ai-chat-title",
+        "fonts": []
+      }
+    ],
+    "file": "after-language-zh.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "language-vi",
+    "phase": "after",
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 22
+          },
+          {
+            "familyName": ".SF NS",
+            "postScriptName": ".SFNS-Bold",
+            "isCustomFont": false,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": ".SF NS",
+            "postScriptName": ".SFNS-Bold",
+            "isCustomFont": false,
+            "glyphCount": 4
+          },
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 6
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": ".ai-chat-title",
+        "fonts": []
+      }
+    ],
+    "file": "after-language-vi.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "language-ru",
+    "phase": "after",
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 2
+          },
+          {
+            "familyName": ".SF NS",
+            "postScriptName": ".SFNS-Bold",
+            "isCustomFont": false,
+            "glyphCount": 27
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": ".SF NS",
+            "postScriptName": ".SFNS-Bold",
+            "isCustomFont": false,
+            "glyphCount": 11
+          },
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 1
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": ".ai-chat-title",
+        "fonts": []
+      }
+    ],
+    "file": "after-language-ru.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "language-ja",
+    "phase": "after",
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [
+      "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "Hiragino Kaku Gothic ProN",
+            "postScriptName": "HiraKakuProN-W6",
+            "isCustomFont": false,
+            "glyphCount": 15
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "Hiragino Kaku Gothic ProN",
+            "postScriptName": "HiraKakuProN-W6",
+            "isCustomFont": false,
+            "glyphCount": 6
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": ".ai-chat-title",
+        "fonts": []
+      }
+    ],
+    "file": "after-language-ja.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "zoom",
+    "phase": "after",
+    "route": "/screening/survey",
+    "viewport": {
+      "width": 960,
+      "height": 540
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 960,
+      "scrollWidth": 960,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "age",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "gender",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "conditions",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "smoking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "SELECT",
+          "id": "drinking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "common-notes",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "eye-wearing",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-left",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-right",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "eye-surgery",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 14
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Medium",
+            "isCustomFont": true,
+            "glyphCount": 4
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": "select",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 2
+          }
+        ]
+      }
+    ],
+    "file": "after-zoom.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "keyboard",
+    "phase": "after",
+    "route": "/screening/survey",
+    "viewport": {
+      "width": 390,
+      "height": 420
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "age",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "gender",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "conditions",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "smoking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "SELECT",
+          "id": "drinking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "common-notes",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "eye-wearing",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-left",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-right",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "eye-surgery",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 14
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Medium",
+            "isCustomFont": true,
+            "glyphCount": 4
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      },
+      {
+        "selector": "select",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 2
+          }
+        ]
+      }
+    ],
+    "file": "after-keyboard.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "timeout",
+    "phase": "after",
+    "route": "/capture",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 16
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": []
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 2
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      }
+    ],
+    "file": "after-timeout.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "m_index",
+    "phase": "after",
+    "route": "/__fixture/template/m_index",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 16
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      }
+    ],
+    "file": "after-m_index.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "m_login_start",
+    "phase": "after",
+    "route": "/__fixture/template/m_login_start",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "identifier",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 13
+          }
+        ]
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 11
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 34
+          }
+        ]
+      }
+    ],
+    "file": "after-m_login_start.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "m_survey",
+    "phase": "after",
+    "route": "/__fixture/template/m_survey",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "user-age",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "user-gender",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "SELECT",
+          "id": "user-wearing",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-left",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-right",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "user-surgery",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "25.2px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "user-smoking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        },
+        {
+          "tag": "SELECT",
+          "id": "user-drinking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "normal"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 11
+          }
+        ]
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Medium",
+            "isCustomFont": true,
+            "glyphCount": 2
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "select",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 2
+          }
+        ]
+      }
+    ],
+    "file": "after-m_survey.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "m_capture",
+    "phase": "after",
+    "route": "/__fixture/template/m_capture",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": []
+      },
+      {
+        "selector": "input",
+        "fonts": []
+      }
+    ],
+    "file": "after-m_capture.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "m_result",
+    "phase": "after",
+    "route": "/__fixture/template/m_result",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 6
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      }
+    ],
+    "file": "after-m_result.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "m_report",
+    "phase": "after",
+    "route": "/__fixture/template/m_report",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "18px",
+      "lineHeight": "28.8px",
+      "letterSpacing": "normal",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 13
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          }
+        ]
+      }
+    ],
+    "file": "after-m_report.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "legacy-survey",
+    "phase": "after",
+    "route": "/survey",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "id": "user-age",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "user-gender",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "user-wearing",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-left",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "vision-right",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "user-surgery",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "INPUT",
+          "id": "user-allergy",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "user-smoking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        },
+        {
+          "tag": "SELECT",
+          "id": "user-drinking",
+          "height": 56,
+          "font": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+          "lineHeight": "28px"
+        }
+      ],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": ".SF NS",
+            "postScriptName": ".SFNS-Regular_wdth_opsz14CCC6_GRAD_wght2580000",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "label",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Medium",
+            "isCustomFont": true,
+            "glyphCount": 2
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "select",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 2
+          }
+        ]
+      }
+    ],
+    "file": "after-legacy-survey.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "training",
+    "phase": "after",
+    "route": "/training",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 27
+          },
+          {
+            "familyName": "Apple Color Emoji",
+            "postScriptName": "AppleColorEmoji",
+            "isCustomFont": false,
+            "glyphCount": 1
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 13
+          }
+        ]
+      }
+    ],
+    "file": "after-training.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "screening-capture",
+    "phase": "after",
+    "route": "/screening/capture",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          }
+        ]
+      },
+      {
+        "selector": ".modality p",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 11
+          }
+        ]
+      }
+    ],
+    "file": "after-screening-capture.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "screening-result",
+    "phase": "after",
+    "route": "/screening/result",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 12
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          }
+        ]
+      },
+      {
+        "selector": ".modality p",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Regular",
+            "isCustomFont": true,
+            "glyphCount": 11
+          }
+        ]
+      }
+    ],
+    "file": "after-screening-result.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  },
+  {
+    "name": "summary",
+    "phase": "after",
+    "route": "/screening/summary",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fixture": "mediflow-ui-v1",
+    "status": "PASS",
+    "failures": [],
+    "errors": [],
+    "externalBlocked": [],
+    "fontRequests": [
+      {
+        "path": "/static/fonts/suit/SUIT-Variable.woff2",
+        "status": 200
+      }
+    ],
+    "metrics": {
+      "bodyFont": "\"SUIT Variable\", -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "fontSize": "20px",
+      "lineHeight": "32px",
+      "letterSpacing": "normal",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "controls": [],
+      "wrongFonts": [],
+      "clipped": [],
+      "faces": [
+        {
+          "family": "SUIT Variable",
+          "weight": "100 900",
+          "status": "loaded"
+        }
+      ],
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "rendered": [
+      {
+        "selector": ".mf-brand",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 8
+          }
+        ]
+      },
+      {
+        "selector": "h1",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-Bold",
+            "isCustomFont": true,
+            "glyphCount": 15
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "fonts": [
+          {
+            "familyName": "SUIT Variable Thin",
+            "postScriptName": "SUITVariable-SemiBold",
+            "isCustomFont": true,
+            "glyphCount": 5
+          }
+        ]
+      }
+    ],
+    "file": "after-summary.png",
+    "source": "54cedc308a67b8a91517919870bc04bd22da16e1"
+  }
+]

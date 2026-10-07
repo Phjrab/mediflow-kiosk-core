@@ -111,3 +111,8 @@ Playwright가 일반 Node 경로에 없으면 `MEDIFLOW_PLAYWRIGHT_MODULE`을 �
 10개 조합 모두 동일한 높이(PASS)였으며 외부 네트워크·운영 데이터는 사용하지 않았다.
 검증용 preview/browser/임시 script는 종료·정리했다. 기존 18개 before/after PNG는 초기 리디자인
 source 커밋의 증거이며 이 후속 CSS 변경을 새로 촬영했다고 주장하지 않는다.
+# 후속 SUIT 검증
+
+`54cedc3` typography 결과는 [typography/README.md](typography/README.md)에 분리했다.
+실제 폰트 network/FontFaceSet/Rendered Fonts와 before/after 41 조건, 기존 browser 22개,
+responsive unit 5개, 의미 보존 audit 27개를 확인했다. 아래 초기 검증 기록은 보존한다.

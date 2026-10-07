@@ -1,0 +1,24 @@
+{
+  "names": {
+    "1": "SUIT Variable Thin",
+    "2": "Regular",
+    "5": "Version 2.040;Glyphs 3.2.3 (3260)",
+    "6": "SUITVariable-Thin"
+  },
+  "axes": [
+    [
+      "wght",
+      100.0,
+      100.0,
+      900.0
+    ]
+  ],
+  "glyphCount": 2933,
+  "missing": {
+    "MediFlow 얼굴을 화면 중앙에 맞춰주세요 촬영 준비 완료 추가 확인 권장 검사 결과를 확인해주세요 Health Screening 2026.10.07": "",
+    "日本語": "日本語",
+    "Tiếng Việt": "ếệ",
+    "ไทย": "ทยไ",
+    "中文": "中文"
+  }
+}

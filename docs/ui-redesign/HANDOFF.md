@@ -1,5 +1,16 @@
 # 최종 인계 · 2026-10-07
 
+## 최신 후속 작업: SUIT typography
+
+현재 구조를 유지한 SUIT 작업의 source commit은 `54cedc308a67b8a91517919870bc04bd22da16e1`이다.
+상세 변경·폰트 출처/버전·scope 토큰·캡처·미검증·재현·rollback은
+[typography/README.md](typography/README.md)를 기준으로 한다. 이 파일과 typography 증거를 포함한 다음
+로컬 commit은 `git log -2 --oneline`으로 확인한다. push/운영 배포 없음.
+41 조건 before/after, 기존 browser 22개, responsive unit 5개, 의미 보존 audit 27개 PASS.
+웹/Chromium PDF와 서버 ReportLab PDF를 구분한다. 서버 Helvetica 경로는 SUIT 미적용/NOT_RUN이며
+실장비·OS 확대·실제 가상 키보드 검증은 남아 있다. 임시 loopback fixture 두 개는 종료했다.
+아래 내용은 초기 리디자인 작업 당시의 기록이며 새 typography 결과로 덮어쓰지 않았다.
+
 대상 Phjrab/mediflow-kiosk-core, branch `codex/ui-mediflow-guided-screening`.
 Baseline `bfab34c79381d1603a5ada1e8a96bee7babcc284`, 구현 commit `0c7fbf0f598ea65f952e8bd61dd61842cb8ef331`.
 증거/README/문서 commit은 이 파일을 포함하는 다음 commit이며 `git log -2 --oneline`으로 확인한다.

@@ -1,0 +1,26 @@
+{
+  "engine": "fixture Chromium print, not ReportLab backend",
+  "fontNames": [
+    "AAAAAA+SUITVariable-Bold",
+    "BAAAAA+SUITVariable-Bold",
+    "CAAAAA+SUITVariable-Regular",
+    "DAAAAA+SUITVariable-Bold",
+    "EAAAAA+SUITVariable-Regular",
+    "FAAAAA+SUITVariable-Bold",
+    "GAAAAA+SUITVariable-Bold",
+    "HAAAAA+SUITVariable-SemiBold",
+    "IAAAAA+SUITVariable-Bold",
+    "JAAAAA+AppleSDGothicNeo-Regular",
+    "KAAAAA+SUITVariable-Bold",
+    "LAAAAA+Times-Roman",
+    "MAAAAA+SUITVariable-Regular",
+    "NAAAAA+SUITVariable-Bold",
+    "OAAAAA+SUITVariable-Bold",
+    "PAAAAA+SUITVariable-Regular",
+    "QAAAAA+SUITVariable-Regular",
+    "RAAAAA+SUITVariable-Regular"
+  ],
+  "bytes": 514649,
+  "SUITEmbedded": true,
+  "otherFonts": "system glyph fallback and pre-existing graphic/SVG text; not a universal SUIT assertion"
+}

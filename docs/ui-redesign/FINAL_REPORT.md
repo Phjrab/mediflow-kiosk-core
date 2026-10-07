@@ -95,3 +95,7 @@ before는 baseline archive를 별도 포트의 preview `--source`로 열고 `MED
 원복은 [ROLLBACK](ROLLBACK.md), 최종 이어가기 경계는 [HANDOFF](HANDOFF.md)에 있다.
 운영 적용 전에 필요한 항목은 VALIDATION의 NOT_RUN/NEEDS_HARDWARE 표이며 이번 범위의
 추가 구현 blocker는 없다. 의존성 누락과 실제 장치 검증은 해소됐다고 주장하지 않는다.
+# 후속 SUIT 적용 보고
+
+현재 UI 구조를 유지한 typography 구현은 `54cedc3`이며, 최종 파일·폰트·토큰·검증·캡처·한계는
+[typography/README.md](typography/README.md)에 정리했다. 아래 초기 리디자인 보고서는 당시 기록이다.

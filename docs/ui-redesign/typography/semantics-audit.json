@@ -1,0 +1,137 @@
+[
+  {
+    "file": "web/templates/_clinical_header.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/_guided_header.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/admin_ai_experiments.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/admin_config.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/capture.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/index.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/login.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/m_capture.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/m_dashboard.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/m_index.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/m_login.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/m_login_start.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/m_report.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/m_result.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/m_survey.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/report.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/report_pdf.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/result.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/screening_capture.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/screening_result.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/screening_select.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/screening_summary.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/screening_survey.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/survey.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/test_i18n.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/templates/training.html",
+    "status": "PASS",
+    "check": "DOM, wording, logic, URLs and non-typography declarations unchanged"
+  },
+  {
+    "file": "web/static/js/timeout.js",
+    "status": "PASS",
+    "check": "timeout logic and wording unchanged"
+  }
+]

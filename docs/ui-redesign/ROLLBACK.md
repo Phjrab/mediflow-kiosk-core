@@ -1,5 +1,14 @@
 # UI 변경 rollback
 
+## SUIT 후속 변경만 원복
+
+SUIT source는 `54cedc308a67b8a91517919870bc04bd22da16e1`이다.
+현재 사용자 변경을 확인·보존한 후 `git revert 54cedc308a67b8a91517919870bc04bd22da16e1`한다.
+이번 증거·문서도 원복하려면 typography 문서를 포함한 후속 evidence commit을 먼저 revert한다.
+초기 리디자인과 `899affd` 드롭다운/입력 높이 조정은 유지한다.
+DB·모델·운영 설정·브라우저 저장값 변경이 없어 해당 운영 원복은 필요하지 않다.
+자세한 범위는 [typography/README.md](typography/README.md)에 있다. 아래는 초기 리디자인 전체 원복 기록이다.
+
 초기 리디자인은 기존 clean baseline `bfab34c`에서 branch `codex/ui-mediflow-guided-screening`에
 만든 두 로컬 커밋으로 구성한다. UI·관측 source commit은 `0c7fbf0f598ea65f952e8bd61dd61842cb8ef331`,
 증거·문서는 그 다음 commit이다. `git log -2 --oneline`으로 정확한 두 SHA를 확인한다.

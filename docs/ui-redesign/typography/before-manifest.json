@@ -1,0 +1,716 @@
+[
+  {
+    "filename": "before-start.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.934Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/",
+    "scenario": "start",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "d66cf207963deb446b28c5a10c694ef42f05b7a8ba33efe6fa72857bf727159b"
+  },
+  {
+    "filename": "before-identity.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.947Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/login",
+    "scenario": "identity",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "ed39d81614819d86f1f283847d0be2bc8d62f36f3d3dd9dd2fdfb31f0d1d8428"
+  },
+  {
+    "filename": "before-selection.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.947Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/screening",
+    "scenario": "selection",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "86d6564f87e4f13fac0c6c9752625fc39a26bf0ad90f056a5e3decc701f5c9f8"
+  },
+  {
+    "filename": "before-survey.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.948Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/screening/survey",
+    "scenario": "survey",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "35887e1be15f5e62363a6134c9416ee8b40436d21c19867f69a184d2ca981370"
+  },
+  {
+    "filename": "before-capture.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.948Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/capture",
+    "scenario": "capture",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "3bb328105edb8bc142e47ad1cd350b0651e65a82d78dace30b84c82c108bbaca"
+  },
+  {
+    "filename": "before-pending.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.948Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/capture",
+    "scenario": "pending",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "453d1e8eb3492831337f76c5fb03662e64d52e7ccb3d8848d34e6eabe7b8a87c"
+  },
+  {
+    "filename": "before-result.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.949Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/result",
+    "scenario": "result",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "20934adef85bfb89af2cef87199c42c77d35d8d57112731e4a1c37bc68eb3e01"
+  },
+  {
+    "filename": "before-history.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.949Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/report",
+    "scenario": "history",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "067d8b362be01c09c0aee3f7f485019cbea00e323fb1fc7d0fd6f7467c3b7638"
+  },
+  {
+    "filename": "before-operations.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.950Z",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "route": "/admin/config",
+    "scenario": "operations",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "c5fe9069bff518ac94e59895a6c1b3bca6e1e6cf932bd37466276c8f20cc0955"
+  },
+  {
+    "filename": "before-research.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.950Z",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "route": "/admin/ai-experiments",
+    "scenario": "research",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "756c996bc84767f3b16caff4632577856281314d920c81567930647760e96fe9"
+  },
+  {
+    "filename": "before-error.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.951Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/screening",
+    "scenario": "error",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "16fc6c07a350ee6daa824a1a9cf8561e323e3d019aa935ce04001d435c89a5f7"
+  },
+  {
+    "filename": "before-modal.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.951Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/login",
+    "scenario": "modal",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "937a4b3f57028787e8b9849b8fcb1bc163d73683d85a1da2946b65c5354d3dbc"
+  },
+  {
+    "filename": "before-widget.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.951Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/result",
+    "scenario": "widget",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "15039652d37976b7ecd7b4c947e793c72e7982a4e300b0eee9f4d73cf6a51bd8"
+  },
+  {
+    "filename": "before-html-report.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.952Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/report/pdf",
+    "scenario": "html-report",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "4d2b87c7b2de565073284560ceb6ed5335847496d86e6b814f0db99c78110ebe"
+  },
+  {
+    "filename": "before-mobile.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.952Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/screening",
+    "scenario": "mobile",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "5a180435d8555ce768c435337bea67504baf3c067485e9db970af3a50629b4d8"
+  },
+  {
+    "filename": "before-mobile-survey.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.952Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/screening/survey",
+    "scenario": "mobile-survey",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "7f86a3ccf56a3fb51ee870ab877ca3a7e11ff03a540cf9f19e64ef0daae1854d"
+  },
+  {
+    "filename": "before-mobile-capture.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.953Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/capture",
+    "scenario": "mobile-capture",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "c33eb59da8e968563c75161cee0bfecfbc41da6f0dceec9836dcb6ac6b5d6ab4"
+  },
+  {
+    "filename": "before-mobile-result.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.954Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/result",
+    "scenario": "mobile-result",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "b4edda8384d5b740b844a563b2d3df03f38432a3efd4acb1aaf7e57d89a0cf4c"
+  },
+  {
+    "filename": "before-mobile-history.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.954Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/report",
+    "scenario": "mobile-history",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "67a773ce92ddc905a0ce5247b832fa0bc0ad2c0efecc5accde978a9b8fed2dc9"
+  },
+  {
+    "filename": "before-mobile-pin.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.955Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/m",
+    "scenario": "mobile-pin",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "219c03fb8203098567e2146e8a18c5b433f629c6a9752468f698fd0f7cd913ca"
+  },
+  {
+    "filename": "before-mobile-dashboard.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.956Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/m/dashboard",
+    "scenario": "mobile-dashboard",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "ad4f0b3e812b497d441b2ae1513fe9114118a4989d0865d73100990a45cf0993"
+  },
+  {
+    "filename": "before-portrait.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.956Z",
+    "viewport": {
+      "width": 1080,
+      "height": 1920
+    },
+    "route": "/screening/survey",
+    "scenario": "portrait",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "1b31b5e89f4f39669b1d8e382bf23c2e13c4b27580830768adbce4899a750740"
+  },
+  {
+    "filename": "before-english.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.956Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/",
+    "scenario": "english",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "890d7c3dea3f85cc4573ee09f166527bb13bb87d60c11fdad7f199d64e433cab"
+  },
+  {
+    "filename": "before-language-zh.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.957Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/",
+    "scenario": "language-zh",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "30f9caacdc4db709f3ed9b954965822df6b3cfef0471f46493e1da6b756880d6"
+  },
+  {
+    "filename": "before-language-vi.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.957Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/",
+    "scenario": "language-vi",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "15d21a07c43521e9360dbec37ef0d21aebb7586bd76649be17161f7ff5b6e661"
+  },
+  {
+    "filename": "before-language-ru.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.957Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/",
+    "scenario": "language-ru",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "048805604a1781d3d562bc7bd0118ed486c36697b0ebf6a515df12de4dbace15"
+  },
+  {
+    "filename": "before-language-ja.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.958Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/",
+    "scenario": "language-ja",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "425671d414166f7800b09fd31ced2a31fad17800d5f81139daae452cfd5a57fb"
+  },
+  {
+    "filename": "before-zoom.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.959Z",
+    "viewport": {
+      "width": 960,
+      "height": 540
+    },
+    "route": "/screening/survey",
+    "scenario": "zoom",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "ea36382aaea88801b1ffb9311c2a5bb11d0ac10e6603114b7736b3d5387a2581"
+  },
+  {
+    "filename": "before-keyboard.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.960Z",
+    "viewport": {
+      "width": 390,
+      "height": 420
+    },
+    "route": "/screening/survey",
+    "scenario": "keyboard",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "1acbb3969c064728edcbb7fd9d3e8a0aee503396beb0505c13224dfca41fa555"
+  },
+  {
+    "filename": "before-timeout.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.960Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/capture",
+    "scenario": "timeout",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "d051f3fb5ea22b8b0767314001f04a3219b0484c48176fd96decf8c5306ce2f4"
+  },
+  {
+    "filename": "before-m_index.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.960Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/__fixture/template/m_index",
+    "scenario": "m_index",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "13b53d01363207cfabed7594b6e3c98b0ea1d31e2cc047334fd4e39350bf0fbf"
+  },
+  {
+    "filename": "before-m_login_start.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.961Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/__fixture/template/m_login_start",
+    "scenario": "m_login_start",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "4bfecc22c11d8fba55a73b13737a3ceef4eca7662d5e83cf7db663810241b889"
+  },
+  {
+    "filename": "before-m_survey.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.961Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/__fixture/template/m_survey",
+    "scenario": "m_survey",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "b7e25148781d1e5ae8fc0e20b7b5b26cbbb9e18d0c366d2d96de3bba227894fd"
+  },
+  {
+    "filename": "before-m_capture.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.962Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/__fixture/template/m_capture",
+    "scenario": "m_capture",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "c1f9c8df4ddf215acd426c191e44cd276491ff18b063f45a2ae3bfae1b30183f"
+  },
+  {
+    "filename": "before-m_result.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.962Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/__fixture/template/m_result",
+    "scenario": "m_result",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "945f71ddff160baf1b31804312eabdbb26f76bd356b6ef63faa4050bfef110d2"
+  },
+  {
+    "filename": "before-m_report.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.963Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "route": "/__fixture/template/m_report",
+    "scenario": "m_report",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "1ac8453c9a1731ec7a722d0b3503a9d2d842f31fdd6b8743d37e60f06babec35"
+  },
+  {
+    "filename": "before-legacy-survey.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.963Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/survey",
+    "scenario": "legacy-survey",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "9952af724f71b1a4b1eff2605f31e2bd182aaae659945a8df58b265e991799e8"
+  },
+  {
+    "filename": "before-training.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.963Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/training",
+    "scenario": "training",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "d9a51443842675c7a6682e9517e3093aa60a1fd3a0593ca2f826fa804eba6311"
+  },
+  {
+    "filename": "before-screening-capture.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.964Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/screening/capture",
+    "scenario": "screening-capture",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "86d6564f87e4f13fac0c6c9752625fc39a26bf0ad90f056a5e3decc701f5c9f8"
+  },
+  {
+    "filename": "before-screening-result.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.964Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/screening/result",
+    "scenario": "screening-result",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "86d6564f87e4f13fac0c6c9752625fc39a26bf0ad90f056a5e3decc701f5c9f8"
+  },
+  {
+    "filename": "before-summary.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.964Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/screening/summary",
+    "scenario": "summary",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "5c2a0ddefd342d34da66c3e4e4ca1e49c91134659901bf2c8e9f3312f74e781a"
+  },
+  {
+    "filename": "before-specimen.png",
+    "repo": "Phjrab/mediflow-kiosk-core",
+    "source": "899affd6572affb56156f7c40774efda56df7a8d",
+    "captured_at": "2026-10-07T08:02:44.934Z",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "route": "/",
+    "scenario": "test-only typography specimens",
+    "fixture_id": "mediflow-ui-v1",
+    "data_provenance": "generated shapes + deterministic synthetic JSON",
+    "live_actions": "none; loopback fixture",
+    "privacy_review": "synthetic only",
+    "sha256": "c8ee60fe8bf6151022d218164e1ed92e38e4382f04d20f42fa698d2f3952f925"
+  }
+]
