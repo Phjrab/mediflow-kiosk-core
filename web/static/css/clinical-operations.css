@@ -17,6 +17,7 @@ body.mf-clinical { margin: 0; padding: 0 0 60px; width: 100%; height: auto; min-
 .mf-clinical .key-chip { color: var(--mf-teal); border-color: var(--mf-line); background: var(--mf-surface); white-space: normal; overflow-wrap: anywhere; }
 .mf-clinical :is(input,select,button) { font: inherit; max-width: 100%; min-height: 44px; }
 .mf-clinical :is(input,select) { border: 1px solid var(--mf-line); background: var(--mf-surface); color: var(--mf-ink); border-radius: 6px; padding: 10px 12px; }
+.mf-clinical :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),select:not([multiple]):not([size])) { height: 44px; }
 .mf-clinical .btn-primary { background: #146b65; color: white; border-color: #146b65; }
 .mf-clinical .ai-status-grid { grid-template-columns: 1fr 1fr; gap: 0; margin: 14px 0 22px; border: 1px solid var(--mf-line); border-radius: 8px; }
 .mf-clinical .ai-status-item { padding: 12px 16px; border: 0; border-bottom: 1px solid var(--mf-line); border-radius: 0; background: var(--mf-surface); font-size: 14px; overflow-wrap: anywhere; }

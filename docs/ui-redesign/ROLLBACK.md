@@ -1,8 +1,11 @@
 # UI 변경 rollback
 
-이번 작업은 기존 clean baseline `bfab34c`에서 branch `codex/ui-mediflow-guided-screening`에
+초기 리디자인은 기존 clean baseline `bfab34c`에서 branch `codex/ui-mediflow-guided-screening`에
 만든 두 로컬 커밋으로 구성한다. UI·관측 source commit은 `0c7fbf0f598ea65f952e8bd61dd61842cb8ef331`,
 증거·문서는 그 다음 commit이다. `git log -2 --oneline`으로 정확한 두 SHA를 확인한다.
+
+후속 드롭다운 높이 조정 커밋(`Align dropdown and text input heights`)이 있으면
+`git log --oneline`에서 해당 SHA를 확인해 먼저 revert한다. 그 후 아래 초기 source 원복을 진행한다.
 
 ## source 원복
 

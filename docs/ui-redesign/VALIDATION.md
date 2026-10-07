@@ -101,3 +101,13 @@ Playwright가 일반 Node 경로에 없으면 `MEDIFLOW_PLAYWRIGHT_MODULE`을 �
 | 비밀·데이터·운영 프로세스 보호 | PASS | change-audit, 원본 DB/설정 diff 없음, 생성한 preview만 종료 |
 | 코드·테스트·문서·rollback·local commit | PASS | FINAL_REPORT/ROLLBACK/HANDOFF, branch의 두 로컬 커밋 |
 | 요청하지 않은 원격 작업 없음 | PASS | push/PR/merge/release/deploy 미실행 |
+
+## 후속 수정: 드롭다운 높이 통일
+
+공통 CSS에서 single-line input과 dropdown select의 높이를 환자 56px, 관리자 44px로
+맞췄다. textarea·checkbox·radio·range·file·다중 선택 목록은 이 고정 높이에서 제외한다.
+합성 preview + 실제 Chromium의 `getBoundingClientRect().height`로 1366×768 및 390×844에서
+통합 문진, 기존 문진, dormant 모바일 문진, 관리자 설정, 연구 화면의 입력/select를 비교했다.
+10개 조합 모두 동일한 높이(PASS)였으며 외부 네트워크·운영 데이터는 사용하지 않았다.
+검증용 preview/browser/임시 script는 종료·정리했다. 기존 18개 before/after PNG는 초기 리디자인
+source 커밋의 증거이며 이 후속 CSS 변경을 새로 촬영했다고 주장하지 않는다.
