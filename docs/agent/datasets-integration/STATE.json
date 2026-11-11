@@ -1,0 +1,14 @@
+{
+  "schema": "mediflow_integration_state_v2",
+  "phase": "P1",
+  "status": "BLOCKED_REMOTE_ACCESS",
+  "kiosk_branch": "codex/datasets-kiosk-real-integration-20260929",
+  "kiosk_base_commit": "26faa17f2e2c58960208c93bc35891bde32ab43d",
+  "datasets_commit": "ffd71eca68ff1e21c145ed56158f4cfa77f7f037",
+  "completed_gates": [],
+  "current_work": "사용자가 Jetson 원격 환경으로 실행 위치를 변경함; SSH 접속 대기",
+  "last_command_summary": "Mac 기준 추론 6/6 완료(원격 증거 아님); jetson_orin_nano BatchMode SSH는 시간 초과",
+  "blockers": ["Jetson SSH 접속 정보 또는 네트워크 연결 필요"],
+  "next_action": "Jetson 접속 확인 후 장비 환경과 운영 프로세스/DB를 읽기 전용으로 점검하고 분리 실행 경로를 만든다.",
+  "evidence_run_id": "20260929-local-01"
+}
